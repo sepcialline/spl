@@ -35,8 +35,8 @@
                         <div class="row">
                             <div class="col-md-6 mb-md-0 mb-4">
                                 <div class="d-flex svg-illustration mb-4 gap-2">
-                                    <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}" width="50%"
-                                        alt="">
+                                    <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}"
+                                        width="50%" alt="">
                                     <span class="app-brand-text h3 mb-0 fw-bold"></span>
                                 </div>
                                 <p class="mb-1">{{ __('admin._company_address_') }}</p>
@@ -130,7 +130,7 @@
                     <div class="table-responsive">
                         <table class="table border-top m-0">
                             <thead>
-                                @if ($has_stock == 1 && count($shipment_content ) > 0)
+                                @if ($has_stock == 1 && count($shipment_content) > 0)
                                     @if (count($shipment_content) > 0)
                                         <tr>
                                             <th>#</th>
@@ -145,19 +145,18 @@
                                 @endif
                             </thead>
                             <tbody>
-                                @if ($has_stock == 1 && count($shipment_content ) > 0)
+                                @if ($has_stock == 1 && count($shipment_content) > 0)
                                     @php $i = 1; @endphp
-                                    @if (count($shipment_content ) > 0)
-                                    @foreach ($shipment_content as $content)
-                                    <tr>
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $content->product->name ?? '' }}</td>
-                                        <td>{{ $content->quantity ?? '' }}</td>
+                                    @if (count($shipment_content) > 0)
+                                        @foreach ($shipment_content as $content)
+                                            <tr>
+                                                <td>{{ $i++ }}</td>
+                                                <td>{{ $content->product->name ?? '' }}</td>
+                                                <td>{{ $content->quantity ?? '' }}</td>
 
-                                    </tr>
-                                @endforeach
+                                            </tr>
+                                        @endforeach
                                     @endif
-
                                 @else
                                     <tr>
                                         <td>{{ $shipment_content->content_text ?? '' }}</td>
@@ -212,11 +211,11 @@
                             </a>
                         @endif
                         @if (Auth::guard('employee')->user()->can('employee-Shipment-change-status'))
-                        <button class="btn btn-primary d-grid w-100" data-bs-toggle="offcanvas"
-                            data-bs-target="#change_status">
-                            <span class="d-flex align-items-center justify-content-center text-nowrap"><i
-                                    class="bx bx-stats bx-xs me-1"></i>{{ __('admin.change_status') }}</span>
-                        </button>
+                            <button class="btn btn-primary d-grid w-100" data-bs-toggle="offcanvas"
+                                data-bs-target="#change_status">
+                                <span class="d-flex align-items-center justify-content-center text-nowrap"><i
+                                        class="bx bx-stats bx-xs me-1"></i>{{ __('admin.change_status') }}</span>
+                            </button>
                         @endif
                     </div>
                 </div>
@@ -226,7 +225,52 @@
             <!-- /Invoice Actions -->
         </div>
 
+        <div class="card my-2">
+            <h3 class="p-4">{{ __('admin.tracking') }}</h3>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('admin.status') }}</th>
+                                    <th>{{ __('admin.user') }}</th>
+                                    <th>{{ __('admin.action') }}</th>
+                                    <th>{{ __('admin.rider') }}</th>
+                                    <th>created_at</th>
+                                    <th>#{{ __('admin.date') }}</th>
+                                    <th>{{ __('admin.note:') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($trackings as $tracking)
+                                    <tr>
+                                        <td>{{ $tracking->status->name }}</td>
+                                        <td>
+                                            @if ($tracking->guard == 'admin')
+                                                {{ App\Models\Admin::where('id', $tracking->user_id)->first()->name }}
+                                            @endif
+                                            @if ($tracking->guard == 'rider')
+                                                {{ App\Models\Rider::where('id', $tracking->user_id)->first()->name }}
+                                            @endif
+                                            @if ($tracking->guard == 'employee')
+                                                {{ App\Models\Employee::where('id', $tracking->user_id)->first()->name }}
+                                            @endif
+                                        </td>
+                                        <td>{{ $tracking->action }}</td>
+                                        <td>{{ $tracking->Rider->name ?? '-' }}</td>
+                                        <td>{{ $tracking->created_at }}</td>
+                                        <td>{{ $tracking->time }}</td>
+                                        <td>{{ $tracking->notes }}</td>
+                                    </tr>
+                                @endforeach
 
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
         <!-- Offcanvas -->
@@ -283,8 +327,8 @@
                         <h5 class="{{ $shipment->Status->html_code }}">{{ $shipment->Status->name }}</h5>
                     </div>
                     @if ($shipment->status_id == 3 && $shipment->is_rider_has == 0)
-                        <span class="badge rounded-pill bg-danger">{{ __('admin.shipments_locked') }} || {{__('admin.or_without_rider')}} <i
-                                class='bx bxs-lock'></i></span><br>
+                        <span class="badge rounded-pill bg-danger">{{ __('admin.shipments_locked') }} ||
+                            {{ __('admin.or_without_rider') }} <i class='bx bxs-lock'></i></span><br>
                         <span>{{ __('admin.contact_with_main_office_accountant') }}</span>
                     @else
                         <input type="hidden" name="id" value="{{ $shipment->id }}">
@@ -439,47 +483,47 @@
                     })
             })()
         </script>
-       <script>
-        $(document).on('change', '#payment_method', function() {
+        <script>
+            $(document).on('change', '#payment_method', function() {
 
-            $('#delivered_amount').val('');
-            $('#transferred_amount').val('');
-            $('#img').prop('src','')
+                $('#delivered_amount').val('');
+                $('#transferred_amount').val('');
+                $('#img').prop('src', '')
 
 
-            $('#cash_payment').addClass('d-none');
-            $('#transfer_payment').addClass('d-none');
-            $('#cash_payment').addClass('d-none');
-            $('#image').addClass('d-none');
+                $('#cash_payment').addClass('d-none');
+                $('#transfer_payment').addClass('d-none');
+                $('#cash_payment').addClass('d-none');
+                $('#image').addClass('d-none');
 
-            $('#delivered_amount').prop('required', false);
-            $('#transferred_amount').prop('required', false);
-            $('#img').prop('required', false)
+                $('#delivered_amount').prop('required', false);
+                $('#transferred_amount').prop('required', false);
+                $('#img').prop('required', false)
 
-            if ($(this).val() == 1) { //cash
-                $('#cash_payment').removeClass('d-none');
-                $('#delivered_amount').prop('required', true)
-                $('#delivered_amount').val({{$shipment->rider_should_recive}})
-            }
-            if ($(this).val() == 2 || $(this).val() == 3) { //transfer to SDL or Vendor
-                $('#image').removeClass('d-none');
-                $('#transfer_payment').removeClass('d-none');
-                $('#transferred_amount').prop('required', true)
-                $('#transferred_amount').val({{$shipment->rider_should_recive}})
-                $('#img').prop('required', true)
-            }
+                if ($(this).val() == 1) { //cash
+                    $('#cash_payment').removeClass('d-none');
+                    $('#delivered_amount').prop('required', true)
+                    $('#delivered_amount').val({{ $shipment->rider_should_recive }})
+                }
+                if ($(this).val() == 2 || $(this).val() == 3) { //transfer to SDL or Vendor
+                    $('#image').removeClass('d-none');
+                    $('#transfer_payment').removeClass('d-none');
+                    $('#transferred_amount').prop('required', true)
+                    $('#transferred_amount').val({{ $shipment->rider_should_recive }})
+                    $('#img').prop('required', true)
+                }
 
-            if ($(this).val() == 0) { // split
-                $('#image').removeClass('d-none');
-                $('#transfer_payment').removeClass('d-none');
-                $('#cash_payment').removeClass('d-none');
-                $('#transferred_amount').prop('required', true)
-                $('#delivered_amount').prop('required', true)
-                $('#img').prop('required', true)
-            }
+                if ($(this).val() == 0) { // split
+                    $('#image').removeClass('d-none');
+                    $('#transfer_payment').removeClass('d-none');
+                    $('#cash_payment').removeClass('d-none');
+                    $('#transferred_amount').prop('required', true)
+                    $('#delivered_amount').prop('required', true)
+                    $('#img').prop('required', true)
+                }
 
-        });
-    </script>
+            });
+        </script>
         <!-- Vendors JS -->
         <script src="{{ asset('build/assets/vendor/libs/select2/select2.js') }}"></script>
 

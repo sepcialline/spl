@@ -205,6 +205,7 @@ class ShipmentController extends Controller
     public function shipment_actions($id)
     {
         $data = ShipmentHelper::ShipmentViewPrintInvoicePdf($id);
+        $data['trackings'] = Tracking::where('shipment_id', $id)->get();
         return view('employee.shipment.actions', $data);
     }
 

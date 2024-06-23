@@ -104,14 +104,16 @@ class ShipmentsImport implements ToModel, WithHeadingRow , WithValidation, Skips
             'company_id'=>$company,
             'branch_created_id'=>1,
             'branch_destination_id'=>1,
-            'shipment_notes'=> $row['notes']
+            'shipment_notes' => $row['notes'],
+            'is_external_order' => 0,
+
         ];
         $user = ShipmentHelper::checkUser($request,$guard);
 
 
-        // $states = ShipmentHelper::states($request);
+        $states = ShipmentHelper::states($request);
 
-        // ShipmentHelper::storeShipment($request, $user, $guard, $states['rider_should_recive'], $states['vendor_due'], $states['specialline_due'], $ref='');
+        ShipmentHelper::storeShipment($request, $user, $guard, $states['rider_should_recive'], $states['vendor_due'], $states['specialline_due'], $ref='');
 
     }
     public function rules(): array

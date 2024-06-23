@@ -76,8 +76,8 @@
                                         <dd class="col-sm-6 d-flex justify-content-md-end">
                                             <div class="w-px-150">
                                                 <input type="text" class="form-control date-picker"
-                                                    {{-- name="delivered_date" value="{{ \Carbon\Carbon::tomorrow() }}" --}}
-                                                    name="delivered_date" value="{{ $date ?? \Carbon\Carbon::tomorrow() }}"
+                                                    {{-- name="delivered_date" value="{{ \Carbon\Carbon::tomorrow() }}" --}} name="delivered_date"
+                                                    value="{{ $date ?? \Carbon\Carbon::tomorrow() }}"
                                                     placeholder="YYYY-MM-DD" />
                                             </div>
                                         </dd>
@@ -99,9 +99,12 @@
                                             <div class="input-group">
                                                 {{-- <span class="input-group-text" id="basic-addon1">971</span> --}}
                                                 <input type="number" id="client_phone" name="client_phone"
-                                                    value="{{ old('client_phone') }}" maxlength = "12"  oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
-                                                    class="form-control @error('client_phone') is-invalid @enderror"
-                                                    required placeholder="9715xxxxxxxx" aria-label=""  />
+                                                    value="{{ old('client_phone') }}" maxlength = "12"
+                                                    oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                                    class="form-control @error('client_phone')
+is-invalid
+@enderror"
+                                                    required placeholder="9715xxxxxxxx" aria-label="" />
                                                 <div class="invalid-feedback">{{ __('admin.this_field_is_required') }}
                                                     @error('client_phone')
                                                         <div class="alert alert-danger">{{ $message }}</div>
@@ -124,7 +127,8 @@
                                         </div>
                                         <div class="mb-3 col">
                                             <label class="form-label"
-                                                for="client_email">{{ __('admin.shipments_client_email') }} / {{__('admin.another_number')}}</label>
+                                                for="client_email">{{ __('admin.shipments_client_email') }} /
+                                                {{ __('admin.another_number') }}</label>
                                             <input type="text" id="client_email" name="client_email"
                                                 value="{{ old('client_email') }}"
                                                 class="form-control @error('client_email') is-invalid @enderror"
@@ -259,7 +263,7 @@
                                                     </option>
                                                     @foreach ($fees_types as $fees_type)
                                                         <option value="{{ $fees_type->id }}"
-                                                           {{$fees_type->id == 2 ? 'selected' : ''}}>
+                                                            {{ $fees_type->id == 2 ? 'selected' : '' }}>
                                                             {{ $fees_type->name }}</option>
                                                     @endforeach
                                                 </select>
@@ -377,6 +381,43 @@
                                                 <div class="alert alert-danger">{{ $message }}</div>
                                             @enderror
                                         </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="mb-3 col">
+                                                <h4>{{ __('admin.is_external_order') }}</h4>
+                                                <label class="switch switch-primary">
+                                                    <input type="checkbox" class="switch-input is_external_order"
+                                                        data-url="" name="is_external_order"
+                                                        id="is_external_order" />
+                                                    <span class="switch-toggle-slider" style="width: 150px">
+                                                        <span class="switch-on">
+                                                            <h5>{{__('admin.external')}}</h5>
+                                                        </span>
+                                                        <span class="switch-off">
+                                                            <h5>{{__('admin.internal')}}</h5>
+                                                        </span>
+                                                    </span>
+                                                    {{-- <span class="switch-label">Primary</span> --}}
+                                                </label>
+                                            </div>
+                                            <div class="mb-3 col">
+                                                <h4>{{ __('admin.Including_vat?') }}</h4>
+                                                <label class="switch switch-success">
+                                                    <input type="checkbox" class="switch-input Including_vat"
+                                                        data-url="" name="Including_vat" checked readonly
+                                                        id="Including_vat" />
+                                                    <span class="switch-toggle-slider" style="width: 150px">
+                                                        <span class="switch-on">
+                                                            <h5>{{__('admin.Including_vat')}}</h5>
+                                                        </span>
+                                                        <span class="switch-off">
+                                                            <h5>{{__('admin.vat_not_included')}}</h5>
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+
 
 
                                     </div>

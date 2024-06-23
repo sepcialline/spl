@@ -104,6 +104,7 @@
                                     <td>{{ $i++ }}</td>
                                     <td><span
                                             class="{{ $shipment->Status->html_code }}">{{ $shipment->Status->name }}</span>
+                                            {{ $shipment->shipment->is_external_order == 1 ? '(خارجية)' : '' }}
                                     </td>
                                     <td>
                                          {{-- {!! DNS2D::getBarcodeHTML("$shipment->shipment_no", 'DATAMATRIX') !!} --}}

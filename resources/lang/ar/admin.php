@@ -738,4 +738,10 @@ return [
     'another_number'=>'رقم آخر',
     'assign_shipment_to '=>'اسناد الشحنة لـ',
     'payments_branches'=>'دفعات الأفرع',
+    'is_external_order'=>' هل الشحنة خارجية؟',
+    'Including_vat?'=>'هل شالمة للضريبة',
+    'Including_vat'=>'شاملة للضريبة',
+    'vat_not_included'=>'غير شاملة للضريبة',
+    'external'=>'خارجية',
+    'internal'=>'داخلية',
 ];

@@ -100,9 +100,21 @@
                                 {{-- @php $shipment  = App\Models\Shipment::where('id',$tracking->shipment_id)->first(); @endphp --}}
                                 <tr>
                                     {{-- <input type="hidden" id="id" value="{{ $shipment->id }}"> --}}
-                                    <td>{{ $i++ }}</td>
+                                    <td>{{ $i++ }}
+                                        @auth('admin')
+                                            @if (auth()->guard('admin')->user()->hasRole('Super Admin'))
+                                                {{-- User is authenticated as admin and has the 'programming' role --}}
+                                                {{-- Place your Blade template content here --}}
+                                                {{-- For example: --}}
+                                                <a href="{{ route('admin.tracking_delete', $shipment->id) }}">delete</a>
+                                            @else
+                                            @endif
+                                        @endauth
+
+                                    </td>
                                     <td><span
                                             class="{{ $shipment->Status->html_code }}">{{ $shipment->Status->name }}</span>
+                                        {{ $shipment->shipment->is_external_order == 1 ? '(خارجية)' : '' }}
                                     </td>
                                     <td>
                                         {{-- {!! DNS2D::getBarcodeHTML("$shipment->shipment_no", 'DATAMATRIX') !!} --}}
@@ -153,30 +165,32 @@
                                     <td>{{ $vendor_count['count'] }}</td>
 
                                     @foreach (App\Models\ShipmentStatuses::get() as $status)
-                            @if (isset($vendor_count['shipments'][$status->id]))
-                                        <td class="mx-0">
-                                             <span class="btn btn-sm {{ $status->html_code }}">{{ $vendor_count['shipments'][$status->id]->count() }} : {{ $status->name }} </span>
-                                        </td>
-                            @endif
-                @endforeach
+                                        @if (isset($vendor_count['shipments'][$status->id]))
+                                            <td class="mx-0">
+                                                <span
+                                                    class="btn btn-sm {{ $status->html_code }}">{{ $vendor_count['shipments'][$status->id]->count() }}
+                                                    : {{ $status->name }} </span>
+                                            </td>
+                                        @endif
+                                    @endforeach
 
 
-                </tr>
-                @endforeach
-                <tr>
-                    <td>#</td>
-                    <td>{{ __('admin.all') }}</td>
-                    <td>{{ $all }}</td>
-                </tr>
-                </tbody>
-                </table>
-            @else
-                <div class="row justify-center">
-                    <div class="col-md">
-                        <img src="{{ asset('build/assets/img/pages/nodata.jpg') }}" width="100%" alt="">
+                                </tr>
+                            @endforeach
+                            <tr>
+                                <td>#</td>
+                                <td>{{ __('admin.all') }}</td>
+                                <td>{{ $all }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                @else
+                    <div class="row justify-center">
+                        <div class="col-md">
+                            <img src="{{ asset('build/assets/img/pages/nodata.jpg') }}" width="100%" alt="">
 
+                        </div>
                     </div>
-                </div>
                 @endif
 
                 <hr>
@@ -246,10 +260,11 @@
                             <th> {{ App\Models\ExpenseType::where('id', $key)->first()->name }}</th>
                         @endforeach
                         @foreach ($expenses_sim as $key => $value)
-                            <th> {{ App\Models\ExpenseType::where('id', $key)->first()->name }} <span class="text-danger">شريحة</span> </th>
+                            <th> {{ App\Models\ExpenseType::where('id', $key)->first()->name }} <span
+                                    class="text-danger">شريحة</span> </th>
                         @endforeach
                         @if ($recived_shipments_count && $recived_shipments_count != 0)
-                            <th>الاستلامات  <span class="text-danger">({{$recived_shipments_count}} طرد)</span></th>
+                            <th>الاستلامات <span class="text-danger">({{ $recived_shipments_count }} طرد)</span></th>
                         @endif
                         <th>عمولة توصيل واستلام</th>
                         <th>{{ __('admin.cash_on_hand') }}</th>
@@ -267,10 +282,11 @@
                                 <th> {{ $value }} {{ __('admin.currency') }}</th>
                             @endforeach
                             @if ($recived_shipments_count && $recived_shipments_count != 0)
-                            <td>{{$recived_shipments_prize}}</td>
+                                <td>{{ $recived_shipments_prize }}</td>
                             @endif
                             <td>{{ $commissions + $recived_shipments_prize }} {{ __('admin.currency') }}</td>
-                            <td>{{ $cod - $sum_expenses - $commissions - $recived_shipments_prize }} {{ __('admin.currency') }}</td>
+                            <td>{{ $cod - $sum_expenses - $commissions - $recived_shipments_prize }}
+                                {{ __('admin.currency') }}</td>
                         </tr>
                     </tbody>
                 </table>

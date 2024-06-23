@@ -751,4 +751,10 @@ return [
     'another_number'=>'Another Number',
     'assign_shipment_to '=>'assign shipment to',
     'payments_branches'=>'payments Branches',
+    'is_external_order'=>'Is External Shipment?',
+    'Including_vat?'=>'Is Including vat?',
+    'Including_vat'=>'Including vat',
+    'vat_not_included'=>'vat not included',
+    'external'=>'external',
+    'internal'=>'internal',
 ];

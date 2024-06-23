@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Shipment;
 
 use App\Exports\operationReportExport;
+use App\Exports\ShipmentExport;
 use PDF;
 use Carbon\Carbon;
 use App\Models\User;
@@ -101,6 +102,9 @@ class ShipmentController extends Controller
 
 
 
+        if(request()->input('action') == 'export'){
+            return Excel::download(new ShipmentExport, 'from'.Carbon::parse($request->date_from)->format('Y-m-d').'to'.Carbon::parse($request->date_to)->format('Y-m-d').'.xlsx');
+        }
 
 
         if (request()->input('action') == 'report') {
@@ -890,6 +894,12 @@ class ShipmentController extends Controller
         return Response::download($filepath);
     }
 
+
+public function trackingDelete($id){
+    Tracking::where('id', $id)->forceDelete();
+    toastr()->success('deleted successfully');
+    return redirect()->back();
+}
 
     // public function operation(){
     //     $rider= Rider::where('id',Request()->rider_id)->first()->name;

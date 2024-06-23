@@ -399,6 +399,44 @@ is-invalid
                                     </div>
                                 </div>
                             </div>
+                            <hr>
+                            <div class="row">
+                                <div class="mb-3 col">
+                                    <h4>{{ __('admin.is_external_order') }}</h4>
+                                    <label class="switch switch-primary">
+                                        <input type="checkbox" class="switch-input is_external_order" data-url=""
+                                            name="is_external_order" id="is_external_order"
+                                            {{ $shipment->is_external_order == 1 ? 'checked' : '' }} />
+                                        <span class="switch-toggle-slider" style="width: 150px">
+                                            <span class="switch-on">
+                                                <h5>{{ __('admin.external') }}</h5>
+                                                {{-- <i class="bx bx-check"></i> --}}
+                                            </span>
+                                            <span class="switch-off">
+                                                {{-- <i class="bx bx-x"></i> --}}
+                                                <h5>{{ __('admin.internal') }}</h5>
+                                            </span>
+                                        </span>
+                                        {{-- <span class="switch-label">Primary</span> --}}
+                                    </label>
+                                </div>
+                                <div class="mb-3 col">
+                                    <h4>{{ __('admin.Including_vat') }}</h4>
+                                    <label class="switch switch-primary">
+                                        <input type="checkbox" class="switch-input Including_vat" data-url=""
+                                            name="Including_vat" id="Including_vat" readonly
+                                            {{ $shipment->including_vat == 1 ? 'checked' : '' }} />
+                                        <span class="switch-toggle-slider" style="width: 150px">
+                                            <span class="switch-on">
+                                                <h5>{{ __('admin.Including_vat') }}</h5>
+                                            </span>
+                                            <span class="switch-off">
+                                                <h5>{{ __('admin.vat_not_included') }}</h5>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
                             <hr class="mx-n4" />
 
                             {{-- Shipment Contents  --}}
@@ -464,8 +502,8 @@ is-invalid
                                                     <tr>
                                                         <input type="hidden" id="product_id"
                                                             value="{{ $content->id }}">
-                                                        <td>{{ $content->product->name  ?? ''}}</td>
-                                                        <td>{{ $content->quantity ?? ''}}</td>
+                                                        <td>{{ $content->product->name ?? '' }}</td>
+                                                        <td>{{ $content->quantity ?? '' }}</td>
                                                         <td>
                                                             <a
                                                                 class="btn btn-label-danger btn-sm return_product">{{ __('admin.return_product_to_stock') }}</a>

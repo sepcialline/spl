@@ -471,6 +471,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('shipment/daily_shipment_rider', 'dailyShipmentRider')->name('shipments_daily_rider');
             Route::get('shipment/dailyReport', 'dailyReport')->name('shipments_daily_report');
+            Route::get('shipment/dailyReport/tracking_delete/{id}', 'trackingDelete')->name('tracking_delete');
+
 
             Route::get('shipment/assign_to_rider', 'assignToRider')->name('shipments_assign_to_rider');
             Route::post('shipment/assign-shipmets-rider', 'assignShipments')->name('assignShipments');

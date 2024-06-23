@@ -163,6 +163,9 @@
 
                             <button name="action" value="report" type="submit"
                                 class="btn btn-label-facebook">{{ __('admin.accounts_reports') }}</button>
+
+                            <button name="action" value="export" type="submit"
+                                class="btn btn-label-success"><i class="fa fa-file-export"></i></button>
                         </div>
 
                     </div>
@@ -181,7 +184,7 @@
         <hr>
         @if (isset($shipments) && count($shipments) > 0)
 
-            <div class="card" id="content_table">
+            <div class="card " id="content_table">
                 <div class="card">
                     <div class="card-body">
                         <div class="mb-3">
@@ -189,50 +192,53 @@
                             {{-- <div class="float-end my-2"><input type="search" class="form-control" placeholder="{{__('admin.search_text')}}"></div> --}}
                             {{-- <a href="" target="_blank" rel="noopener noreferrer"><i class="bx bx-printer">{{}}</i></a> --}}
                         </div>
-                        <table class="table table-striped table-bordered my-2">
-                            <thead>
-                                <tr>
-                                    <th width='1%'>#</th>
-                                    <th>{{ __('admin.shipments_delivered_Date') }}</th>
-                                    <th>{{ __('admin.shipment_no') }}/<br>{{ __('admin.shipment_refrence') }}</th>
-                                    <th>{{ __('admin.rider')}}</th>
-                                    <th>{{ __('admin.client') }}</th>
-                                    <th>{{ __('admin.shipments_client_address') }}</th>
-                                    <th>{{ __('admin.vendors_companies') }}</th>
-                                    <th>{{ __('admin.payment_method') }}</th>
-                                    <th>{{ __('admin.status') }}</th>
-                                    <th>{{ __('admin.actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php $i = 1; @endphp
-                                @foreach ($shipments as $shipment)
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered my-2">
+                                <thead>
                                     <tr>
-                                        <input type="hidden" id="id" value="{{ $shipment->id }}">
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $shipment->delivered_date ?? '' }}</td>
-                                        <td>{{ $shipment->shipment_no ?? '' }} <br>
-                                            #{{ $shipment->shipment_refrence ?? '' }}</td>
-                                            <td>{{$shipment->Rider->name ?? 'لا يوجد' }}</td>
-                                        <td>{{ $shipment->Client->name ?? '' }} <br>
-                                            {{ $shipment->Client?->mobile ?? '' }}</td>
-                                        <td>{{ $shipment->emirate->name ?? '' }} <br>
-                                            {{ $shipment->city->name ?? '' }} <br>
-                                            {{ $shipment->delivered_address ?? '' }}</td>
-                                        <td>{{ $shipment->Company->name ?? '' }}</td>
-                                        <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
-                                        <td><span
-                                                class="{{ $shipment->Status->html_code }}">{{ $shipment->Status->name }}</span>
-                                        </td>
-                                        <td>
-                                            @include('includes.shipment_action_dropdown_admin', [
-                                                'shipment' => $shipment,
-                                            ])
-                                        </td>
+                                        <th width='1%'>#</th>
+                                        <th>{{ __('admin.shipments_delivered_Date') }}</th>
+                                        <th>{{ __('admin.shipment_no') }}/<br>{{ __('admin.shipment_refrence') }}</th>
+                                        <th>{{ __('admin.rider')}}</th>
+                                        <th>{{ __('admin.client') }}</th>
+                                        <th>{{ __('admin.shipments_client_address') }}</th>
+                                        <th>{{ __('admin.vendors_companies') }}</th>
+                                        <th>{{ __('admin.payment_method') }}</th>
+                                        <th>{{ __('admin.status') }}</th>
+                                        <th>{{ __('admin.actions') }}</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @php $i = 1; @endphp
+                                    @foreach ($shipments as $shipment)
+                                        <tr>
+                                            <input type="hidden" id="id" value="{{ $shipment->id }}">
+                                            <td>{{ $i++ }}</td>
+                                            <td>{{ $shipment->delivered_date ?? '' }}</td>
+                                            <td>{{ $shipment->shipment_no ?? '' }} <br>
+                                                #{{ $shipment->shipment_refrence ?? '' }}</td>
+                                                <td>{{$shipment->Rider->name ?? 'لا يوجد' }}</td>
+                                            <td>{{ $shipment->Client->name ?? '' }} <br>
+                                                {{ $shipment->Client?->mobile ?? '' }}</td>
+                                            <td>{{ $shipment->emirate->name ?? '' }} <br>
+                                                {{ $shipment->city->name ?? '' }} <br>
+                                                {{ $shipment->delivered_address ?? '' }}</td>
+                                            <td>{{ $shipment->Company->name ?? '' }}</td>
+                                            <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
+                                            <td><span
+                                                    class="{{ $shipment->Status->html_code }}">{{ $shipment->Status->name }}</span>
+                                            </td>
+                                            <td>
+                                                @include('includes.shipment_action_dropdown_admin', [
+                                                    'shipment' => $shipment,
+                                                ])
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+
+                        </div>
                         {{ $shipments->appends(Request()->all())->links() }}
                         <strong> {{__('admin.total')}} {{$shipments->total()}} {{__('admin.shipments')}}</strong>
                     </div>

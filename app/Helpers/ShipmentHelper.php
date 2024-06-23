@@ -186,6 +186,11 @@ class ShipmentHelper
         $shipment->shipment_notes = $request['shipment_notes'];
         $shipment->created_by = Auth::guard($guard)->user()->name;
 
+        $shipment->is_external_order = $request['is_external_order'] ? 1 : 0;
+        $shipment->Including_vat = $request['Including_vat'] ? 1 : 0;
+
+
+
         $shipment->save();
         if ($shipment->save()) {
             if ($guard == 'vendor') {
@@ -206,6 +211,12 @@ class ShipmentHelper
     public static function updateShipment($request, $user, $guard, $rider_should_recive, $vendor_due, $specialline_due)
     {
         $shipment = Shipment::where('id', $request->shipment_id)->first();
+
+        // if ($request->is_external_order) {
+        //     $is_external_order = 1;
+        // } else {
+        //     $is_external_order = 0;
+        // }
         $shipment->update([
             'shipment_refrence' => $request->shipment_refrence,
             'delivered_date' => $request->delivered_date,
@@ -230,6 +241,7 @@ class ShipmentHelper
 
             'shipment_notes' => $request->shipment_notes ?? $shipment->shipment_notes,
             'updated_by' => Auth::guard($guard)->user()->name,
+            'is_external_order' =>  $request->is_external_order ? 1 : 0
         ]);
 
         if ($shipment->update()) {
@@ -291,10 +303,10 @@ class ShipmentHelper
             $time = $time;
         }
 
-        if($shipment->status_id == 4){
+        if ($shipment->status_id == 4) {
             $date_time =  $time;
-        }else{
-            $date_time =$shipment->delivered_date;
+        } else {
+            $date_time = $shipment->delivered_date;
         }
 
         $fees_type = FeesType::where('id', $shipment->fees_type_id)->first()->name;
@@ -395,7 +407,7 @@ class ShipmentHelper
         if ($data['shipment']->status_id == 2) { // In Progress
             if (Auth::guard('admin')->check() && ((Auth::guard('admin')->user()->hasRole('Accountant')) || (Auth::guard('admin')->user()->hasRole('Super Admin')))) {
                 $data['change_statuss'] = ShipmentStatuses::whereIn('id', [3, 4, 5, 6, 7, 8, 9])->select('id', 'name')->get();
-            } elseif (Auth::guard('employee')->check() || Auth::guard('vendor')->check()){
+            } elseif (Auth::guard('employee')->check() || Auth::guard('vendor')->check()) {
                 $data['change_statuss'] = ShipmentStatuses::whereIn('id', [4, 5, 6, 7, 8, 9])->select('id', 'name')->get();
             }
             // delivered + delayed +  transfered + canceled + damaged + duplicated  + return to store
@@ -403,7 +415,7 @@ class ShipmentHelper
 
         if ($data['shipment']->status_id == 3) { // delivered
             if (Auth::guard('admin')->check() && ((Auth::guard('admin')->user()->hasRole('Accountant')) || (Auth::guard('admin')->user()->hasRole('Super Admin')))) {
-            $data['change_statuss'] = ShipmentStatuses::whereIn('id', [2])->get(); // In Progress
+                $data['change_statuss'] = ShipmentStatuses::whereIn('id', [2])->get(); // In Progress
             }
         }
 
@@ -431,10 +443,10 @@ class ShipmentHelper
         if ($data['shipment_company']->has_stock == 1) {
             $data['has_stock'] = 1;
             $contents = ShipmentContent::where('shipment_id', $data['shipment']->id)->get();
-            if(count($contents) > 0) {
+            if (count($contents) > 0) {
                 $data['shipment_content'] = ShipmentContent::where('shipment_id', $data['shipment']->id)->get();
-            }else{
-                $data['shipment_content'] =[];
+            } else {
+                $data['shipment_content'] = [];
             }
         } else {
             $data['has_stock'] = 0;

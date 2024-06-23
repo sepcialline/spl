@@ -107,7 +107,8 @@ class EmployeeShipmetnImport implements ToModel, WithHeadingRow, WithValidation,
             'company_id' => Request()->company_id,
             'branch_created_id' => Request()->branch_created,
             'branch_destination_id' => Request()->branch_created,
-            'shipment_notes' => $row['notes']
+            'shipment_notes' => $row['notes'],
+            'is_external_order' => 0,
         ];
         $user = ShipmentHelper::checkUser($request, $guard);
 

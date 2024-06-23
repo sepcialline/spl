@@ -73,6 +73,9 @@ return new class extends Migration
 
             $table->string('shipment_notes')->nullable();
 
+            $table->tinyInteger('is_external_order')->default(0)->comment('هل هو طرد خارجي ام لا (1 طرد خارجي)');
+            $table->tinyInteger('Including_vat')->default(1)->comment('شاملة للضريبة أم لا (شاملة 1)');
+
             $table->string('shopify_order_id')->nullable()->comment('الشحنات المطلوبة من شوبيفاي');
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
