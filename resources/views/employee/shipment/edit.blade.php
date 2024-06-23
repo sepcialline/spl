@@ -40,8 +40,8 @@
                             <div class="row p-sm-3 p-0">
                                 <div class="col-md-6 mb-md-0 mb-4">
                                     <div class="d-flex svg-illustration mb-4 gap-2">
-                                        <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}" width="50%"
-                                            alt="">
+                                        <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}"
+                                            width="50%" alt="">
                                         <span class="app-brand-text h3 mb-0 fw-bold"></span>
                                     </div>
                                     <p class="mb-1">{{ __('admin._company_address_') }}</p>
@@ -106,8 +106,11 @@
                                             <div class="input-group">
                                                 {{-- <span class="input-group-text" id="basic-addon1">971</span> --}}
                                                 <input type="number" id="client_phone" name="client_phone"
-                                                    value="{{ $user->mobile }}"  maxlength = "12"  oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
-                                                    class="form-control @error('client_phone') is-invalid @enderror"
+                                                    value="{{ $user->mobile }}" maxlength = "12"
+                                                    oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                                    class="form-control @error('client_phone')
+is-invalid
+@enderror"
                                                     required placeholder="9715xxxxxxxx" aria-label="" />
                                                 <div class="invalid-feedback">{{ __('admin.this_field_is_required') }}
                                                     @error('client_phone')
@@ -131,7 +134,7 @@
                                         </div>
                                         <div class="mb-3 col">
                                             <label class="form-label"
-                                                for="client_email">{{ __('admin.shipments_client_email') }}/{{__('admin.another_number')}}</label>
+                                                for="client_email">{{ __('admin.shipments_client_email') }}/{{ __('admin.another_number') }}</label>
                                             <input type="text" id="client_email" name="client_email"
                                                 value="{{ $user->email }}"
                                                 class="form-control @error('client_email') is-invalid @enderror"
@@ -296,7 +299,7 @@
                                                 for="client_name">{{ __('admin.delivery_fees') }}</label>
                                             <div class="input-group mb-3">
                                                 <input type="number" id="delivery_fees" name='delivery_fees'
-                                                     value="{{ $shipment->delivery_fees }}"
+                                                    value="{{ $shipment->delivery_fees }}"
                                                     class="form-control @error('delivery_fees') is-invalid @enderror"
                                                     required placeholder="" aria-label="" />
                                                 <label class="input-group-text"
@@ -391,28 +394,44 @@
                                     <div class="mb-3">
                                         <label for="note"
                                             class="form-label fw-semibold">{{ __('admin.shipment_content_text') }}</label>
-                                         @if ($has_stock == 0)
+                                        @if ($has_stock == 0)
                                             <textarea class="form-control" name="content_text" rows="2" id="content_text" placeholder="">{{ $shipment_content->content_text ?? '' }}</textarea>
                                         @endif
                                     </div>
                                 </div>
                                 <hr>
+                            </div>
+                            <div class="row">
                                 <div class="mb-3 col">
-                                    <h4>{{ __('admin.is_external_order') }}</h4>
+                                    <h6>{{ __('admin.is_external_order') }}</h6>
                                     <label class="switch switch-primary">
-                                        <input type="checkbox" class="switch-input is_external_order"
-                                            data-url="" name="is_external_order" id="is_external_order"  {{($shipment->is_external_order == 1) ? 'checked' : ''}} />
+                                        <input type="checkbox" class="switch-input is_external_order" data-url=""
+                                            name="is_external_order" id="is_external_order"
+                                            {{ $shipment->is_external_order == 1 ? 'checked' : '' }} />
                                         <span class="switch-toggle-slider" style="width: 150px">
                                             <span class="switch-on">
-                                                <h5> خارجية / external</h5>
-                                                {{-- <i class="bx bx-check"></i> --}}
+                                                <span>{{ __('admin.external') }}</span>
                                             </span>
                                             <span class="switch-off">
-                                                {{-- <i class="bx bx-x"></i> --}}
-                                                <h5>داخلية / internal</h5>
+                                                <span>{{ __('admin.internal') }}</span>
                                             </span>
                                         </span>
-                                        {{-- <span class="switch-label">Primary</span> --}}
+                                    </label>
+                                </div>
+                                <div class="mb-3 col">
+                                    <h6>{{ __('admin.Including_vat') }}</h6>
+                                    <label class="switch switch-primary">
+                                        <input type="checkbox" class="switch-input Including_vat" data-url=""
+                                            name="Including_vat" id="Including_vat"
+                                            {{ $shipment->Including_vat == 1 ? 'checked' : '' }} />
+                                        <span class="switch-toggle-slider" style="width: 150px">
+                                            <span class="switch-on">
+                                                <span>{{ __('admin.Including_vat') }}</span>
+                                            </span>
+                                            <span class="switch-off">
+                                                <span>{{ __('admin.vat_not_included') }}</span>
+                                            </span>
+                                        </span>
                                     </label>
                                 </div>
                             </div>

@@ -457,23 +457,40 @@ is-invalid
                                             </div>
                                         </div>
                                         <hr>
-                                        <div class="mb-3 col">
-                                            <h4>{{ __('admin.is_external_order') }}</h4>
-                                            <label class="switch switch-primary">
-                                                <input type="checkbox" class="switch-input is_external_order"
-                                                    data-url="" name="is_external_order" id="is_external_order" />
-                                                <span class="switch-toggle-slider" style="width: 150px">
-                                                    <span class="switch-on">
-                                                        <h5> خارجية / external</h5>
-                                                        {{-- <i class="bx bx-check"></i> --}}
+                                        <div class="row">
+                                            <div class="mb-3 col">
+                                                <h6>{{ __('admin.is_external_order') }}</h6>
+                                                <label class="switch switch-primary">
+                                                    <input type="checkbox" class="switch-input is_external_order"
+                                                        data-url="" name="is_external_order"
+                                                        id="is_external_order" />
+                                                    <span class="switch-toggle-slider" style="width: 75px">
+                                                        <span class="switch-on">
+                                                            <span>{{__('admin.external')}}</span>
+                                                        </span>
+                                                        <span class="switch-off">
+                                                            <span>{{__('admin.internal')}}</span>
+                                                        </span>
                                                     </span>
-                                                    <span class="switch-off">
-                                                        {{-- <i class="bx bx-x"></i> --}}
-                                                        <h5>داخلية / internal</h5>
+                                                    {{-- <span class="switch-label">Primary</span> --}}
+                                                </label>
+                                            </div>
+                                            <div class="mb-3 col">
+                                                <h6>{{ __('admin.Including_vat?') }}</h6>
+                                                <label class="switch switch-success">
+                                                    <input type="checkbox" class="switch-input Including_vat"
+                                                        data-url="" name="Including_vat" checked
+                                                        id="Including_vat" />
+                                                    <span class="switch-toggle-slider" style="width: 100px">
+                                                        <span class="switch-on">
+                                                            <span>{{__('admin.Including_vat')}}</span>
+                                                        </span>
+                                                        <span class="switch-off">
+                                                            <span>{{__('admin.vat_not_included')}}</span>
+                                                        </span>
                                                     </span>
-                                                </span>
-                                                {{-- <span class="switch-label">Primary</span> --}}
-                                            </label>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
