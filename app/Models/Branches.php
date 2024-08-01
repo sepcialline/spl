@@ -16,4 +16,5 @@ class Branches extends Model
     public function emirate(){
         return $this->belongsTo(Emirates::class,'branch_emirat_id');
     }
+
 }

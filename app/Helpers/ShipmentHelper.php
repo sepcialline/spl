@@ -2,31 +2,34 @@
 
 namespace App\Helpers;
 
-use App\Events\TrackingEvent;
-use App\Models\Admin;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Admin;
+use App\Models\Rider;
 use App\Models\Cities;
-use App\Models\Branches;
 use App\Models\Company;
+use App\Models\Payment;
+use App\Models\Product;
+use App\Models\Branches;
 use App\Models\Emirates;
 use App\Models\FeesType;
-use App\Models\Payment;
 use App\Models\Shipment;
 use App\Models\Tracking;
-use Illuminate\Http\Request;
-use App\Models\VendorCompany;
-use App\Models\PaymentMethods;
-use App\Models\Product;
-use App\Models\ProductDetails;
-use App\Models\Rider;
-use App\Models\ShipmentContent;
-use App\Models\ShipmentStatuses;
 use App\Models\Warehouse;
 use App\Models\WarehouseLog;
-use App\Notifications\VendorCreateShipment;
+use Illuminate\Http\Request;
+use App\Events\TrackingEvent;
+use App\Models\AccountingEntries;
+use App\Models\AccountTree;
+use App\Models\VendorCompany;
+use App\Models\PaymentMethods;
+use App\Models\ProductDetails;
+use App\Models\ShipmentContent;
+use App\Models\ShipmentStatuses;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Notifications\VendorCreateShipment;
 use Illuminate\Support\Facades\Notification;
 
 
@@ -458,7 +461,7 @@ class ShipmentHelper
     public static function generateBarCode($shipment_no)
     {
         $generator = new \Picqer\Barcode\BarcodeGeneratorHTML();
-        $barcode = $generator->getBarcode($shipment_no, $generator::TYPE_CODE_128_A);
+        $barcode = $generator->getBarcode($shipment_no, $generator::TYPE_CODE_128);
         return $barcode;
     }
 
@@ -494,6 +497,9 @@ class ShipmentHelper
                 if ($current_status == 3) { // Current is delivered
                     $payments = Payment::where('shipment_id', $shipment->id)->get(); // delete payments
                     $payments->each->delete();
+
+                    $entries  = AccountingEntries::where('shipment_id', $shipment->id)->get(); // delete journals voucher
+                    $entries->each->delete();
 
                     $shipment->update([
                         'is_rider_has' => 0,
@@ -583,6 +589,7 @@ class ShipmentHelper
                             ]);
                         }
                     }
+
 
 
                     // 2 TO BANK one payment
@@ -841,11 +848,276 @@ class ShipmentHelper
             'in_out' => $shipment->branch_created == $shipment->branch_delivered ? '0' : '1',
             'created_by' => Auth::guard($guard)->user()->name ?? Auth::user()->name,
         ]);
+
+        $voucher_nmber = 10000001;
+
+        $account = AccountingEntries::select('number')->latest()->first();
+        if ($account) {
+            $voucher_nmber = $account->number + 1;
+        } else {
+            $voucher_nmber = $voucher_nmber;
+        }
+
+        $vendor_account = VendorCompany::where('id', $payment->company_id)->first();
+        $branch_rev = Branches::where('id', $payment->branch_created)->first();
+        $cash_account = AccountTree::where('is_cash', 1)->first();
+        $bank_account = AccountTree::where('is_bank', 1)->first();
+
+        if (($vendor_account->account_number != Null) && ($branch_rev->revenuse_account != null) && ($cash_account) && ($bank_account)) {
+            DB::transaction(function () use ($payment, $shipment,  $guard, $vendor_account, $branch_rev, $cash_account, $bank_account, $voucher_nmber) {
+
+                $branch_rev_name = AccountTree::where('account_code', $branch_rev->revenuse_account)->first();
+                $branch_vat_on_sales = AccountTree::where('account_code', $branch_rev->vat_on_sales)->first();
+                $vendor_account_name = AccountTree::where('account_code', $vendor_account->account_number)->first();
+                if ($payment->payment_method_id == 1) { // cod
+
+                    /*
+                         * tow journal voucher
+                         * ---- compound_entry_with ----
+                         * 1-1  debit vendor account | credit rev branch (delivery fees) (25 |  (25*100)/1.05)
+                         * 1-2 vat op (debit - credit (1statmtnet) ) credit قيد مركب
+                         * 25 vendor debit | 23,95 rev credit
+                         * 0 vendor debit | 1.05 vat output credit
+                         *
+                         *
+                         *
+                         * 2 - debit cash | credit vendor account (  due_amount )
+                         *
+                         *  3-
+                         *
+                         * المبلغ قبل الضريبة = المبلغ بعد الضريبة ÷ (1 + نسبة الضريبة)
+                         * المبلغ بعد الضريبة = 25 (المبلغ الإجمالي المدفوع)
+                         * نسبة الضريبة = 5% = 0.05
+                         */
+
+                    $enrty1 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $vendor_account_name->account_code,  // cash account
+                        $debit_account_name = ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], // cash account
+                        $credit_account_number =  Null,
+                        $credit_account_name = Null,
+                        $statment = Null,
+                        $amount_debit = $payment->delivery_fees,
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                    $enrty2 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  // vendor account
+                        $debit_account_name = Null, // vendor account
+                        $credit_account_number =  $branch_rev->revenuse_account, //branch rev account
+                        $credit_account_name = ['ar' => $branch_rev_name->getTranslation('account_name', 'ar'), 'en' => $branch_rev_name->getTranslation('account_name', 'en')], //branch rev account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->delivery_fees / (1.05),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                    $enrty3 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  // vendor account
+                        $debit_account_name = Null, // vendor account
+                        $credit_account_number =  $branch_rev->vat_on_sales, //vat output
+                        $credit_account_name = ['ar' => $branch_vat_on_sales->getTranslation('account_name', 'ar'), 'en' => $branch_vat_on_sales->getTranslation('account_name', 'en')], //vat output
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->delivery_fees - ($payment->delivery_fees / (1.05)),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = $enrty2->id,
+                        $journal_type_id = 1 // daily
+                    );
+
+
+
+                    $enrty4 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $cash_account->account_code,  //cash
+                        $debit_account_name = ['ar' => $cash_account->getTranslation('account_name', 'ar'), 'en' => $cash_account->getTranslation('account_name', 'en')], //cash
+                        $credit_account_number = Null, //vendor account
+                        $credit_account_name = Null, //vendor account
+                        $statment = Null,
+                        $amount_debit = $payment->amount,
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                    $enrty5 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  //cash
+                        $debit_account_name = Null, //cash
+                        $credit_account_number =  $vendor_account->account_code, //vendor account
+                        $credit_account_name =  ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], //vendor account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->amount,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                }
+
+                elseif ($payment->payment_method_id == 2) { // Tr-T-Sp
+                    /*
+                         * tow journal voucher
+                         *
+                         * 1-  debit vendor account | credit rev branch (delivery fees)
+                         * 2 - debit bank | credit vendor account (  due_amount )
+                         */
+                    $enrty1 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $bank_account->account_code,  // bank account
+                        $debit_account_name = ['ar' => $bank_account->getTranslation('account_name', 'ar'), 'en' => $bank_account->getTranslation('account_name', 'en')], // bank account
+                        $credit_account_number =  Null,
+                        $credit_account_name = Null,
+                        $statment = Null,
+                        $amount_debit = $payment->delivery_fees,
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                    $enrty2 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,
+                        $debit_account_name = Null,
+                        $credit_account_number =  $branch_rev->revenuse_account, //branch rev account
+                        $credit_account_name = ['ar' => $branch_rev_name->getTranslation('account_name', 'ar'), 'en' => $branch_rev_name->getTranslation('account_name', 'en')], //branch rev account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->delivery_fees / (1.05),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                    $enrty3 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  // vendor account
+                        $debit_account_name = Null, // vendor account
+                        $credit_account_number =  $branch_rev->vat_on_sales, //vat output
+                        $credit_account_name = ['ar' => $branch_vat_on_sales->getTranslation('account_name', 'ar'), 'en' => $branch_vat_on_sales->getTranslation('account_name', 'en')], //vat output
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->delivery_fees - ($payment->delivery_fees / (1.05)),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = $enrty2->id,
+                        $journal_type_id = 1 // daily
+                    );
+
+                    $enrty4 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $bank_account->account_code,  // bank
+                        $debit_account_name = ['ar' => $bank_account->getTranslation('account_name', 'ar'), 'en' => $bank_account->getTranslation('account_name', 'en')], // bank
+                        $credit_account_number =  Null, // vendor account
+                        $credit_account_name = Null, // vendor account
+                        $statment = Null,
+                        $amount_debit = $payment->due_amount,
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                    $enrty5 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  // bank
+                        $debit_account_name = Null, // bank
+                        $credit_account_number =  $vendor_account->account_code, // vendor account
+                        $credit_account_name = ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], // vendor account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->due_amount,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                }
+                elseif ($payment->payment_method_id == 3) { // Tr-T-vendor
+                    /*
+                         * one journal voucher
+                         * 1-   from vendor account | to rev branch (delivery fees)
+                         */
+
+                    ShipmentHelper::accounting_entries(
+                        $debit_account_number = $vendor_account->account_number,  // vendor account
+                        $debit_account_name =  ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], //vendor account
+                        $credit_account_number =  Null, //branch rev account
+                        $credit_account_name = Null, //branch rev account
+                        $statment = Null,
+                        $amount_debit = $payment->delivery_fees,
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+
+
+                    ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  // vendor account
+                        $debit_account_name =  Null, //vendor account
+                        $credit_account_number =  $branch_rev->revenuse_account, //branch rev account
+                        $credit_account_name = ['ar' => $branch_rev_name->getTranslation('account_name', 'ar'), 'en' => $branch_rev_name->getTranslation('account_name', 'en')], //branch rev account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = $payment->delivery_fees,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        $guard,
+                        $compound_entry_with = Null,
+                        $journal_type_id = 1 // daily
+                    );
+                }
+
+                $payment->update([
+                    'posted_journal_voucher' => 1
+                ]);
+            });
+        }
     }
 
 
-    public static function searchPayments($request, $query)
+    public static function searchPayments($request)
     {
+        $query = Payment::query();
+
         if ($request->company_id && $request->company_id != 0) {
             $query->where('company_id', $request->company_id);
         }
@@ -871,7 +1143,40 @@ class ShipmentHelper
 
         return $query;
     }
-    public static function accounting_entries()
+    public static function accounting_entries($debit_account_number, $debit_account_name, $credit_account_number, $credit_account_name, $statment , $amount_debit, $amount_credit, $voucher_nmber, $payment, $shipment,$cost_center, $guard, $compound_entry_with,$journal_type_id)
     {
+        $enrty = AccountingEntries::create([
+            'number' => $voucher_nmber,
+            'debit_account_number' => $debit_account_number, // الحسساب المدين وهو اللي أخذ
+            'debit_account_name' => $debit_account_name,
+            'credit_account_number' => $credit_account_number, // الحساب الدائن وهو اللي أعطى
+            'credit_account_name' => $credit_account_name,
+            'statment' => $statment ? $statment : $shipment->paymentMethod->name . ' - ' . $shipment->feesType->name,
+            'amount_debit' => $amount_debit,
+            'amount_credit' => $amount_credit,
+            'transaction_date' => $payment->date ?? Carbon::now()->format('Y-m-d'),
+            'posting_date' => Null,
+            'journal_type_id' => $journal_type_id,
+            'is_posted' => 0,
+            'cost_center' => $cost_center ?? null,
+            'shipment_id' => $shipment->id ?? null,
+            'created_by' => Auth::guard($guard)->user()->name ?? Auth::user()->name,
+            'compound_entry_with' => $compound_entry_with
+        ]);
+
+        return $enrty;
     }
 }
+
+
+/**
+ *
+ * أرصدة مدينة أخرى تحت الموجودات المتداولة
+ * ضريبة على المشتريات
+ *
+ */
+
+/**
+ * أرصدة دائنة أخرى تحت الخصوم
+ *
+ */

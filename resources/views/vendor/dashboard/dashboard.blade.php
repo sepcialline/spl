@@ -636,7 +636,7 @@
             <!--/ Activity Timeline -->
         </div>
 
-        <hr>
+        {{-- <hr>
         <div class="card">
             <div class="card-body">
                 <table class="table table-bordered">
@@ -666,7 +666,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div> --}}
         <hr>
         <div class="card" id="content_table">
             <div class="card">

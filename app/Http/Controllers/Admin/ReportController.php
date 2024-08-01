@@ -19,6 +19,7 @@ use App\Helpers\ShipmentHelper;
 use App\Models\ShipmentStatuses;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\Branch;
 use App\Models\Company;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Calculation\TextData\Format;
@@ -42,7 +43,7 @@ class ReportController extends Controller
         $data['shipment_status'] = ShipmentStatuses::select('id', 'name')->get();
         $data['emirates'] = Emirates::select('id', 'name')->get();
         $data['cities'] = Cities::select('id', 'name')->get();
-        $data['branches'] = Branches::select('id', 'branch_name')->get();
+        $data['branches'] = Branches::where('is_main', 0)->select('id', 'branch_name')->get();
         $date_from = Carbon::today()->format('Y-m-d');
         $date_to = Carbon::today()->format('Y-m-d');
 
@@ -72,31 +73,60 @@ class ReportController extends Controller
 
         $data['payments'] = $all_payments->whereBetween('date', [$date_from, $date_to])->get();
 
+        $data['summary_accounts'] = array();
+
+        $sum_cod = 0;
+        $sum_tr_bank = 0;
+        $sum_tr_vendor = 0;
+        $sum_cod_sp_income = 0;
+        $sum_tr_bank_sp_income = 0;
+        $sum_transfer_to_vendor_company = 0;
+        $sum_cod_vendor_balance = 0;
+        $sum_tr_bank_vendor_balance = 0;
+        $total = 0;
+        $net_income = 0;
+        $vendor_account = 0;
+
+        foreach ($data['branches']->pluck('id') as $branch) {
 
 
-        // $data['cash_on_delivery'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 1)->sum('amount');
-        $data['cash_on_delivery'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 1)->sum('amount');
-        // $data['cod_sp_income'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 1)->where('amount', '>', 0)->sum('delivery_fees');
-        $data['cod_sp_income'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 1)->where('amount', '>', 0)->sum('delivery_fees');
-        $data['cod_vendor_balance'] = $data['cash_on_delivery'] - $data['cod_sp_income'];
+            $data['summary_accounts'][] = [
+                'branch_name' => $data['branch_name'] = Branches::where('id', $branch)->first()->branch_name,
+                'cash_on_delivery' => $data['cash_on_delivery'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('branch_created', $branch)->where('payment_method_id', 1)->sum('amount'),
+                'cod_sp_income' => $data['cod_sp_income'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('branch_created', $branch)->where('payment_method_id', 1)->sum('delivery_fees'),
+                'cod_vendor_balance' => $data['cod_vendor_balance'] = $data['cash_on_delivery'] - $data['cod_sp_income'],
 
 
-        // $data['transfer_to_Bank'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 2)->sum('amount');
-        $data['transfer_to_Bank'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 2)->sum('amount');
-        // $data['tr_bank_sp_income'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 2)->where('amount', '>', 0)->sum('delivery_fees');
-        $data['tr_bank_sp_income'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', 2)->where('amount', '>', 0)->sum('delivery_fees');
-        $data['tr_bank_vendor_balance'] = $data['transfer_to_Bank'] - $data['tr_bank_sp_income'];
+                'transfer_to_Bank' => $data['transfer_to_Bank'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('branch_created', $branch)->where('payment_method_id', 2)->sum('amount'),
+                'tr_bank_sp_income' => $data['tr_bank_sp_income'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('branch_created', $branch)->where('payment_method_id', 2)->sum('delivery_fees'),
+                'tr_bank_vendor_balance' => $data['tr_bank_vendor_balance'] = $data['transfer_to_Bank'] - $data['tr_bank_sp_income'],
 
-        // $data['transfer_to_vendor_company'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', $all_payments->pluck('id'))->where('due_amount', '<', 0)->sum('due_amount');
-        $data['transfer_to_vendor_company'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('due_amount', '<', 0)->sum('due_amount');
+                'transfer_to_vendor_company' => $data['transfer_to_vendor_company'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('branch_created', $branch)->where('payment_method_id', 3)->sum('due_amount'),
+
+            ];
+
+            $sum_cod = $data['cash_on_delivery'] + $sum_cod;
+            $sum_tr_bank = $data['transfer_to_Bank'] + $sum_tr_bank;
+            $sum_tr_vendor = $data['transfer_to_vendor_company'] + ($sum_tr_vendor);
+
+            $sum_cod_sp_income =   $data['cash_on_delivery'] + $sum_cod_sp_income;
+            $sum_tr_bank_sp_income = $data['transfer_to_Bank']  + $sum_tr_bank_sp_income;
+            $sum_transfer_to_vendor_company = $data['transfer_to_vendor_company']  + $sum_transfer_to_vendor_company;
+            $sum_cod_vendor_balance =  $data['cod_vendor_balance'] + $sum_cod_vendor_balance;
+            $sum_tr_bank_vendor_balance =  $data['tr_bank_vendor_balance'] + $sum_tr_bank_vendor_balance;
+
+            $total = $total +  Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('branch_created', $branch)->where('payment_method_id', '!=', 3)->sum('amount');
+            $vendor_account = ($sum_cod_vendor_balance) +  ($sum_tr_bank_vendor_balance) - (- ($sum_transfer_to_vendor_company));
+            $net_income = $total - $vendor_account;
+        }
 
 
-        // $data['total'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->sum('amount');
-        $data['total'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', '!=', 3)->sum('amount');
-        $data['net_income'] =  $data['cod_sp_income'] +  $data['tr_bank_sp_income'] + (- ($data['transfer_to_vendor_company']));
-        $data['vendor_account'] =  ($data['cod_vendor_balance']) +  ($data['tr_bank_vendor_balance']) - (- ($data['transfer_to_vendor_company']));
-
-
+        $data['total'] = $total;
+        $data['net_income'] = $net_income;
+        $data['vendor_account'] = $vendor_account;
+        // $data['total'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', '!=', 3)->sum('amount');
+        // $data['net_income'] =  $sum_cod_sp_income +  $sum_tr_bank_sp_income + (- ($sum_transfer_to_vendor_company));
+        // $data['vendor_account'] =  ($sum_cod_vendor_balance) +  ($sum_tr_bank_vendor_balance) - (- ($sum_transfer_to_vendor_company));
 
 
         // calc vandor due
@@ -132,21 +162,17 @@ class ReportController extends Controller
 
 
 
-            // $data['cash_on_delivery_table_summary'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 1)->sum('amount');
             $data['cash_on_delivery_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 1)->sum('amount');
-            // $data['cod_sp_income_table_summary'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 1)->where('amount', '>', 0)->sum('delivery_fees');
-            $data['cod_sp_income_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 1)->where('amount', '>', 0)->sum('delivery_fees');
+            $data['cod_sp_income_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 1)->sum('delivery_fees');
             $data['cod_vendor_balance_table_summary'] = $data['cash_on_delivery_table_summary'] - $data['cod_sp_income_table_summary'];
 
 
-            // $data['transfer_to_Bank_table_summary'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 2)->sum('amount');
             $data['transfer_to_Bank_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 2)->sum('amount');
-            // $data['tr_bank_sp_income_table_summary'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 2)->where('amount', '>', 0)->sum('delivery_fees');
-            $data['tr_bank_sp_income_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 2)->where('amount', '>', 0)->sum('delivery_fees');
+            $data['tr_bank_sp_income_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('deleted_at', Null)->where('payment_method_id', 2)->sum('delivery_fees');
             $data['tr_bank_vendor_balance_table_summary'] = $data['transfer_to_Bank_table_summary'] - $data['tr_bank_sp_income_table_summary'];
 
-            // $data['transfer_to_vendor_company_table_summary'] = Payment::where('is_spl_get_due',0)->where('is_vendor_get_due',0)->whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('due_amount', '<', 0)->sum('due_amount');
-            $data['transfer_to_vendor_company_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('due_amount', '<', 0)->sum('due_amount');
+            $data['transfer_to_vendor_company_table_summary'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->where('company_id', $company_id)->where('payment_method_id', 3)->sum('due_amount');
+
 
 
 
@@ -201,35 +227,37 @@ class ReportController extends Controller
 
         ###################### summary branches ####################################################################
 
-        $branches_ids = $all_payments->groupBy('branch_created')->pluck('branch_created');
-        $data['summary_branches'] = array();
+        // $branches_ids = $all_payments->groupBy('branch_created')->pluck('branch_created');
+        // $data['summary_branches'] = array();
 
-        // // $summary_branches_payments = ShipmentHelper::searchPayments($request, $query)->get();
+        // // // $summary_branches_payments = ShipmentHelper::searchPayments($request, $query)->get();
 
-        foreach ($branches_ids as $branch) {
-            $vendors_ids = $all_payments->groupBy('company_id')->where('branch_created',$branch)->pluck('company_id');
-            foreach ($vendors_ids as $vendor){
-                $payment_vendor_in = ShipmentHelper::searchPayments($request, $query)->where('company_id',$vendor)->where('in_out',0)->get();
-                $payment_vendor_out = ShipmentHelper::searchPayments($request, $query)->where('company_id',$vendor)->where('in_out',1)->get();
+        // foreach ($branches_ids as $branch) {
+        //     $vendors_ids = $all_payments->groupBy('company_id')->where('branch_created',$branch)->pluck('company_id');
+        //     foreach ($vendors_ids as $vendor){
+        //         $payment_vendor_in = ShipmentHelper::searchPayments($request, $query)->where('company_id',$vendor)->where('in_out',0)->get();
+        //         $payment_vendor_out = ShipmentHelper::searchPayments($request, $query)->where('company_id',$vendor)->where('in_out',1)->get();
 
 
-            $data['summary_branches'][] =[
-                'branch_name'=>Branches::where('id',$branch)->first()->branch_name,
-                'vendor'=> VendorCompany::where('id',$vendor)->first()->name,
-                'inside_payments'=> count($payment_vendor_in),
-                // 'inside_payments_delivery_fees'=>ShipmentHelper::searchPayments($request, $query)->where('branch_created',$branch)->where('in_out',0)->sum('delivery_fees') / 0,
-                // 'inside_payments_delivery_fees'=>0,
-                'outside_payments'=> count($payment_vendor_out),
-                'outside_payments_delivery_fees'=>ShipmentHelper::searchPayments($request, $query)->where('branch_created',$branch)->where('in_out',1)->sum('delivery_fees') / 2,
-            ];
-            }
+        //     $data['summary_branches'][] =[
+        //         'branch_name'=>Branches::where('id',$branch)->first()->branch_name,
+        //         'vendor'=> VendorCompany::where('id',$vendor)->first()->name,
+        //         'inside_payments'=> count($payment_vendor_in),
+        //         // 'inside_payments_delivery_fees'=>ShipmentHelper::searchPayments($request, $query)->where('branch_created',$branch)->where('in_out',0)->sum('delivery_fees') / 0,
+        //         // 'inside_payments_delivery_fees'=>0,
+        //         'outside_payments'=> count($payment_vendor_out),
+        //         'outside_payments_delivery_fees'=>ShipmentHelper::searchPayments($request, $query)->where('branch_created',$branch)->where('in_out',1)->sum('delivery_fees') / 2,
+        //     ];
+        //     }
 
-        }
+    // }
 
         // return $data['summary_branches'];
 
         ###########################################################################################################
-
+        if (request()->input('action') == 'export') {
+            return Excel::download(new PaymentExport, '' . Carbon::today()->toDateString() . '.xlsx');
+        }
 
         if (request()->input('action') == 'report') {
             return view('admin.shipment.reports.payment_report', $data);
@@ -238,25 +266,26 @@ class ReportController extends Controller
         }
     }
 
-    public function paymentsReportBranches(){
-        $data['branches'] = Branches::where('is_main',0)->select('id','branch_name')->orderBy('id','asc')->get();
+    public function paymentsReportBranches()
+    {
+        $data['branches'] = Branches::where('is_main', 0)->select('id', 'branch_name')->orderBy('id', 'asc')->get();
         $data['from'] = Carbon::now()->format('Y-m-d');
         $data['to'] = Carbon::now()->format('Y-m-d');
 
-        if(Request()->date_from){
+        if (Request()->date_from) {
             $data['from'] = Carbon::parse(Request()->date_from)->format('Y-m-d');
         }
-        if(Request()->date_to){
+        if (Request()->date_to) {
             $data['to'] = Carbon::parse(Request()->date_to)->format('Y-m-d');
         }
 
-        $data['payments'] = Payment::where('branch_created',Request()->branch)->get();
+        $data['payments'] = Payment::where('branch_created', Request()->branch)->get();
 
-        if(request()->input('action') == 'search_action'){
+        if (request()->input('action') == 'search_action') {
             return $data['payments'];
         }
         // return $data['payments'];
-        return view('admin.shipment.reports.payment_branches',$data);
+        return view('admin.shipment.reports.payment_branches', $data);
     }
 
 
@@ -353,10 +382,10 @@ class ReportController extends Controller
 
     public function emirate_post_export(Request $request)
     {
-        return Excel::download(new EmiratePostExport, '' . Carbon::today()->toDateString() . '.csv');
+        return Excel::download(new EmiratePostExport, '' . Carbon::today()->toDateString() . '.xlsx');
     }
     public function payments_export(Request $request)
     {
-        return Excel::download(new PaymentExport, '' . Carbon::today()->toDateString() . '.csv');
+        return Excel::download(new PaymentExport, '' . Carbon::today()->toDateString() . '.xlsx');
     }
 }

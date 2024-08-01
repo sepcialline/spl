@@ -225,10 +225,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/branch/edit/{id}', 'edit')->name('branch_edit');
             Route::post('/branch/update', 'updateBranch')->name('branch_update');
             Route::post('/branch/store', 'store')->name('branch_store');
+
+            Route::get('branch/account-details-rev/{id}','show_account_details_page_rev')->name('branch_account_details_rev');
+            Route::get('branch/account-details-vat-on-sales/{id}','show_account_details_page_vat_on_sales')->name('branch_account_details_vat_on_sales');
+            Route::get('branch/account-details-vat-on-purchase/{id}','show_account_details_page_vat_on_purchase')->name('branch_account_details_vat_on_purchase');
+            Route::get('branch/account-details-exp/{id}','show_account_details_page_exp')->name('branch_account_details_exp');
+
+            Route::post('branch/branch_account','store_account_details')->name('store_branch_account_details');
+
             Route::delete('/branch/destroy', 'destroy')->name('branch_destroy');
             Route::post('/branch/{id}', [BranchController::class, 'delete_branch'])->name('branch_delete');
             Route::get('/branch/{id}', 'show')->name('branch_show');
             Route::post('/branch/update-status/{id}', 'updateStatus')->name('branch_status_update');
+
+
+
         }); //نهاية  الفروع
 
         //بداية المناطق

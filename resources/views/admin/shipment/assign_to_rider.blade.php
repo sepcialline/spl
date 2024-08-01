@@ -49,8 +49,8 @@
                                     <td>{{ $shipment->Client->name ?? '' }} <br>
                                         {{ $shipment->Client?->mobile ?? '' }}</td>
                                     <td>{{ $shipment->Client?->emirate->name ?? '' }} <br>
-                                        {{ $shipment->Client?->city->name ?? '' }} <br>
-                                        {{ $shipment->Client?->address ?? '' }}</td>
+                                        {{ $shipment->city->name ?? '' }} <br>
+                                        {{ $shipment->delivered_address ?? '' }}</td>
                                     <td>{{ $shipment->Company->name ?? '' }}</td>
                                     <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
                                     <td><span

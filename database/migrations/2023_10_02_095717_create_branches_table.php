@@ -30,6 +30,10 @@ return new class extends Migration
             $table->string('updated_by')->nullable();
             $table->string('delete_by')->nullable();
 			$table->boolean('status')->default(true);
+            $table->integer('revenuse_account')->nullable()->comment('رقم حساب الفرع بالايرادات');
+            $table->integer('vat_on_sales')->nullable()->comment('رقم حساب الفرع بالضرائب عند البيع');
+            $table->integer('vat_on_purchase')->nullable()->comment('رقم حساب الفرع بالضرائب عند الشراء');
+            $table->integer('expense_account')->nullable()->comment('رقم حساب الفرع بالمصاريف');
             $table->softDeletes();
             $table->timestamps();
         });

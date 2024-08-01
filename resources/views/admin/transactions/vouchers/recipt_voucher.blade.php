@@ -6,6 +6,13 @@
 
     @section('VendorsCss')
         <link rel="stylesheet" href="{{ asset('build/assets/vendor/libs/select2/select2.css') }}" />
+
+        <style>
+            .readonly {
+                background: #eee;
+                /* لون الخلفية الرمادي */
+            }
+        </style>
     @endsection
     <div class="container-xxl flex-grow-1 container-p-y">
 
@@ -16,28 +23,39 @@
 
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.account.store_recipt_voucher') }}" method="post" 
+                <form action="{{ route('admin.account.store_recipt_voucher') }}" method="post"
                     class="row g-3 needs-validation" novalidate>
                     @csrf
                     <div class="row mt-2">
-                        <div class="form-group col-4">
+                        <div class="form-group col-2">
                             <label for="exampleFormControlInput1">{{ __('admin.date') }}</label>
                             <input type="date" name="date" class="form-control"
                                 value="{{ Carbon\Carbon::now()->format('Y-m-d') }}">
                         </div>
-                        <div class="form-group col-8">
+                        <div class="form-group col-5">
                             <label for="exampleFormControlInput1">{{ __('admin.statment') }}</label>
                             <textarea name="statment" class="form-control" id="statment" cols="" rows="1" required></textarea>
                         </div>
+                        <div class="form-group col-2">
+                            <label for="exampleFormControlInput1">{{ __('admin.shipment_no') }}</label>
+                            <input name="shipment_refrence" class="form-control" id="shipment_refrence"></textarea>
+                        </div>
+                        <div class="form-group col-3">
+                            <label for="exampleFormControlInput1">{{ __('admin.cost_center') }}</label>
+                            <select name="cost_center" id="cost_center" class="js-example-basic-single">
+                                <option value="" selected disabled>{{ __('admin.please_select') }}</option>
+                                @foreach ($cars as $car)
+                                    <option value="{{ $car->id }}">{{ $car->car_name }} |{{ $car->car_plate }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-
 
 
                     <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th width="15%">{{ __('admin.account_name') }}</th>
-                                {{-- <th width="15%">{{ __('admin.amount') }}</th> --}}
                                 <th width="15%">{{ __('admin.credit') }}</th>
                                 <th width="15%">{{ __('admin.debit') }}</th>
                             </tr>
@@ -45,47 +63,46 @@
                         <tbody>
                             <tr>
                                 <td class="p-0">
-                                    <select name="account_id[]" id="" class="js-example-basic-single" required>
+                                    <select name="account_id[]" class="js-example-basic-single" required>
                                         <option value="" selected disabled>{{ __('admin.please_select') }}
                                         </option>
                                         @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
+                                            <option value="{{ $account->id }}">{{ $account->account_name }} |
+                                                {{ $account->account_code }}</option>
                                         @endforeach
                                     </select>
                                 </td>
-                                {{-- <td class="p-0"><input name="amount[]" type="number" class="form-control" required> --}}
+                                <td class="p-0">
+                                    <input type="text" name="credit[]" class="form-control credit">
                                 </td>
                                 <td class="p-0">
-                                    <input type="text" name="credit[]" id="credit" class="form-control" required>
-                                </td>
-                                <td class="p-0">
-                                    <input type="text" name="debit[]" id="credit" class="form-control" required>
+                                    <input type="text" name="debit[]" class="form-control debit">
                                 </td>
                             </tr>
                             <tr>
                                 <td class="p-0">
-                                    <select name="account_id[]" id="" class="js-example-basic-single" required>
+                                    <select name="account_id[]" class="js-example-basic-single" required>
                                         <option value="" selected disabled>{{ __('admin.please_select') }}
                                         </option>
                                         @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
+                                            <option value="{{ $account->id }}">{{ $account->account_name }} |
+                                                {{ $account->account_code }}</option>
                                         @endforeach
                                     </select>
                                 </td>
-                                {{-- <td class="p-0"><input name="amount[]" type="number" class="form-control"></td> --}}
                                 <td class="p-0">
-                                    <input type="text" name="credit[]" id="credit" class="form-control" required>
+                                    <input type="text" name="credit[]" class="form-control credit">
                                 </td>
                                 <td class="p-0">
-                                    <input type="text" name="debit[]" id="credit" class="form-control" required>
+                                    <input type="text" name="debit[]" class="form-control debit">
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
                     <div class="my-2">
-                        <button type="submit" class="btn btn-label-secondary">{{ __('admin.save_and_print') }}</button>
+                        <button type="submit"
+                            class="btn btn-label-secondary">{{ __('admin.save_and_print') }}</button>
                     </div>
                 </form>
             </div>
@@ -103,39 +120,36 @@
             });
         </script>
 
-        {{-- <script>
-            $(document).ready(function() {
-                $("#add_row").click(function() {
-                    var markup = `
-                    <tr>
-                                <td class="p-0">
-                                    <select name="account_id[]" id="" class="js-example-basic-single">
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
-                                        @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td class="p-0"><input name="amount[]" type="text" class="form-control"></td>
-                                <td class="p-0">
-                                    <select name="type_account[]" id="type_account" class="js-example-basic-single">
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
-                                        <option value="0">{{ __('admin.credit') }}</option>
-                                        <option value="1">{{ __('admin.debit') }}</option>
-                                    </select>
-                                </td>
-                                <td class="p-0">
-                                    <textarea name="statment[]" class="form-control" id="statment" cols="30" rows="1"></textarea>
-                                </td>
-                            </tr>
-                    `;
-                    $("table tbody").append(markup);
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const creditInputs = document.querySelectorAll('input.credit');
+                const debitInputs = document.querySelectorAll('input.debit');
+
+                function toggleInput(input, otherInput) {
+                    if (input.value) {
+                        otherInput.setAttribute('readonly', true);
+                        otherInput.classList.add('readonly');
+                    } else {
+                        otherInput.removeAttribute('readonly');
+                        otherInput.classList.remove('readonly');
+                    }
+                }
+
+                creditInputs.forEach((creditInput, index) => {
+                    const debitInput = debitInputs[index];
+
+                    creditInput.addEventListener('input', function() {
+                        toggleInput(creditInput, debitInput);
+                    });
+
+                    debitInput.addEventListener('input', function() {
+                        toggleInput(debitInput, creditInput);
+                    });
                 });
             });
-        </script> --}}
+        </script>
+
+
         <script>
             // Example starter JavaScript for disabling form submissions if there are invalid fields
             (function() {

@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers\Admin\Branch;
 
-use App\Http\Controllers\Controller;
-use App\Http\Middleware\Branch;
 use App\Models\Branches;
 use App\Models\Emirates;
 use App\Models\MapSetting;
+use App\Models\AccountTree;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\Branch;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class BranchController extends Controller
 {
     function __construct()
     {
         $this->middleware(['permission:admin-Branch-Show-Page'], ['only' => ['index']]);
-        $this->middleware(['permission:admin-Branch-add'], ['only' => ['create','store']]);
+        $this->middleware(['permission:admin-Branch-add'], ['only' => ['create', 'store']]);
         $this->middleware(['permission:admin-Branch-show'], ['only' => ['show']]);
-        $this->middleware(['permission:admin-Branch-edit'], ['only' => ['edit','updateBranch','updateStatus']]);
-        $this->middleware(['permission:admin-Branch-delete'], ['only' => ['delete_branch','destroy']]);
+        $this->middleware(['permission:admin-Branch-edit'], ['only' => ['edit', 'updateBranch', 'updateStatus']]);
+        $this->middleware(['permission:admin-Branch-delete'], ['only' => ['delete_branch', 'destroy']]);
     }
 
     /**
@@ -40,7 +41,6 @@ class BranchController extends Controller
     {
         $emirates = Emirates::get();
         $maps = MapSetting::first();
-        // return $maps;
         return view('admin.branchs.create', compact('emirates', 'maps'));
     }
 
@@ -60,12 +60,12 @@ class BranchController extends Controller
                 'mobile' => 'required|numeric', //|min:9|max:15',
                 'email' => 'required|email|max:255',
                 'emirates' => 'required|max:255',
-                'branch_percentage' => 'required|numeric|max:255',
+                // 'branch_percentage' => 'required|numeric|max:255',
                 'branch_status' => 'required',
-                'percentage_in' => 'required|numeric|max:100|min:1',
-                'percentage_out' => 'required|numeric|max:100|min:1',
-                'map_longitude' => 'required|numeric|max:255',
-                'map_latitude' => 'required|numeric|max:255',
+                // 'percentage_in' => 'required|numeric|max:100|min:1',
+                // 'percentage_out' => 'required|numeric|max:100|min:1',
+                // 'map_longitude' => 'required|numeric|max:255',
+                // 'map_latitude' => 'required|numeric|max:255',
                 'is_main' => 'required',
             ],
             [
@@ -79,8 +79,8 @@ class BranchController extends Controller
                 'branch_status.required' => __('admin.this_field_is_required'),
                 'percentage_in.required' => __('admin.this_field_is_required'),
                 'percentage_out.required' => __('admin.this_field_is_required'),
-                'map_longitude.required' => __('admin.this_field_is_required'),
-                'map_latitude.required' => __('admin.this_field_is_required'),
+                // 'map_longitude.required' => __('admin.this_field_is_required'),
+                // 'map_latitude.required' => __('admin.this_field_is_required'),
                 'is_main.required' => __('admin.this_field_is_required'),
             ]
         );
@@ -92,13 +92,13 @@ class BranchController extends Controller
         $branches->branch_mobile = $request->mobile;
         $branches->branch_email = $request->email;
         $branches->branch_emirat_id = $request->emirates;
-        $branches->percentage = $request->branch_percentage;
-        $branches->percentage_in = $request->percentage_in;
-        $branches->percentage_out = $request->percentage_out;
+        // $branches->percentage = $request->branch_percentage;
+        // $branches->percentage_in = $request->percentage_in;
+        // $branches->percentage_out = $request->percentage_out;
         $branches->status = $request->branch_status;
-        $branches->longitude = $request->map_longitude;
-        $branches->latitude = $request->map_latitude;
-        $branches->branch_postal_code = $request->postal_code;
+        // $branches->longitude = $request->map_longitude;
+        // $branches->latitude = $request->map_latitude;
+        // $branches->branch_postal_code = $request->postal_code;
         $branches->is_main = $request->is_main;
 
         $branches->save();
@@ -233,6 +233,112 @@ class BranchController extends Controller
 
     }
 
+    public function show_account_details_page_rev($id)
+    {
+        $data['branch'] = Branches::where('id', $id)->first();
+        $data['rev_account'] = AccountTree::where('account_code', $data['branch']->revenuse_account)->first();
+        $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
+        $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
+        $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
+        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        return view('admin.branchs.account_details_rev', $data);
+    }
+
+
+
+    public function show_account_details_page_vat_on_sales($id)
+    {
+        $data['branch'] = Branches::where('id', $id)->first();
+        $data['rev_account'] = AccountTree::where('account_code', $data['branch']->revenuse_account)->first();
+        $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
+        $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
+        $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
+        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        return view('admin.branchs.account_details_vat_on_sales', $data);
+    }
+    public function show_account_details_page_vat_on_purchase($id)
+    {
+        $data['branch'] = Branches::where('id', $id)->first();
+        $data['rev_account'] = AccountTree::where('account_code', $data['branch']->revenuse_account)->first();
+        $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
+        $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
+        $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
+        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        return view('admin.branchs.account_details_vat_on_purchase', $data);
+    }
+
+
+    public function show_account_details_page_exp($id)
+    {
+        $data['branch'] = Branches::where('id', $id)->first();
+        $data['rev_account'] = AccountTree::where('account_code', $data['branch']->revenuse_account)->first();
+        $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
+        $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
+        $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
+        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        return view('admin.branchs.account_details_exp', $data);
+    }
+
+    public function store_account_details(Request $request)
+    {
+
+
+        $id = null;
+        if ($request->id != Null) {
+            $id = $request->id;
+            $request->validate([
+                'code' => 'required|unique:account_trees,account_code,' . $id,
+            ]);
+        } else {
+            $request->validate([
+                'code' => 'required|unique:account_trees,account_code',
+            ]);
+        }
+
+        DB::transaction(function () use ($request) {
+            $account = AccountTree::updateOrCreate(
+                ['account_code' => $request->code],
+                [
+                    'account_level' => $request->level,
+                    'account_code' => $request->code,
+                    'account_name' => ['ar' => $request->name_ar, 'en' => $request->name_en],
+                    'account_type' => $request->type,
+                    'account_parent' => $request->parent,
+                    'account_dc_type' => $request->account_dc_type,
+                    'account_final' => $request->account_final
+                ]
+            );
+            $branch = Branches::where('id', $request->branch_id)->first();
+            if ($branch) {
+                if ($request->account_detail == "rev") {
+                    $branch->update([
+                        'revenuse_account' => $account->account_code,
+                    ]);
+                }
+                if ($request->account_detail == "vat_on_sales") {
+                    $branch->update([
+                        'vat_on_sales' => $account->account_code,
+                    ]);
+                }
+                if ($request->account_detail == "vat_on_purchase") {
+                    $branch->update([
+                        'vat_on_purchase' => $account->account_code,
+                    ]);
+                }
+                if ($request->account_detail == "exp") {
+                    $branch->update([
+                        'expense_account' => $account->account_code,
+                    ]);
+                }
+            }
+        });
+
+
+
+
+        toastr()->success(__('admin.msg_success_add'));
+        return redirect()->back();
+    }
     // delete branch
     public function delete_branch($id)
     {

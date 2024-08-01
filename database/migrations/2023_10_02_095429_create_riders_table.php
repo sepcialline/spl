@@ -32,6 +32,7 @@ return new class extends Migration
             $table->boolean('status')->nullable()->default(true);
             $table->string('lat')->nullable();
             $table->string('lng')->nullable();
+
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();

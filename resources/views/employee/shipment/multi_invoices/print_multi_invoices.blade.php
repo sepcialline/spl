@@ -74,23 +74,6 @@
             }
         }
 
-        /* * {
-            margin: 0px;
-            padding: 0px;
-            font-size: 10px;
-            align-items: center;
-            align-content: center;
-        }
-
-        body{
-            padding: 0px;
-            margin: 0px;
-        }
-        div {
-            width: 100%;
-            overflow: hidden  !important;
-        } */
-
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;1000&display=swap');
 
         @page {
@@ -98,18 +81,6 @@
         }
 
         @media print {
-
-            /* * {
-            margin: 0px;
-            padding: 0px;
-            font-size: 10px;
-            align-items: center;
-            align-content: center;
-        }
-
-        div {
-            width: 100%;
-        } */
             @page {
                 size: A5 landscape
             }
@@ -139,13 +110,17 @@
                         </h5>
                     </div>
                     <div>
-                        <h4 style="color: red !important ;margin:5px">#{{ $value['shipment']->shipment_refrence }}
+                        <h4 style="color: rgb(255, 255, 255) !important ;margin:5px">
+                            #{{ $value['shipment']->shipment_refrence }}
                         </h4>
                     </div>
 
                 </div>
-                <hr>
-                {!! $barcodes[$key] !!}
+                <div class="row mt-1 mb-1 justify-content-between">
+                    <div class="col"></div>
+                    <div class="col">{!! $barcodes[$key] !!}</div>
+                    <div class="col"></div>
+                </div>
                 <hr>
                 <div class="row d-flex justify-content-between my-0">
                     <div class="col w-50 justify-content-center mx-0">

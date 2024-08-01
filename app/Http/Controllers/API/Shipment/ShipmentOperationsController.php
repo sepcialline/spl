@@ -39,7 +39,6 @@ class ShipmentOperationsController extends Controller
 
         $guard = 'rider';
         $shipment = Shipment::where('shipment_no', $request->shipmentNo)->first();
-
         ShipmentHelper::shipmentChangeStatus($request, $shipment, $guard);
 
         $status = ShipmentStatuses::where('id', $request->status_id)->first();

@@ -239,19 +239,7 @@
 
                 </div>
                 <hr>
-                {{-- <div class="d-flex justify-content-around">
-                <div>
-                    <table class="table">
-                        <thead><tr><th>{{__('admin.due_amount_for_vendor')}}</th></tr></thead>
-                        <tbody><tr><td>  {{$vendor_amount_due}} {{__('admin.currency')}}</td></tr></tbody>
-                    </table>
 
-                </div>
-                <div>
-
-
-                </div>
-            </div> --}}
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -284,7 +272,6 @@
                         <tr class="bg-light">
                             <td>#</td>
                             <td> {{ __('admin.all') }}</td>
-                            {{-- <td>  {{$payments->groupBy('shipment_id')->count();}}</td> --}}
                             <td> {{ $total_count }}</td>
                             <td>{{ $total_summary_due_amount }}{{ __('admin.currency') }}</td>
                         </tr>

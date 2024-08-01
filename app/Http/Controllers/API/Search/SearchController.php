@@ -37,6 +37,7 @@ class SearchController extends Controller
             $has_stock = null;
             $shipment_content = [];
             $shipment = Shipment::where('shipment_no', $request->shipment_no)->orWhere('shipment_refrence', $request->shipment_no)->orderBy('id','desc')->first();
+
             //return response(compact('shipment'), 200);
             $shipment_company = VendorCompany::where('id', $shipment->company_id)->first();
             $notes = $shipment->shipment_notes;

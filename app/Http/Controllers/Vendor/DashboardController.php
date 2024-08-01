@@ -38,57 +38,39 @@ class DashboardController extends Controller
         $query = Shipment::query();
         $request = request();
 
-        $all_shipments = ShipmentHelper::searchPayments($request, $query);
+        // $all_shipments = ShipmentHelper::searchPayments($request, $query);
 
-        // $data['shipments'] = $all_shipments
+
+        // $data['shipments_vendor_due'] = $all_shipments
+        //     ->where('status_id', 3)
         //     ->where('company_id',Auth::guard('vendor')->user()->company_id)
-        //     ->whereIn('status_id', [3,9])
         //     // ->where('is_rider_has', 0)
-        //     ->where('is_vendor_get_due', 0)
+        //     // ->where('is_vendor_get_due', 0)
         //     ->where('deleted_at', Null)
         //     ->get();
 
-        // foreach ($data['shipments'] as $shipment) {
-        //     if ($shipment->is_split_payment == 0) {
-        //         $data['sum'] =  $data['sum'] + $shipment->vendor_due;
-        //     } else {
-        //         $to_vendor = 0;
-        //         $payment = Payment::where('shipment_id', $shipment->id)->where('is_split', 1)->where('payment_method_id', 3)->where('is_vendor_get_due', 0)->first();
-        //         $to_vendor = $payment->amount ?? 0;
-        //         $data['sum'] = $data['sum'] + ($shipment->vendor_due - $to_vendor);
-        //     }
-        // }
-
-        $data['shipments_vendor_due'] = $all_shipments
-            ->where('status_id', 3)
-            ->where('company_id',Auth::guard('vendor')->user()->company_id)
-            // ->where('is_rider_has', 0)
-            // ->where('is_vendor_get_due', 0)
-            ->where('deleted_at', Null)
-            ->get();
-
-        $data['sum'] = Payment::whereIn('shipment_id',  $data['shipments_vendor_due']->pluck('id'))->sum('due_amount');
+        // $data['sum'] = Payment::whereIn('shipment_id',  $data['shipments_vendor_due']->pluck('id'))->sum('due_amount');
 
         //latest 5 transiction
 
-        $query =
-            AccountingEntries::query()->where('account_number', Auth::guard('vendor')->user()->company->account_number)->where('debit', '!=', 0);
+        // $query =
+        //     AccountingEntries::query()->where('account_number', Auth::guard('vendor')->user()->company->account_number)->where('debit', '!=', 0);
 
-        $data['journal_numbers'] = $query->orderBy('id','desc')->take(8)->get();
-        $data['journals'] = array();
-        foreach ($data['journal_numbers'] as $number) {
+        // $data['journal_numbers'] = $query->orderBy('id','desc')->take(8)->get();
+        // $data['journals'] = array();
+        // foreach ($data['journal_numbers'] as $number) {
 
-            $credit = AccountingEntries::where('number', $number->number)->where('credit', '!=', 0)->first();
-            $debit = AccountingEntries::where('number', $number->number)->where('debit', '!=', 0)->first();
-            $currency = __('admin.currency');
-            $data['journals'][] = [
-                'number' => $number->number,
-                'type' => JounalType::where('id', $number->journal_type_id)->first(),
-                'debit' => "$debit->debit  $currency",
-                'statment' => $number->statment,
-                'date' => $number->transaction_date
-            ];
-        }
+        //     $credit = AccountingEntries::where('number', $number->number)->where('credit', '!=', 0)->first();
+        //     $debit = AccountingEntries::where('number', $number->number)->where('debit', '!=', 0)->first();
+        //     $currency = __('admin.currency');
+        //     $data['journals'][] = [
+        //         'number' => $number->number,
+        //         'type' => JounalType::where('id', $number->journal_type_id)->first(),
+        //         'debit' => "$debit->debit  $currency",
+        //         'statment' => $number->statment,
+        //         'date' => $number->transaction_date
+        //     ];
+        // }
 
         return view('vendor.dashboard.dashboard', $data);
     }

@@ -51,8 +51,7 @@ return new class extends Migration
             $table->unsignedBigInteger('branch_created')->comment('الفرع المنشأ للدفعة')->nullable();
             $table->foreign('branch_created')->references('id')->on('branches')->onDelete('cascade')->onUpdate('cascade');
 
-            $table->unsignedBigInteger('branch_update')->comment('الفرع المعدل عليها')->nullable();
-            $table->foreign('branch_update')->references('id')->on('branches')->onDelete('cascade')->onUpdate('cascade');
+            $table->tinyInteger('posted_journal_voucher')->comment('هل ترحلت لقيد محاسبي أم لا')->default(0);
 
             $table->tinyInteger('in_out')->nullable()->default(0)->comment("صفر : في حال كان الفرع المنشأ نفسه الفرع المسلم / واحد : في  حال كان الفرع المنشأ غير الفرع المسلم");
 
@@ -71,8 +70,6 @@ return new class extends Migration
             $table->string('destination_city')->default('عجمان');
             $table->string('additional_info_2')->nullable()->default('');
 
-            $table->integer('withdrawn_in_branch')->nullable()->comment('تم السحب من السائق في الفرع');
-            $table->tinyInteger('witdrawn_in_admin')->nullable()->comment('تم السحب من السائق في الادمن')->default(0);
 
             $table->softDeletes();
             $table->timestamps();

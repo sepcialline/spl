@@ -62,7 +62,7 @@
                 <div class="row  g-3">
                     <div class="col-md-6">
                         <div class="row mb-3 g-3">
-                            <div class=" col-md-6">
+                            <div class=" col-md-4">
                                 <label for="landline" class="form-label">{{ __('admin.landline') }}</label>
                                 <input  type="text" id="landline" name="landline"
                                     class="form-control  @error('landline') is-invalid @enderror"
@@ -72,7 +72,7 @@
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class=" col-md-6">
+                            <div class=" col-md-4">
                                 <label for="mobile" class="form-label">{{ __('admin.mobile') }}</label>
                                 <input  type="text" id="mobile" name="mobile"
                                     class="form-control  @error('mobile') is-invalid @enderror"
@@ -83,7 +83,7 @@
                                 @enderror
                             </div>
 
-                            <div class=" col-md-6">
+                            <div class=" col-md-4">
                                 <label for="email" class="form-label">{{ __('admin.email') }}</label>
                                 <input  type="email" value="{{ $data->branch_email  }}" id="email" name="email"
                                     class="form-control  @error('email') is-invalid @enderror"
@@ -92,7 +92,7 @@
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
+                            {{-- <div class="col-md-6">
                                 <label for="postal_code" class="form-label">{{ __('admin.postal_code') }}</label>
                                 <input  type="number" id="postal_code" value="{{ $data->branch_postal_code  }}"
                                     name="postal_code" class="form-control  @error('postal_code') is-invalid @enderror"
@@ -101,10 +101,10 @@
                                 @error('postal_code')
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
                         </div>
                         <div class="row g-3">
-                            <div class="  col-md-6">
+                            <div class="  col-md-4">
                                 <label for="emirates" class="form-label">{{ __('admin.emirates_list') }}</label>
                                 <select class="form-select   @error('emirates') is-invalid @enderror"
                                     value="{{ $data->emirates_id }}" id="emirates" name="emirates" class="custom-select ">
@@ -116,22 +116,21 @@
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class=" col-md-6">
+                            {{-- <div class=" col-md-6">
                                 <label for="branch_percentage" class="form-label">{{ __('admin.branch_percentage')
                                     }}</label>
                                 <select name="branch_percentage" value="{{ $data->percentage }}"
                                     class="form-select  @error('branch_percentage') is-invalid @enderror"
                                     id="branch_percentage" aria-label="branch_percentage select example">
-                                    {{-- <option selected>Open this select menu</option> --}}
                                     <option value="0" {{$data->percentage == 0 ? 'selected' : ''}}>{{ __('admin.no') }}</option>
                                     <option value="1" {{$data->percentage == 1 ? 'selected' : ''}}>{{ __('admin.yes') }}</option>
                                 </select>
                                 @error('branch_percentage')
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
 
-                            <div class="mb-3 col-md-6">
+                            <div class="mb-3 col-md-4">
                                 <label for="branch_status" class="form-label">{{ __('admin.status') }}</label>
                                 <select name="branch_status" value="{{ $data->status }}"
                                     class="form-select  @error('branch_status') is-invalid @enderror" id="branch_status"
@@ -144,7 +143,7 @@
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class=" col-md-6">
+                            {{-- <div class=" col-md-6">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label for="tax_include" class="form-label">{{ __('admin.in') }}</label>
@@ -169,15 +168,14 @@
                                 </div>
                             </div>
 
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-4">
+                        </div> --}}
+                        {{-- <div class="row g-3"> --}}
+                            {{-- <div class="col-md-4">
                                 <label class="form-label" for="map_longitude">{{ __('admin.setting_map_longitude')
                                     }}</label>
                                 <input  type="text" id="map_longitude" value="{{ $data->longitude }}"
                                     class="form-control  @error('map_longitude') is-invalid @enderror"
                                     name="map_longitude"
-                                    {{-- value="25.405216" --}}
                                     placeholder="{{ __('admin.setting_map_longitude') }}" />
                                 @error('map_longitude')
                                 <div class="alert alert-danger">{{ $message }}</div>
@@ -189,12 +187,11 @@
                                 <input  type="text" value="{{ $data->latitude  }}" id="map_latitude"
                                     class="form-control  @error('map_latitude') is-invalid @enderror"
                                     name="map_latitude"
-                                    {{-- value="55.513641" --}}
                                     placeholder="{{ __('admin.setting_map_latitude') }}" />
                                 @error('map_latitude')
                                 <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
                             <div class="col-md-4">
                                 <label for="is_main" class="form-label">{{ __('admin.branch_branch_is_main') }}</label>
                                 <select name="is_main" value="{{ old('is_main') }}"
@@ -211,7 +208,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
 
                         <div class="col-12">
                             <label class="form-label" for="multicol-first-name">{{ __('admin.location') }}</label>
@@ -225,11 +222,10 @@
                                         style="width: 300px; margin-top: 10px"
                                     />
                                     <div style="height: 310px !important" id="map"></div>
-                                    {{-- <button name="locationButton">aaa</button> --}}
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-md-12 row">
                         <div class="col-1">
                             <button  id='submit' type="submit" class="btn btn-primary d-flex justify-content-between">

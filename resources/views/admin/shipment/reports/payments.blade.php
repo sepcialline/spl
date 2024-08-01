@@ -22,6 +22,14 @@
             .table td {
                 text-align: center;
             }
+
+            .table {
+                font-size: 12px
+            }
+
+            .table th {
+                font-size: 12px
+            }
         </style>
     @endsection
     <div class="container-xxl flex-grow-1 container-p-y">
@@ -124,6 +132,8 @@
 
                             <button name="action" value="report" type="submit"
                                 class="btn btn-label-facebook">{{ __('admin.accounts_reports') }}</button>
+                            <button name="action" value="export" type="submit" class="btn btn-label-success"><i
+                                    class="fa fa-file-export"></i></button>
                         </div>
 
                     </div>
@@ -167,6 +177,7 @@
                                         <th>{{ __('admin.delivery_fees') }}</th>
                                         <th>{{ __('admin.due_amount_for_vendor') }}</th>
                                         <th>{{ __('admin.pay/dont_pay') }}</th>
+                                        <th>posted</th>
                                     </tr>
 
                                 </thead>
@@ -206,6 +217,16 @@
                                             <td>{{ $payment->due_amount }}</td>
                                             <td>{{ $payment->is_vendor_get_due == 0 ? __('admin.no') : __('admin.yes') }}
                                             </td>
+                                            <td>
+                                                @if ($payment->posted_journal_voucher == 0)
+                                                    <form action="" method="post">
+
+                                                    </form>
+                                                @else
+                                                    yes
+                                                @endif
+
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -228,26 +249,111 @@
         <hr>
         <div class="card">
             <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="mx-1">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="background-color:#ffd200">{{ __('admin.cod') }}</th>
+                                <th style="">{{ __('admin.total') }}</th>
+                                <th style="">{{ __('admin.net_income') }}</th>
+                                <th style="">{{ __('admin.vendor_account') }}</th>
+                            </tr>
+                            @php $total_cash_on_delivery = 0; @endphp
+                            @php $total_cod_sp_income = 0; @endphp
+                            @php $total_cod_vendor_balance = 0; @endphp
+
+                            @foreach ($summary_accounts as $account)
+                                @php $total_cash_on_delivery =$account['cash_on_delivery'] + $total_cash_on_delivery; @endphp
+                                @php $total_cod_sp_income =$account['cod_sp_income'] + $total_cod_sp_income; @endphp
+                                @php $total_cod_vendor_balance = $account['cod_vendor_balance']+ $total_cod_vendor_balance; @endphp
+                                <tr>
+                                    <td style="">{{ $account['branch_name'] }}</td>
+                                    <td style="">{{ $account['cash_on_delivery'] }}</td>
+                                    <td style="">{{ $account['cod_sp_income'] }}</td>
+                                    <td style="">{{ $account['cod_vendor_balance'] }}</td>
+                                </tr>
+                            @endforeach
+                            <tr>
+                                <td>#</td>
+                                <td>{{ $total_cash_on_delivery }}</td>
+                                <td>{{ $total_cod_sp_income }}</td>
+                                <td>{{ $total_cod_vendor_balance }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="background-color:#ffd200">{{ __('admin.transfer_to_Bank') }}</th>
+                                <th>{{ __('admin.total') }}</th>
+                                <th>{{ __('admin.net_income') }}</th>
+                                <th>{{ __('admin.vendor_account') }}</th>
+                            </tr>
+                            @php $total_transfer_to_Bank = 0; @endphp
+                            @php $total_tr_bank_sp_income = 0; @endphp
+                            @php $total_tr_bank_vendor_balance = 0; @endphp
+                            @foreach ($summary_accounts as $account)
+                                @php $total_transfer_to_Bank =$account['transfer_to_Bank'] + $total_transfer_to_Bank; @endphp
+                                @php $total_tr_bank_sp_income =$account['tr_bank_sp_income'] + $total_tr_bank_sp_income; @endphp
+                                @php $total_tr_bank_vendor_balance = $account['tr_bank_vendor_balance']+ $total_tr_bank_vendor_balance; @endphp
+                                <tr>
+                                    <td>{{ $account['branch_name'] }}</td>
+                                    <td>{{ $account['transfer_to_Bank'] }}</td>
+                                    <td>{{ $account['tr_bank_sp_income'] }}</td>
+                                    <td>{{ $account['tr_bank_vendor_balance'] }}</td>
+                                </tr>
+                            @endforeach
+                            <tr>
+                                <td>#</td>
+                                <td>{{ $total_transfer_to_Bank }}</td>
+                                <td>{{ $total_tr_bank_sp_income }}</td>
+                                <td>{{ $total_tr_bank_vendor_balance }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="background-color:#ffd200">{{ __('admin.transfer_to_vendor_company') }}
+                                </th>
+                                <th>{{ __('admin.vendor_account') }}</th>
+                            </tr>
+                            @php $total_transfer_to_vendor_company = 0; @endphp
+                            @foreach ($summary_accounts as $account)
+                                @php $total_transfer_to_vendor_company = $account['transfer_to_vendor_company'] +  $total_transfer_to_vendor_company; @endphp
+                                <tr>
+                                    <td>{{ $account['branch_name'] }}</td>
+                                    <td>{{ $account['transfer_to_vendor_company'] }}</td>
+                                </tr>
+                            @endforeach
+                            <tr>
+                                <td>#</td>
+                                <td>{{ $total_transfer_to_vendor_company }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <hr>
                 <div class="d-flex justify-content-around">
                     <div>
                         <table class="table">
                             <tr>
-                                <th>{{ __('admin.total') }}</th>
+                                <th style="background-color:#ffd200">{{ __('admin.total') }}</th>
                                 <td>{{ $total }} {{ __('admin.currency') }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('admin.net_income') }}</th>
+                                <th style="background-color:#ffd200">{{ __('admin.net_income') }}</th>
                                 <td>{{ $net_income }} {{ __('admin.currency') }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('admin.vendor_account') }}</th>
+                                <th style="background-color:#ffd200">{{ __('admin.vendor_account') }}</th>
                                 <td>{{ $vendor_account }} {{ __('admin.currency') }}</td>
                             </tr>
 
                         </table>
 
                     </div>
-                    <div>
+                    {{-- <div>
                         <table class="table">
                             <tr>
                                 <th>{{ __('admin.cash_on_delivery') }}</th>
@@ -297,7 +403,7 @@
                             </tbody>
                         </table>
 
-                    </div>
+                    </div> --}}
 
                 </div>
                 <hr>
@@ -346,7 +452,6 @@
                         <tr class="bg-light">
                             <td>#</td>
                             <td> {{ __('admin.all') }}</td>
-                            {{-- <td>  {{$payments->groupBy('shipment_id')->count();}}</td> --}}
                             <td> {{ $total_count }}</td>
                             <td>{{ $total_summary_due_amount }}{{ __('admin.currency') }}</td>
                         </tr>
@@ -378,7 +483,6 @@
                                     <td>{{ $value }}</td>
                                     <td>{{ $days_30_1[$key] }}</td>
                                     <td>{{ $days_30_2[$key] }}</td>
-                                    {{-- <td>{{ $days_30_1[$key] }}  +  {{ $days_30_2[$key] }} = {{$days_30_1[$key] +  $days_30_2[$key]}} {{($days_30_1[$key] +  $days_30_2[$key] < 0 ) ? '(0)'  : ''}}</td> --}}
                                     <td>{{ $days_30_1[$key] + $days_30_2[$key] }}</td>
                                     <td> {{ $days_30_1[$key] + $days_30_2[$key] < 0 ? $days_30_1[$key] + $days_30_2[$key] . ' تصبح (0)' : $days_30_1[$key] + $days_30_2[$key] }}
                                     </td>
@@ -393,31 +497,12 @@
                             </tr>
                         </tbody>
                     </table>
-                    {{-- <div class="col">
-                        <h3>السالب</h3>
-                        @foreach ($days_30_1_with_days as $day)
-                            {{ $day }} <hr>
-                        @endforeach
-                    </div> --}}
-
-                    {{-- <div class="col">
-                    <h3>الموجب</h3>
-                    @foreach ($days_30_2_with_days as $day)
-                        {{ $day }} <hr>
-                    @endforeach
-                </div> --}}
-                    {{-- <div class="col">
-                    <h3>المجموع</h3>
-                    @foreach ($sum_days_30_2_with_days as $day)
-                        {{ $day }} <hr>
-                    @endforeach
-                </div> --}}
                 </div>
 
 
             </div>
 
-            <div class="row">
+            {{-- <div class="row">
                 <div class="col">
                     <h4>{{ __('admin.branch_branch_manager') }}</h4>
                     <table class="table table-striped-columns">
@@ -465,7 +550,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> --}}
 
         </div>
 

@@ -137,7 +137,7 @@ class ShipmentController extends Controller
         $now = Carbon::now();
         $tz = 'Asia/Dubai';
         $start = Carbon::createFromTimeString('00:01', $tz);
-        $end = Carbon::createFromTimeString('22:59', $tz);
+        $end = Carbon::createFromTimeString('15:59', $tz);
 
         $data['date'] = Carbon::today($tz)->format('Y-m-d');
 

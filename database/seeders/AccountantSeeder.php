@@ -21,7 +21,13 @@ class AccountantSeeder extends Seeder
         //3 //12 Current assetes
         AccountTree::create(['account_level' => 2, 'account_code' => 12, 'account_name' => ['ar' => 'الموجودات المتداولة', 'en' => 'Current Assets'], 'account_type' => 1,  'account_parent' => 1, 'account_dc_type' => 1, 'account_final' => 1]);
         //4 //13 Ready Money
-        AccountTree::create(['account_level' => 2, 'account_code' => 13, 'account_name' => ['ar' => 'الأموال الجاهزة', 'en' => 'Ready Money'], 'account_type' => 1,  'account_parent' => 1, 'account_dc_type' => 1, 'account_final' => 1]);
+        $cash_and_cash_equlevent = AccountTree::create(['account_level' => 2, 'account_code' => 13, 'account_name' => ['ar' => 'الأموال الجاهزة', 'en' => 'cash and cash equlevent'], 'account_type' => 1,  'account_parent' => 1, 'account_dc_type' => 1, 'account_final' => 1]); // النقد والنقد المعادل
+
+        // cash
+        AccountTree::create(['account_level' => 2, 'account_code' => 131, 'account_name' => ['ar' => 'الصندوق', 'en' => 'cash'], 'account_type' => 1,  'account_parent' => $cash_and_cash_equlevent->id, 'account_dc_type' => 1, 'account_final' => 1 ,'is_cash'=>1]); // الكاش
+        // bank
+        AccountTree::create(['account_level' => 2, 'account_code' => 132, 'account_name' => ['ar' => 'البنك', 'en' => 'bank'], 'account_type' => 1,  'account_parent' => $cash_and_cash_equlevent->id, 'account_dc_type' => 1, 'account_final' => 1 ,'is_bank'=>1]); // البنك
+
 
         ##########################################################################
         //5 // liabilities

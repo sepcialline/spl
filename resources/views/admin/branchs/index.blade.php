@@ -108,17 +108,19 @@
                             <td>
                                 @can('admin-Branch-show')
                                     <a href="{{ $row['id'] }}"
-                                        class="btn btn-label-dark">{{ __('admin.branch_action_show') }}</a>
+                                        class="btn btn-label-dark btn-sm">{{ __('admin.branch_action_show') }}</a>
                                 @endcan
                                 @can('admin-Branch-edit')
                                     <a href="edit/{{ $row['id'] }}"
-                                        class="btn btn-label-secondary">{{ __('admin.branch_action_edit') }}</a>
+                                        class="btn btn-label-secondary btn-sm">{{ __('admin.branch_action_edit') }}</a>
                                 @endcan
 
                                 @can('admin-Branch-delete')
-                                    <a id="delete" class="btn btn-label-danger delete"
+                                    <a id="delete" class="btn btn-label-danger delete btn-sm"
                                         data-url="{{ route('admin.branch_delete', $row['id']) }}">{{ __('admin.branch_action_delete') }}</a>
                                 @endcan
+
+                                <a href="{{route('admin.branch_account_details_rev',$row['id'])}}" class="btn btn-label-vimeo btn-sm">{{__('admin.accountant_details')}}</a>
                             </td>
                         </tr>
                     @endforeach

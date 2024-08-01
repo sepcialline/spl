@@ -66,7 +66,7 @@
                     <div class="card-body">
                         <ul id="myUL">
                             @foreach ($accounts as $account)
-                                <li><span class="caret">{{ $account->account_name }}</span>
+                                <li><span class="caret">{{ $account->account_name }}</span> <span>{{$account->account_code}}</span>
                                     <span style="cursor: pointer;" onclick="editFunctipon({{ $account->id }})"><i
                                             class='bx bxs-pencil'></i></span>
                                     <ul class="nested">

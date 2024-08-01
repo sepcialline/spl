@@ -4,18 +4,22 @@ namespace App\Http\Controllers\Admin\Accounting;
 
 use PDO;
 use Carbon\Carbon;
+use App\Models\Payment;
+use App\Models\Branches;
+use App\Models\CarPLate;
+use App\Models\Shipment;
+use App\Models\JounalType;
 use App\Models\AccountTree;
 use Illuminate\Http\Request;
+use App\Models\VendorCompany;
+use App\Helpers\ShipmentHelper;
 use App\Models\AccountingEntries;
 use Illuminate\Support\Facades\DB;
+use Rmunate\Utilities\SpellNumber;
 use App\Http\Controllers\Controller;
-use App\Models\JounalType;
-use App\Models\Payment;
-use App\Models\Shipment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
-use Rmunate\Utilities\SpellNumber;
 
 class AccountTreeController extends Controller
 {
@@ -38,7 +42,7 @@ class AccountTreeController extends Controller
     public function getParent(Request $request)
     {
         $level = $request->level - 1;
-        return AccountTree::where('account_level', $level)->select('id', 'account_name')->get();
+        return AccountTree::where('account_level', $level)->select('id', 'account_name', 'account_code')->get();
     }
 
     public function store(Request $request)
@@ -70,10 +74,10 @@ class AccountTreeController extends Controller
 
 
         toastr()->success(__('admin.msg_success_add'));
-        return redirect()->route('admin.account.index');
+        return redirect()->back();
     }
 
-    
+
 
     public function edit(Request $request)
     {
@@ -90,68 +94,149 @@ class AccountTreeController extends Controller
         $from = Carbon::now()->format('Y-m-d');
         $to = Carbon::now()->format('Y-m-d');
 
+        $query =
+            AccountingEntries::query();
         if (Request()->from) {
             $from = Carbon::parse(Request()->from)->format('Y-m-d');
         }
-
         if (Request()->to) {
             $to = Carbon::parse(Request()->to)->format('Y-m-d');
         }
 
-        $query =
-            AccountingEntries::query()->whereBetween('transaction_date', [$from, $to])
-            ->orderBy('number', 'asc')->groupBy('number');
+
+        $query->whereBetween('transaction_date', [$from, $to]);
 
         if (Request()->account && Request()->account != 0) {
-            $query->where('account_number', Request()->account);
+            $query->where('debit_account_number', Request()->account)->orWhere('credit_account_number', Request()->account);
         }
-        $data['journal_numbers'] = $query->get();
-        // return   $data['journal_numbers'];
-        $data['journals'] = array();
-        foreach ($data['journal_numbers'] as $number) {
+        if (Request()->search) {
+            $query->where('number', Request()->search);
+        }
 
-            $credit = AccountingEntries::where('number', $number->number)->where('credit', '!=', 0)->first();
-            $debit = AccountingEntries::where('number', $number->number)->where('debit', '!=', 0)->first();
-            $currency = __('admin.currency');
-            $data['journals'][] = [
-                'number' => $number->number,
-                'type' => JounalType::where('id', $number->journal_type_id)->first(),
-                'credit' => "$credit->credit  $currency , $credit->account_number $credit->account_name",
-                'debit' => "$debit->debit  $currency , $debit->account_number $debit->account_name",
-                'statment' => $number->statment,
-                'date' => $number->transaction_date
-            ];
+
+        // // $data['journals'] = $query->orderBy('id','desc')->groupBy('number')->pluck('number');
+        $data['entries'] = $query->orderBy('id', 'desc')->paginate(50);
+
+
+
+        $query_total = AccountingEntries::query();
+
+        if (Request()->from || Request()->to) {
+            $from = Request()->from ? Carbon::parse(Request()->from)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+            $to = Request()->to ? Carbon::parse(Request()->to)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+            $query_total->whereBetween('transaction_date', [$from, $to]);
         }
-        $data['sum_credit'] = AccountingEntries::whereIn('number', $data['journal_numbers']->pluck('number'))->whereBetween('transaction_date', [$from, $to])->sum('credit');
-        $data['sum_debit'] = AccountingEntries::whereIn('number', $data['journal_numbers']->pluck('number'))->whereBetween('transaction_date', [$from, $to])->sum('debit');
+
+        if (Request()->account && Request()->account != 0) {
+            $query_total->where(function ($query) {
+                $query->where('debit_account_number', Request()->account)
+                    ->orWhere('credit_account_number', Request()->account);
+            });
+        }
+
+        if (Request()->search) {
+            $query_total->where('number', Request()->search);
+        }
+
+        $entries_total = $query_total->get();
+
+        $account_totals = $entries_total->groupBy('debit_account_number')->map(function ($entries_total, $accountNumber) {
+            $total_debit = $entries_total->sum('amount_debit');
+            $total_credit = $entries_total->sum('amount_credit');
+            return [
+                'account_number' => $accountNumber,
+                'total_debit' => $total_debit,
+                'total_credit' => $total_credit,
+                'balance' => $total_debit - $total_credit,
+            ];
+        });
+
+        $total_sums = $account_totals->reduce(function ($carry, $item) {
+            $carry['total_debit'] += $item['total_debit'];
+            $carry['total_credit'] += $item['total_credit'];
+            $carry['total_balance'] += $item['balance'];
+            return $carry;
+        }, ['total_debit' => 0, 'total_credit' => 0, 'total_balance' => 0]);
+
+        $total_debit = round($total_sums['total_debit'], 2);
+        $total_credit = round($total_sums['total_credit'], 2);
+        $total_balance = round($total_sums['total_balance'], 2);
+
+        // Print or return the results as needed
+        $data['totals'] = [
+            'account_totals' => $account_totals,
+            'total_debit' => round($total_debit, 2),
+            'total_credit' => round($total_credit, 2),
+            'total_balance' => round($total_balance, 2),
+        ];
+
+
+
+
         return view('admin.transactions.vouchers.journals', $data);
-        // return $data['journals'];
     }
+
 
     //سند يومية
     public function journalVoucher()
     {
-        $data['accounts'] = AccountTree::get();
+        $data['accounts'] = AccountTree::doesntHave('childrenAccounts')->select('id', 'account_name', 'account_code')->get();
+        $data['cars'] = CarPLate::select('car_name', 'car_plate')->get();
         return view('admin.transactions.vouchers.journal_voucher', $data);
     }
 
     public function storeJournalVoucher(Request $request)
     {
 
-        $voucher_nmber = 10000001;
+        foreach ($request['debit_account_id'] as $key => $account_id) {
 
-        $account = AccountingEntries::select('number')->latest()->first();
-        if ($account) {
-            $voucher_nmber = $account->number + 1;
-        } else {
-            $voucher_nmber = $voucher_nmber;
-        }
 
-        $accounts = AccountTree::whereIn('id', $request->account_id)->get();
+            $voucher_nmber = 10000001;
 
-        $data['vouchers'] = [];
-        foreach ($accounts as $key => $value) {
-            $data['vouchers'][] = $this->createdJournal($request,  $key, $value, $journal_type = 1, $voucher_nmber);
+            $account = AccountingEntries::select('number')->latest()->first();
+            if ($account) {
+                $voucher_nmber = $account->number + 1;
+            } else {
+                $voucher_nmber = $voucher_nmber;
+            }
+
+
+
+            $debit[$key] = AccountTree::where('id',$account_id )->first();
+            $credit[$key] = AccountTree::where('id',$request['credit_account_id'][$key])->first();
+
+            $first_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = $debit[$key]->account_code,
+                $debit_account_name =  ['ar' => $debit[$key]->getTranslation('account_name', 'ar'), 'en' => $debit[$key]->getTranslation('account_name', 'en')],
+                $credit_account_number = Null,
+                $credit_account_name = Null,
+                $statment = $request->statments[$key] ?? Null,
+                $amount_debit = $request->debit_amount[$key],
+                $amount_credit = Null,
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence[$key] ? Shipment::where('shipment_refrence', $request->shipment_refrence[$key])->orderBy('updated_at', 'desc')->first() : Null,
+                $cost_center = $request->cost_centers[$key] ? CarPLate::where('id', $request->cost_centers[$key])->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 1 // daily
+            );
+            $second_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = Null,
+                $debit_account_name =  Null,
+                $credit_account_number = $credit[$key]->account_code,
+                $credit_account_name = ['ar' => $credit[$key]->getTranslation('account_name', 'ar'), 'en' => $credit[$key]->getTranslation('account_name', 'en')],
+                $statment = $request->statments[$key] ?? Null,
+                $amount_debit = Null,
+                $amount_credit = $request->credit_amount[$key],
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence[$key] ? Shipment::where('shipment_refrence', $request->shipment_refrence[$key])->orderBy('updated_at', 'desc')->first() : null,
+                $cost_center = $request->cost_centers[$key] ? CarPLate::where('id', $request->cost_centers[$key])->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 1 // daily
+            );
         }
 
         toastr()->success(__('admin.msg_success_add'));
@@ -162,6 +247,7 @@ class AccountTreeController extends Controller
     public function reciptVoucher()
     {
         $data['accounts'] = AccountTree::get();
+        $data['cars'] = CarPLate::select('id', 'car_name', 'car_plate')->get();
         return view('admin.transactions.vouchers.recipt_voucher', $data);
     }
 
@@ -177,16 +263,92 @@ class AccountTreeController extends Controller
             $voucher_nmber = $voucher_nmber;
         }
 
-        $accounts = AccountTree::whereIn('id', $request->account_id)->get();
+        // give me debit array if first line debit is null => account is credite && same thing for credit account
+        $credites = $request->credit;
+        $debits = $request->debit;
+        // return $request;
+        if ($credites[0] == Null && $debits[0] != null) {
+            $credit = AccountTree::where('id', $request->account_id[1])->first();
+            $debit = AccountTree::where('id', $request->account_id[0])->first();
 
-        $data['vouchers'] = [];
-        foreach ($accounts as $key => $value) {
-            $data['vouchers'][] = $this->createdJournal($request,  $key, $value, $journal_type = 2, $voucher_nmber);
+
+            $first_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = $debit->account_code,
+                $debit_account_name =  ['ar' => $debit->getTranslation('account_name', 'ar'), 'en' => $debit->getTranslation('account_name', 'en')],
+                $credit_account_number = Null,
+                $credit_account_name = Null,
+                $statment = $request->statment,
+                $amount_debit = $debits[0],
+                $amount_credit = Null,
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : Null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 2 // recipt
+            );
+            $second_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = Null,
+                $debit_account_name =  Null,
+                $credit_account_number = $credit->account_code,
+                $credit_account_name = ['ar' => $credit->getTranslation('account_name', 'ar'), 'en' => $credit->getTranslation('account_name', 'en')],
+                $statment = $request->statment,
+                $amount_debit = Null,
+                $amount_credit = $credites[1],
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 2 // recipt
+            );
         }
+
+        if ($credites[0] != Null && $debits[0] == null) {
+            $credit = AccountTree::where('id', $request->account_id[0])->first();
+            $debit = AccountTree::where('id', $request->account_id[1])->first();
+            $first_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = Null,
+                $debit_account_name =  Null,
+                $credit_account_number = $credit->account_code,
+                $credit_account_name = ['ar' => $credit->getTranslation('account_name', 'ar'), 'en' => $credit->getTranslation('account_name', 'en')],
+                $statment = $request->statment,
+                $amount_debit = Null,
+                $amount_credit = $credites[0],
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 2 // recipt
+            );
+            $second_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = $debit->account_code,
+                $debit_account_name =  ['ar' => $debit->getTranslation('account_name', 'ar'), 'en' => $debit->getTranslation('account_name', 'en')],
+                $credit_account_number = Null,
+                $credit_account_name = Null,
+                $statment = $request->statment,
+                $amount_debit = $debits[1],
+                $amount_credit = Null,
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : Null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 2 // recipt
+            );
+        }
+
+
+
+
 
         toastr()->success(__('admin.msg_success_add'));
         return redirect()->back();
-        // return redirect()->route('admin.account.printRecipt_voucher')->with('ids',$ids);
     }
 
     public function printReciptVoucher($number)
@@ -202,6 +364,8 @@ class AccountTreeController extends Controller
     public function paymentVoucher()
     {
         $data['accounts'] = AccountTree::get();
+        $data['cars'] = CarPLate::select('car_name', 'car_plate')->get();
+
         return view('admin.transactions.vouchers.payment_voucher', $data);
     }
 
@@ -217,12 +381,86 @@ class AccountTreeController extends Controller
             $voucher_nmber = $voucher_nmber;
         }
 
-        $accounts = AccountTree::whereIn('id', $request->account_id)->get();
+        // give me debit array if first line debit is null => account is credite && same thing for credit account
+        $credites = $request->credit;
+        $debits = $request->debit;
+        // return $request;
+        if ($credites[0] == Null && $debits[0] != null) {
+            $credit = AccountTree::where('id', $request->account_id[1])->first();
+            $debit = AccountTree::where('id', $request->account_id[0])->first();
 
-        $data['vouchers'] = [];
-        foreach ($accounts as $key => $value) {
-            $data['vouchers'][] = $this->createdJournal($request,  $key, $value, $journal_type = 3, $voucher_nmber);
+
+            $first_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = $debit->account_code,
+                $debit_account_name =  ['ar' => $debit->getTranslation('account_name', 'ar'), 'en' => $debit->getTranslation('account_name', 'en')],
+                $credit_account_number = Null,
+                $credit_account_name = Null,
+                $statment = $request->statment,
+                $amount_debit = $debits[0],
+                $amount_credit = Null,
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : Null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 3 // payment
+            );
+            $second_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = Null,
+                $debit_account_name =  Null,
+                $credit_account_number = $credit->account_code,
+                $credit_account_name = ['ar' => $credit->getTranslation('account_name', 'ar'), 'en' => $credit->getTranslation('account_name', 'en')],
+                $statment = $request->statment,
+                $amount_debit = Null,
+                $amount_credit = $credites[1],
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 3 // payment
+            );
         }
+
+        if ($credites[0] != Null && $debits[0] == null) {
+            $credit = AccountTree::where('id', $request->account_id[0])->first();
+            $debit = AccountTree::where('id', $request->account_id[1])->first();
+            $first_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = Null,
+                $debit_account_name =  Null,
+                $credit_account_number = $credit->account_code,
+                $credit_account_name = ['ar' => $credit->getTranslation('account_name', 'ar'), 'en' => $credit->getTranslation('account_name', 'en')],
+                $statment = $request->statment,
+                $amount_debit = Null,
+                $amount_credit = $credites[0],
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 3 // payment
+            );
+            $second_line = ShipmentHelper::accounting_entries(
+                $debit_account_number = $debit->account_code,
+                $debit_account_name =  ['ar' => $debit->getTranslation('account_name', 'ar'), 'en' => $debit->getTranslation('account_name', 'en')],
+                $credit_account_number = Null,
+                $credit_account_name = Null,
+                $statment = $request->statment,
+                $amount_debit = $debits[1],
+                $amount_credit = Null,
+                $voucher_nmber,
+                $payment = Null,
+                $shipment = $request->shipment_refrence ? Shipment::where('shipment_refrence', $request->shipment_refrence)->orderBy('updated_at', 'desc')->first() : Null,
+                $cost_center = $request->cost_center ? CarPLate::where('id', $request->cost_center)->first()->id : null,
+                $guard = 'admin',
+                $compound_entry_with = Null,
+                $journal_type_id = 3 // payment
+            );
+        }
+
 
         toastr()->success(__('admin.msg_success_add'));
         return redirect()->back();

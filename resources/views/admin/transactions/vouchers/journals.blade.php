@@ -20,24 +20,33 @@
                     <div class="row">
                         <div class="mb-3 col">
                             <label for="exampleFormControlInput1" class="form-label">{{ __('admin.from') }}</label>
-                            <input type="date" class="form-control" id="from" name="from" value="{{Request()->from ?? Carbon\Carbon::today()->format('Y-m-d')}}">
+                            <input type="date" class="form-control" id="from" name="from"
+                                value="{{ Request()->from ?? Carbon\Carbon::today()->format('Y-m-d') }}">
                         </div>
                         <div class="mb-3 col">
-                            <label for="exampleFormControlInput1" class="form-label">{{ __('admin.from') }}</label>
-                            <input type="date" class="form-control" id="to" name="to" value="{{Request()->to ?? Carbon\Carbon::today()->format('Y-m-d')}}">
+                            <label for="exampleFormControlInput1" class="form-label">{{ __('admin.to') }}</label>
+                            <input type="date" class="form-control" id="to" name="to"
+                                value="{{ Request()->to ?? Carbon\Carbon::today()->format('Y-m-d') }}">
                         </div>
                         <div class="mb-3 col">
                             <label for="exampleFormControlInput1"
                                 class="form-label">{{ __('admin.accounts_accounts') }}</label>
-                                <select class="js-example-basic-single form-control" name="account" id="account">
-                                    <option value="0" {{0 == Request()->account ? 'selected' : ''}}>{{__('admin.all')}}</option>
-                                    @foreach ($accounts as $account)
-                                        <option value="{{$account->account_code}}" {{$account->account_code == Request()->account ? 'selected' : ''}}>{{$account->account_code}} | {{$account->account_name}}</option>
-                                    @endforeach
-                                </select>
+                            <select class="js-example-basic-single form-control" name="account" id="account">
+                                <option value="0" {{ 0 == Request()->account ? 'selected' : '' }}>
+                                    {{ __('admin.all') }}</option>
+                                @foreach ($accounts as $account)
+                                    <option value="{{ $account->account_code }}"
+                                        {{ $account->account_code == Request()->account ? 'selected' : '' }}>
+                                        {{ $account->account_code }} | {{ $account->account_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="">{{ __('admin.number_voucher') }}</label>
+                            <input type="text" class="form-control" name="search" value="{{ Request()->search }}">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-label-dark">{{__('admin.search')}}</button>
+                    <button type="submit" class="btn btn-label-dark">{{ __('admin.search') }}</button>
                 </form>
 
             </div>
@@ -48,55 +57,46 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>#</th>
                             <th>{{ __('admin.number_voucher') }}</th>
-                            <th>{{ __('admin.type_voucher') }}</th>
                             <th>{{ __('admin.debit') }}</th>
                             <th>{{ __('admin.credit') }}</th>
                             <th>{{ __('admin.statment') }}</th>
+                            <th>{{ __('admin.account_name') }}</th>
+                            <th>{{ __('admin.shipment_no') }}/{{ __('admin.cost_center') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @php $i = 1; @endphp
-                        @foreach ($journals as $journal)
-                            <tr class="py-0 my-0">
-                                <td class="py-0 my-0">{{ $i++ }}</td>
-                                <td class="py-0 my-0">{{ $journal['number'] }}</td>
-                                <td class="py-0 my-0">{{ $journal['type']->name }}
-                                    @if ($journal['type']->id == 2)
-                                        {{-- recipt Voucher  --}}
-                                        <a target="_blank" href="{{route('admin.account.print_recipt_voucher',['number'=>$journal['number']])}}"><i class='bx bxs-printer text-danger'></i></a>
-                                    @elseif($journal['type']->id == 3)
-                                        {{-- payment  Voucher  --}}
-                                        <a target="_blank" href="{{route('admin.account.print_payment_voucher',['number'=>$journal['number']])}}"><i class='bx bxs-printer text-success'></i></a>
-                                    @endif
-                                </td>
-                                <td class="py-0 my-0"><span class="text-danger">{{ __('admin.from') }}</span>
-                                    <strong>{{ $journal['debit'] }}</strong>
-                                </td>
-                                <td class="py-0 my-0"><br><br><span class="text-danger">{{ __('admin.to') }}</span>
-                                    <strong>{{ $journal['credit'] }}</strong>
-                                </td>
-                                <td class="py-0 my-0">{{ $journal['statment'] }}</td>
+                        @foreach ($entries as $entry)
+                            @php
+                                $count_of_line = App\Models\AccountingEntries::where('number', $entry->number)
+                                    ->select('number')
+                                    ->get();
+                            @endphp
+                            <tr>
+                                <td>{{ $entry->number }}</td>
+                                <td>{{ $entry->amount_debit ?? '' }}</td>
+                                <td>{{ $entry->amount_credit ?? '' }}</td>
+                                <td>{{ $entry->statment ?? '' }}</td>
+                                <td>{{ $entry?->debit_account_number }} {{ $entry?->debit_account_name }}
+                                    {{ $entry?->credit_account_number }} {{ $entry?->credit_account_name }} </td>
+                                <td>{{ $entry->shipment ? 'ship#' . $entry?->shipment->shipment_refrence : '' }}
+                                    {{ $entry?->cost_center?->car_name }} {{ $entry?->cost_center?->car_plate }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-                <table class="table table-active">
-                    <tr>
-                        <th>{{ __('admin.debit') }}</th>
-                        <td>{{ $sum_debit }} {{ __('admin.currency') }}</td>
-                    </tr>
-                    <tr>
-                        <th>{{ __('admin.credit') }}</th>
-                        <td>{{ $sum_credit }} {{ __('admin.currency') }}</td>
-                    </tr>
-                    <tr>
-                        <th class="text-danger">{{ __('admin.difference') }}</th>
-                        <td>{{ $sum_debit - $sum_credit }} {{ __('admin.currency') }}</td>
-                    </tr>
+                {{ $entries->links() }}
 
-                </table>
+                <div>
+                    <h3>مجموع القيم</h3>
+                    <p>إجمالي المدين: {{ $totals['total_debit'] ?? 0 }}</p>
+                    <p>إجمالي الدائن: {{ $totals['total_credit'] ?? 0 }}</p>
+                </div>
+                <div>
+                    <h3>المحصلة </h3>
+                    <p>{{ $totals['total_balance'] ?? 0 }}</p>
+
+                </div>
             </div>
         </div>
 
@@ -108,8 +108,15 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             $(document).ready(function() {
-    $('.js-example-basic-single').select2();
-});
+                $('.js-example-basic-single').select2();
+            });
         </script>
     @endsection
 </x-app-layout>
+{{-- <td class="py-0 my-0">{{ $i++ }}
+    @if ($journal?->type?->id == 2)
+        <a target="_blank" href="{{route('admin.account.print_recipt_voucher',['number'=>$journal->number])}}"><i class='bx bxs-printer text-danger'></i></a>
+    @elseif($journal?->type?->id == 3)
+        <a target="_blank" href="{{route('admin.account.print_payment_voucher',['number'=>$journal->number])}}"><i class='bx bxs-printer text-success'></i></a>
+    @endif
+</td> --}}
