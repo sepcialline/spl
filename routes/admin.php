@@ -181,9 +181,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/account', 'index')->name('account.index');
             Route::get('/account/get_parent', 'getParent')->name('account.get_parent');
             Route::post('/account/store', 'store')->name('account.store');
-            Route::get('/account/edit',  'edit')->name('account.edit');
+            Route::get('/account/edit/{id}',  'edit')->name('account.edit');
+            Route::post('/account/update',  'update')->name('account.update');
 
             Route::get('/account/transiction/journals', 'journals')->name('account.journals');
+            Route::get('/account/transiction/balance_review', 'balance_review')->name('account.balance_review'); // ميزان المراجعة
 
             Route::get('/account/transiction/journal_voucher', 'journalVoucher')->name('account.journal_voucher');
             Route::post('/account/transiction/journal_voucher/store', 'storeJournalVoucher')->name('account.store_journal_voucher');

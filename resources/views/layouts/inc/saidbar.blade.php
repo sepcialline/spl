@@ -397,6 +397,14 @@
                                         {{ __('admin.journals') }}</div>
                                 </a>
                             </li>
+                             {{-- ميزان مراجعة  --}}
+                             <li class="menu-item">
+                                <a href="{{ route('admin.account.balance_review') }}"
+                                    class="menu-link {{ Request::routeIs('admin.account.balance_review') ? 'active' : '' }}">
+                                    <div data-i18n="{{ __('admin.balance_review') }}">
+                                        {{ __('admin.balance_review') }}</div>
+                                </a>
+                            </li>
                         @endcan
 
                         @can('admin-Transaction-Journal-Voucher')

@@ -759,5 +759,6 @@ return [
     'vat_on_purchase'=>'ضرائب على المشتريات',
     'amount_debit'=>'مبلغ مدين',
     'amount_credit'=>'مبلغ دائن',
+    'balance_review'=>'ميزان مراجعة',
 
 ];

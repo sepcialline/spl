@@ -75,7 +75,7 @@
     })()
 </script>
 
-<script>
+{{-- <script>
     function editFunctipon(id) {
         $.ajax({
             method: "GET",
@@ -110,7 +110,7 @@
             }
         })
     }
-</script>
+</script> --}}
 
 <script>
     $('#empty').on('click', function() {

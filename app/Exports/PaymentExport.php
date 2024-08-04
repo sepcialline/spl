@@ -16,8 +16,6 @@ use Psy\CodeCleaner\AssignThisVariablePass;
 class PaymentExport implements FromView
 {
 
-
-
     public function view(): View
     {
         $request = Request();

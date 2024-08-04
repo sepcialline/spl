@@ -46,8 +46,7 @@
                             <input type="text" class="form-control" name="search" value="{{ Request()->search }}">
                         </div>
                     </div>
-                    <button type="submit" name="action" value="search" class="btn btn-label-dark">{{ __('admin.search') }}</button>
-                    <button type="submit" name="action" value="export" class="btn btn-label-success">{{ __('admin.export') }}</button>
+                    <button type="submit" class="btn btn-label-dark">{{ __('admin.search') }}</button>
                 </form>
 
             </div>
@@ -58,46 +57,27 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>{{ __('admin.number_voucher') }}</th>
+                            <th>{{ __('admin.account_name') }}</th>
                             <th>{{ __('admin.debit') }}</th>
                             <th>{{ __('admin.credit') }}</th>
-                            <th>{{ __('admin.statment') }}</th>
-                            <th>{{ __('admin.account_name') }}</th>
-                            <th>{{ __('admin.shipment_no') }}/{{ __('admin.cost_center') }}</th>
+                            <th>{{ __('admin.total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($entries as $entry)
-                            @php
-                                $count_of_line = App\Models\AccountingEntries::where('number', $entry->number)
-                                    ->select('number')
-                                    ->get();
-                            @endphp
-                            <tr>
-                                <td>{{ $entry->number }}</td>
-                                <td>{{ $entry->amount_debit ?? '' }}</td>
-                                <td>{{ $entry->amount_credit ?? '' }}</td>
-                                <td>{{ $entry->statment ?? '' }}</td>
-                                <td>{{ $entry?->debit_account_number }} {{ $entry?->debit_account_name }}
-                                    {{ $entry?->credit_account_number }} {{ $entry?->credit_account_name }} </td>
-                                <td>{{ $entry->shipment ? 'ship#' . $entry?->shipment->shipment_refrence : '' }}
-                                    {{ $entry?->cost_center?->car_name }} {{ $entry?->cost_center?->car_plate }}</td>
-                            </tr>
+                        @foreach ($account_totals as $account)
+                            @if ($account['account_number'] != null)
+                                <tr>
+                                    <td>{{ $account['account_number']['account_name'] }} {{ $account['account_number']['account_code'] }}</td>
+                                    <td>{{ $account['total_debit'] }}</td>
+                                    <td>{{ $account['total_credit'] }}</td>
+                                    <td>{{ $account['balance'] }}</td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>
                 {{ $entries->links() }}
 
-                <div>
-                    <h3>مجموع القيم</h3>
-                    <p>إجمالي المدين: {{ $totals['total_debit'] ?? 0 }}</p>
-                    <p>إجمالي الدائن: {{ $totals['total_credit'] ?? 0 }}</p>
-                </div>
-                <div>
-                    <h3>المحصلة </h3>
-                    <p>{{ $totals['total_balance'] ?? 0 }}</p>
-
-                </div>
             </div>
         </div>
 

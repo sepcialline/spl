@@ -1,5 +1,4 @@
 <x-app-layout>
-
     @section('title')
         {{ __('admin.transactions') }} | {{ __('admin.journal_voucher') }}
     @endsection
@@ -63,76 +62,14 @@
 
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.account.store_journal_voucher') }}" method="post" id="journalForm"
-                    class="row g-3 needs-validation" novalidate>
+                <form action="{{ route('admin.account.store_journal_voucher') }}" method="post" id="journalForm" class="row g-3 needs-validation" novalidate>
                     @csrf
                     <div class="row mt-2">
                         <div class="form-group col-4">
                             <label for="exampleFormControlInput1">{{ __('admin.date') }}</label>
-                            <input type="date" name="date" class="form-control"
-                                value="{{ Carbon\Carbon::now()->format('Y-m-d') }}">
+                            <input type="date" name="date" class="form-control" value="{{ Carbon\Carbon::now()->format('Y-m-d') }}">
                         </div>
-                        {{-- <div class="form-group col-8">
-                            <label for="exampleFormControlInput1">{{ __('admin.statment') }}</label>
-                            <textarea name="statment" class="form-control" id="statment" cols="" rows="1" required></textarea>
-                        </div> --}}
                     </div>
-
-
-
-                    {{-- <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th width="15%">{{ __('admin.account_name') }}</th>
-                                <th width="15%">{{ __('admin.credit') }}</th>
-                                <th width="15%">{{ __('admin.debit') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-
-                            <tr>
-                                <td class="p-0">
-                                    <select name="account_id[]" id="" class="js-example-basic-single" required>
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
-                                        @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                </td>
-                                <td class="p-0">
-                                    <input type="text" name="credit[]" id="credit" class="form-control" required>
-                                </td>
-                                <td class="p-0">
-                                    <input type="text" name="debit[]" id="credit" class="form-control" required>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-0">
-                                    <select name="account_id[]" id="" class="js-example-basic-single" required>
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
-                                        @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td class="p-0">
-                                    <input type="text" name="credit[]" id="credit" class="form-control" required>
-                                </td>
-                                <td class="p-0">
-                                    <input type="text" name="debit[]" id="credit" class="form-control" required>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="my-2">
-                        <button type="submit" class="btn btn-label-secondary">{{ __('admin.send') }}</button>
-                    </div> --}}
 
                     <table>
                         <thead>
@@ -148,66 +85,57 @@
                         <tbody id="entries">
                             <tr class="entry">
                                 <td style="width: 16%">
-                                    <select name="credit_account_id[]" id="" class="js-example-basic-single"
-                                        required>
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
+                                    <select name="credit_account_id[]" class="js-example-basic-single">
+                                        <option value="" selected disabled>{{ __('admin.please_select') }}</option>
                                         @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
+                                            <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
                                         @endforeach
-                                    </select> <br>
-                                    <input type="number" placeholder="example 100" class="form-control" step="0.01"
-                                        name="credit_amount[]" required>
+                                    </select>
+                                    <br>
+                                    <input type="number" placeholder="example 100" class="form-control credit-amount" step="0.01" name="credit_amount[]">
                                 </td>
                                 <td style="width: 16%">
-                                    <select name="debit_account_id[]" id="" class="js-example-basic-single"
-                                        required>
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
+                                    <select name="debit_account_id[]" class="js-example-basic-single">
+                                        <option value="" selected disabled>{{ __('admin.please_select') }}</option>
                                         @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">
-                                                {{ $account->account_name }} | {{ $account->account_code }}</option>
+                                            <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
                                         @endforeach
-                                    </select> <br>
-                                    <input type="number" placeholder="example 100" class="form-control" step="0.01"
-                                        name="debit_amount[]" required>
+                                    </select>
+                                    <br>
+                                    <input type="number" placeholder="example 100" class="form-control debit-amount" step="0.01" name="debit_amount[]">
                                 </td>
                                 <td style="width: 29%">
-                                    <textarea name="statments[]" placeholder="هنا أكتب البيان" class="form-control" id="" cols="30" required
-                                        rows="3"></textarea>
+                                    <textarea name="statments[]" placeholder="هنا أكتب البيان" class="form-control" cols="30" rows="3" required></textarea>
                                 </td>
                                 <td style="width: 16%">
-                                    <select name="cost_centers[]" id="" class="js-example-basic-single">
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}
-                                        </option>
+                                    <select name="cost_centers[]" class="js-example-basic-single">
+                                        <option value="" selected disabled>{{ __('admin.please_select') }}</option>
                                         @foreach ($cars as $car)
-                                            <option value="{{ $car->id }}">
-                                                {{ $car->car_name }} | {{ $car->car_plate }}</option>
+                                            <option value="{{ $car->id }}">{{ $car->car_name }} | {{ $car->car_plate }}</option>
                                         @endforeach
                                     </select>
                                 </td>
-                                <td style="width: 10%"><input type="text" class="form-control" step="0.01"
-                                        name="shipment_refrence[]">
-                                </td>
-                                <td style="width: 2%"><button type="button"
-                                        class="delete-btn btn btn-danger btn-sm p-1"
-                                        onclick="deleteRow(this)"disabled><i class="fa fa-delete-left"></i></button>
-                                </td>
+                                <td style="width: 10%"><input type="text" class="form-control" name="shipment_refrence[]"></td>
+                                <td style="width: 2%"><button type="button" class="delete-btn btn btn-danger btn-sm p-1" onclick="deleteRow(this)"><i class="fa fa-delete-left"></i></button></td>
                             </tr>
                         </tbody>
                     </table>
-                    <button type="button" class="add-btn btn btn-primary btn-sm" onclick="addEntry()">إضافة سطر
-                        جديد</button>
+                    <button type="button" class="add-btn btn btn-primary btn-sm" onclick="addEntry()">إضافة سطر جديد</button>
                     <br>
-                    <button type="submit" class="btn btn-success btn-sm">حفظ القيود</button>
+                    <div class="form-group col-12">
+                        <label for="totalCredit">مجموع الدائن: </label>
+                        <span id="totalCredit">0.00</span>
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="totalDebit">مجموع المدين: </label>
+                        <span id="totalDebit">0.00</span>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm" id="submit-btn" disabled>حفظ القيود</button>
+                    <div id="error-message" class="text-danger"></div>
                 </form>
             </div>
         </div>
-
-
     </div>
-
 
     @section('VendorsJS')
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -222,72 +150,86 @@
                 $('.select2').on('focus', function() {
                     $(this).select2('open');
                 });
+
+                function calculateTotals() {
+                    let totalCredit = 0;
+                    let totalDebit = 0;
+
+                    $('.credit-amount').each(function() {
+                        totalCredit += parseFloat($(this).val()) || 0;
+                    });
+
+                    $('.debit-amount').each(function() {
+                        totalDebit += parseFloat($(this).val()) || 0;
+                    });
+
+                    $('#totalCredit').text(totalCredit.toFixed(2));
+                    $('#totalDebit').text(totalDebit.toFixed(2));
+
+                    if (totalCredit === totalDebit) {
+                        $('#submit-btn').prop('disabled', false);
+                        $('#error-message').text('');
+                    } else {
+                        $('#submit-btn').prop('disabled', true);
+                        $('#error-message').text('يجب أن يكون مجموع الدائن والمدين متساوي.');
+                    }
+                }
+
+                $(document).on('input', '.credit-amount, .debit-amount', calculateTotals);
+                $(document).on('change', '.js-example-basic-single', calculateTotals);
+
+                calculateTotals();  // Call once to set initial state
             });
-        </script>
-        <script>
+
             function addEntry() {
                 const entriesTable = document.getElementById('entries');
                 const newRow = document.createElement('tr');
                 newRow.classList.add('entry');
                 newRow.innerHTML = `
                     <td style="width: 16%">
-                        <select name="credit_account_id[]" id="" class="js-example-basic-single"
-                            required>
-                            <option value="" selected disabled>{{ __('admin.please_select') }}
-                            </option>
+                        <select name="credit_account_id[]" class="js-example-basic-single">
+                            <option value="" selected disabled>{{ __('admin.please_select') }}</option>
                             @foreach ($accounts as $account)
-                                <option value="{{ $account->id }}">
-                                    {{ $account->account_name }} | {{ $account->account_code }}</option>
+                                <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
                             @endforeach
-                        </select> <br>
-                        <input type="number" placeholder="example 100" class="form-control" step="0.01"
-                            name="credit_amount[]" required>
-                    </td>
-                     <td style="width: 16%">
-                        <select name="debit_account_id[]" id="" class="js-example-basic-single"
-                            required>
-                            <option value="" selected disabled>{{ __('admin.please_select') }}
-                            </option>
-                            @foreach ($accounts as $account)
-                                <option value="{{ $account->id }}">
-                                    {{ $account->account_name }} | {{ $account->account_code }}</option>
-                                        @endforeach
-                        </select> <br>
-                        <input type="number" placeholder="example 100" class="form-control" step="0.01"
-                            name="debit_amount[]" required>
-                    </td>
-                     <td style="width: 29%">
-                        <textarea name="statments[]" placeholder="هنا أكتب البيان" class="form-control" id="" cols="30" required
-                            rows="3"></textarea>
+                        </select>
+                        <br>
+                        <input type="number" placeholder="example 100" class="form-control credit-amount" step="0.01" name="credit_amount[]">
                     </td>
                     <td style="width: 16%">
-                        <select name="cost_centers[]" id="" class="js-example-basic-single">
-                            <option value="" selected disabled>{{ __('admin.please_select') }}
-                            </option>
+                        <select name="debit_account_id[]" class="js-example-basic-single">
+                            <option value="" selected disabled>{{ __('admin.please_select') }}</option>
+                            @foreach ($accounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
+                            @endforeach
+                        </select>
+                        <br>
+                        <input type="number" placeholder="example 100" class="form-control debit-amount" step="0.01" name="debit_amount[]">
+                    </td>
+                    <td style="width: 29%">
+                        <textarea name="statments[]" placeholder="هنا أكتب البيان" class="form-control" cols="30" rows="3" required></textarea>
+                    </td>
+                    <td style="width: 16%">
+                        <select name="cost_centers[]" class="js-example-basic-single">
+                            <option value="" selected disabled>{{ __('admin.please_select') }}</option>
                             @foreach ($cars as $car)
-                                <option value="{{ $car->id }}">
-                                    {{ $car->car_name }} | {{ $car->car_plate }}</option>
+                                <option value="{{ $car->id }}">{{ $car->car_name }} | {{ $car->car_plate }}</option>
                             @endforeach
                         </select>
                     </td>
-                    <td style="width: 10%"><input type="text" class="form-control" step="0.01" name="shipment_refrence[]" >
-                    </td>
-                     <td style="width: 2%"><button type="button" class="delete-btn btn btn-danger btn-sm p-1"
-                            onclick="deleteRow(this)"disabled><i class="fa fa-delete-left"></i></button>
-                    </td>
+                    <td style="width: 10%"><input type="text" class="form-control" name="shipment_refrence[]"></td>
+                    <td style="width: 2%"><button type="button" class="delete-btn btn btn-danger btn-sm p-1" onclick="deleteRow(this)"><i class="fa fa-delete-left"></i></button></td>
                 `;
                 entriesTable.appendChild(newRow);
                 $('#entries').find('.js-example-basic-single').select2();
-                // تحقق من عدد السطور وتعطيل زر الحذف إذا كان هناك سطر واحد فقط
                 checkDeleteButton();
             }
 
             function deleteRow(btn) {
                 const row = btn.closest('tr');
                 row.parentNode.removeChild(row);
-
-                // بعد حذف السطر، تحقق من عدد السطور وتعطيل زر الحذف إذا كان هناك سطر واحد فقط
                 checkDeleteButton();
+                calculateTotals();  // Recalculate totals after row deletion
             }
 
             function checkDeleteButton() {
@@ -300,16 +242,10 @@
                     });
                 }
             }
-        </script>
-        <script>
-            // Example starter JavaScript for disabling form submissions if there are invalid fields
+
             (function() {
                 'use strict'
-
-                // Fetch all the forms we want to apply custom Bootstrap validation styles to
                 var forms = document.querySelectorAll('.needs-validation')
-
-                // Loop over them and prevent submission
                 Array.prototype.slice.call(forms)
                     .forEach(function(form) {
                         form.addEventListener('submit', function(event) {
@@ -317,7 +253,6 @@
                                 event.preventDefault()
                                 event.stopPropagation()
                             }
-
                             form.classList.add('was-validated')
                         }, false)
                     })

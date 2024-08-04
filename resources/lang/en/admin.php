@@ -772,4 +772,5 @@ return [
     'vat_on_purchase'=>'Vat On Purchase',
     'amount_debit'=>'amount debit',
     'amount_credit'=>'amount credit',
+    'balance_review'=>'Balance Review'
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Accounting;
 
+use App\Exports\JournalsExport;
 use PDO;
 use Carbon\Carbon;
 use App\Models\Payment;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Rmunate\Utilities\SpellNumber;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
 
@@ -79,11 +81,31 @@ class AccountTreeController extends Controller
 
 
 
-    public function edit(Request $request)
+    public function edit($id)
     {
-        return AccountTree::where('id', $request->id)->first();
+        $data['account'] = AccountTree::where('id', $id)->first();
+        $data['accounts_trees'] = AccountTree::select('id', 'account_name', 'account_code')->get();
+        return view('admin.account.edit', $data);
     }
 
+    public function update(Request $request)
+    {
+        $account = AccountTree::find($request->id)->update(
+            [
+                'account_level' => $request->level,
+                'account_code' => $request->code,
+                'account_name' => ['ar' => $request->name_ar, 'en' => $request->name_en],
+                'account_type' => $request->type,
+                'account_parent' => $request->parent,
+                'account_dc_type' => $request->account_dc_type,
+                'account_final' => $request->account_final
+            ]
+        );
+
+
+        toastr()->success(__('admin.msg_success_add'));
+        return redirect()->route('admin.account.index');
+    }
 
     // السندات
 
@@ -138,6 +160,9 @@ class AccountTreeController extends Controller
             $query_total->where('number', Request()->search);
         }
 
+
+
+
         $entries_total = $query_total->get();
 
         $account_totals = $entries_total->groupBy('debit_account_number')->map(function ($entries_total, $accountNumber) {
@@ -170,12 +195,83 @@ class AccountTreeController extends Controller
             'total_balance' => round($total_balance, 2),
         ];
 
+        if (Request()->action == 'export') {
+            return Excel::download(new JournalsExport, 'journals_' . $from . 'to' . $to . '.xlsx');
+        }
 
 
 
         return view('admin.transactions.vouchers.journals', $data);
     }
 
+
+    //ميزان المراجعة
+    public function balance_review()
+    {
+        $data['accounts'] = AccountTree::select('id', 'account_name', 'account_code')->get();
+        $from = Carbon::now()->format('Y-m-d');
+        $to = Carbon::now()->format('Y-m-d');
+
+        $query =
+            AccountingEntries::query();
+        if (Request()->from) {
+            $from = Carbon::parse(Request()->from)->format('Y-m-d');
+        }
+        if (Request()->to) {
+            $to = Carbon::parse(Request()->to)->format('Y-m-d');
+        }
+
+
+        $query->whereBetween('transaction_date', [$from, $to]);
+
+        if (Request()->account && Request()->account != 0) {
+            $query->where('debit_account_number', Request()->account)->orWhere('credit_account_number', Request()->account);
+        }
+        if (Request()->search) {
+            $query->where('number', Request()->search);
+        }
+
+
+        // // $data['journals'] = $query->orderBy('id','desc')->groupBy('number')->pluck('number');
+        $data['entries'] = $query->orderBy('id', 'desc')->paginate(50);
+
+
+
+        $query_total = AccountingEntries::query();
+
+        if (Request()->from || Request()->to) {
+            $from = Request()->from ? Carbon::parse(Request()->from)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+            $to = Request()->to ? Carbon::parse(Request()->to)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+            $query_total->whereBetween('transaction_date', [$from, $to]);
+        }
+
+        if (Request()->account && Request()->account != 0) {
+            $query_total->where(function ($query) {
+                $query->where('debit_account_number', Request()->account)
+                    ->orWhere('credit_account_number', Request()->account);
+            });
+        }
+
+        if (Request()->search) {
+            $query_total->where('number', Request()->search);
+        }
+
+        $entries_total = $query_total->get();
+
+        $data['account_totals'] = $entries_total->groupBy('debit_account_number')->map(function ($entries_total, $accountNumber) {
+            $total_debit = $entries_total->sum('amount_debit');
+            $total_credit = $entries_total->sum('amount_credit');
+            return [
+                'account_number' => AccountTree::where('account_code', $accountNumber)->first(),
+                'total_debit' => $total_debit,
+                'total_credit' => $total_credit,
+                'balance' => $total_debit - $total_credit,
+            ];
+        });
+
+        // return $data['account_totals'];
+        return view('admin.transactions.vouchers.balance_review', $data);
+    }
 
     //سند يومية
     public function journalVoucher()
@@ -202,8 +298,8 @@ class AccountTreeController extends Controller
 
 
 
-            $debit[$key] = AccountTree::where('id',$account_id )->first();
-            $credit[$key] = AccountTree::where('id',$request['credit_account_id'][$key])->first();
+            $debit[$key] = AccountTree::where('id', $account_id)->first();
+            $credit[$key] = AccountTree::where('id', $request['credit_account_id'][$key])->first();
 
             $first_line = ShipmentHelper::accounting_entries(
                 $debit_account_number = $debit[$key]->account_code,

@@ -1,7 +1,9 @@
 <x-app-layout>
+
     @section('title')
-        {{ __('admin.accounts_chart_of_accounts') }}
+        {{ __('admin.transactions') }} | {{ __('admin.journals') }}
     @endsection
+
     @section('VendorsCss')
         <style>
             ul,
@@ -61,36 +63,36 @@
 
 
         <div class="row">
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <ul id="myUL">
-                            @foreach ($accounts as $account)
-                                <li><span class="caret">{{ $account->account_name }}</span>
-                                    <span>{{ $account->account_code }}</span>
-                                    <a href="{{ route('admin.account.edit', $account->id) }}">
-                                        <span style="cursor: pointer;"><i class='bx bxs-pencil'></i></span>
-                                    </a>
-                                    <ul class="nested">
-                                        @foreach ($account->childrenAccounts as $childAccount)
-                                            @include('admin.account.includes.child', [
-                                                'child_account' => $childAccount,
-                                            ])
-                                        @endforeach
-                                    </ul>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
+            {{-- <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <ul id="myUL">
+                        @foreach ($accounts as $account)
+                            <li><span class="caret">{{ $account->account_name }}</span>
+                                <span>{{ $account->account_code }}</span>
+                                <a href="{{ route('admin.account.edit', $account->id) }}">
+                                    <span style="cursor: pointer;"><i class='bx bxs-pencil'></i></span>
+                                </a>
+                                <ul class="nested">
+                                    @foreach ($account->childrenAccounts as $childAccount)
+                                        @include('admin.account.includes.child', [
+                                            'child_account' => $childAccount,
+                                        ])
+                                    @endforeach
+                                </ul>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
+        </div> --}}
             <div class="col">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('admin.account.store') }}" method="post"
+                        <form action="{{ route('admin.account.update') }}" method="post"
                             class="row g-3 needs-validation" novalidate>
                             @csrf
-                            <input type="hidden" name="id" id="id" value="">
+                            <input type="hidden" name="id" id="id" value="{{ $account->id }}">
 
                             <div class="mb-1">
                                 <label for="defaultSelect" class="form-label">{{ __('admin.level') }}</label>
@@ -98,30 +100,40 @@
                                     required>
                                     {{-- <option value="">{{ __('admin.please_select') }}</option> --}}
                                     @for ($i = 1; $i <= 4; $i++)
-                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        <option value="{{ $i }}"
+                                            {{ $i == $account->account_level ? 'selected' : '' }}>{{ $i }}
+                                        </option>
                                     @endfor
                                 </select>
                             </div>
                             <div class="mb-1">
                                 <label for="defaultSelect" class="form-label">{{ __('admin.parent_account') }}</label>
                                 <select id="parent" class="form-select js-example-basic-single" name="parent">
+                                    <option value="" {{$account->account_parent == Null ? 'selected' : ''}}></option>
+                                    @foreach ($accounts_trees as $account_tree)
+                                            <option value="{{ $account_tree->id }}"
+                                                {{ $account_tree->id == $account->account_parent ? 'selected' : '' }}>
+                                                {{ $account_tree->account_code }} | {{ $account_tree->account_name }}
+                                            </option>
+                                        @endforeach
+
 
                                 </select>
                             </div>
                             <div class="mb-1">
                                 <label for="defaultSelect"
                                     class="form-label">{{ __('admin.accounts_arabic_name') }}</label>
-                                <input type="text" id="name_ar" class="form-control" name="name_ar" required>
+                                <input type="text" id="name_ar" class="form-control" value="{{$account->getTranslation('account_name','ar')}}" name="name_ar" required>
                             </div>
                             <div class="mb-1">
                                 <label for="defaultSelect"
                                     class="form-label">{{ __('admin.accounts_english_name') }}</label>
-                                <input type="text" id="name_en" class="form-control" name="name_en" required>
+                                <input type="text" id="name_en" class="form-control" name="name_en" value="{{$account->getTranslation('account_name','en')}}" required>
                             </div>
                             <div class="mb-1">
                                 <label for="defaultSelect" class="form-label">{{ __('admin.accounts_code') }}</label>
                                 <input type="text" id="account_code"
-                                    class="form-control @error('code') is-invalid @enderror" name="code" required>
+                                    class="form-control @error('code') is-invalid @enderror" name="code" value="{{$account->account_code}}" required>
                                 @error('code')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
@@ -131,8 +143,8 @@
                                 <select id="account_type" class="form-select js-example-basic-single" name="type"
                                     required>
                                     {{-- <option  selected disabled>{{ __('admin.please_select') }}</option> --}}
-                                    <option value="0">{{ __('admin.main_account') }}</option>
-                                    <option value="1">{{ __('admin.secondary_account') }}</option>
+                                    <option value="0" {{$account->account_type == 0 ? 'selected' : ''}}>{{ __('admin.main_account') }}</option>
+                                    <option value="1" {{$account->account_type == 1 ? 'selected' : ''}}>{{ __('admin.secondary_account') }}</option>
                                 </select>
                             </div>
                             <div class="mb-1">
@@ -141,8 +153,8 @@
                                 <select id="account_dc_type" class="form-select js-example-basic-single" required
                                     name="account_dc_type">
                                     {{-- <option  selected disabled>{{ __('admin.please_select') }}</option> --}}
-                                    <option value="0">{{ __('admin.credit') }}</option>
-                                    <option value="1">{{ __('admin.debit') }}</option>
+                                    <option value="0" {{$account->account_dc_type == 0 ? 'selected' : ''}}>{{ __('admin.credit') }}</option>
+                                    <option value="1" {{$account->account_dc_type == 1 ? 'selected' : ''}}>{{ __('admin.debit') }}</option>
                                 </select>
                             </div>
                             <div class="mb-1">
@@ -150,14 +162,13 @@
                                 <select id="account_final" class="form-select js-example-basic-single" required
                                     name="account_final">
                                     {{-- <option selected disabled>{{ __('admin.please_select') }}</option> --}}
-                                    <option value="1">{{ __('admin.budget') }}</option>
-                                    <option value="2">{{ __('admin.profits_and_losses') }}</option>
-                                    <option value="3">{{ __('admin.trading') }}</option>
+                                    <option value="1" {{$account->account_final == 1 ? 'selected' : ''}}>{{ __('admin.budget') }}</option>
+                                    <option value="2" {{$account->account_final == 2 ? 'selected' : ''}}>{{ __('admin.profits_and_losses') }}</option>
+                                    <option value="3" {{$account->account_final == 3 ? 'selected' : ''}}>{{ __('admin.trading') }}</option>
                                 </select>
                             </div>
                             <div class="mb-1">
                                 <button type="submit" class="btn btn-label-facebook">{{ __('admin.submit') }}</button>
-                                <a id="empty" class="btn btn-label-danger">{{ __('admin.refresh') }}</a>
                             </div>
                         </form>
                     </div>
@@ -240,41 +251,41 @@
             </script>
 
             {{-- <script>
-                function editFunctipon(id) {
-                    $.ajax({
-                        method: "GET",
-                        url: "{{ route('admin.account.edit') }}",
-                        data: {
-                            id: id
-                        },
-                        success: function(res) {
+            function editFunctipon(id) {
+                $.ajax({
+                    method: "GET",
+                    url: "{{ route('admin.account.edit') }}",
+                    data: {
+                        id: id
+                    },
+                    success: function(res) {
 
-                            $("#level option[value=" + res.account_level + "]").attr('selected', false).change();
-                            $("#parent option[value=" + res.account_parent + "]").attr('selected', false).change();
-                            $("#account_type option[value=" + res.account_type + "]").attr('selected', false).change();
-                            $("#account_dc_type option[value=" + res.account_dc_type + "]").attr('selected', false)
-                                .change();
-                            $("#account_final option[value=" + res.account_final + "]").attr('selected', false)
-                                .change();
+                        $("#level option[value=" + res.account_level + "]").attr('selected', false).change();
+                        $("#parent option[value=" + res.account_parent + "]").attr('selected', false).change();
+                        $("#account_type option[value=" + res.account_type + "]").attr('selected', false).change();
+                        $("#account_dc_type option[value=" + res.account_dc_type + "]").attr('selected', false)
+                            .change();
+                        $("#account_final option[value=" + res.account_final + "]").attr('selected', false)
+                            .change();
 
-                            console.log('res :>> ', res);
-                            $('#id').val(res.id);
-                            $("#level option[value=" + res.account_level + "]").attr('selected', true).change();
-                            $("#parent option[value=" + res.account_parent + "]").attr('selected', true).change();
+                        console.log('res :>> ', res);
+                        $('#id').val(res.id);
+                        $("#level option[value=" + res.account_level + "]").attr('selected', true).change();
+                        $("#parent option[value=" + res.account_parent + "]").attr('selected', true).change();
 
-                            $('#name_ar').val(res.account_name.ar)
-                            $('#name_en').val(res.account_name.en)
-                            $('#account_code').val(res.account_code)
-                            $("#account_type option[value=" + res.account_type + "]").attr('selected', true).change();
-                            $("#account_dc_type option[value=" + res.account_dc_type + "]").attr('selected', true)
-                                .change();
-                            $("#account_final option[value=" + res.account_final + "]").attr('selected', true).change();
+                        $('#name_ar').val(res.account_name.ar)
+                        $('#name_en').val(res.account_name.en)
+                        $('#account_code').val(res.account_code)
+                        $("#account_type option[value=" + res.account_type + "]").attr('selected', true).change();
+                        $("#account_dc_type option[value=" + res.account_dc_type + "]").attr('selected', true)
+                            .change();
+                        $("#account_final option[value=" + res.account_final + "]").attr('selected', true).change();
 
 
-                        }
-                    })
-                }
-            </script> --}}
+                    }
+                })
+            }
+        </script> --}}
 
             <script>
                 $('#empty').on('click', function() {

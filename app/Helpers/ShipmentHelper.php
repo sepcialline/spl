@@ -960,7 +960,7 @@ class ShipmentHelper
                     $enrty5 = ShipmentHelper::accounting_entries(
                         $debit_account_number = Null,  //cash
                         $debit_account_name = Null, //cash
-                        $credit_account_number =  $vendor_account->account_code, //vendor account
+                        $credit_account_number =  $vendor_account_name->account_code, //vendor account
                         $credit_account_name =  ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], //vendor account
                         $statment = Null,
                         $amount_debit = Null,
@@ -1050,7 +1050,7 @@ class ShipmentHelper
                     $enrty5 = ShipmentHelper::accounting_entries(
                         $debit_account_number = Null,  // bank
                         $debit_account_name = Null, // bank
-                        $credit_account_number =  $vendor_account->account_code, // vendor account
+                        $credit_account_number =  $vendor_account_name->account_code, // vendor account
                         $credit_account_name = ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], // vendor account
                         $statment = Null,
                         $amount_debit = Null,
@@ -1071,7 +1071,7 @@ class ShipmentHelper
                          */
 
                     ShipmentHelper::accounting_entries(
-                        $debit_account_number = $vendor_account->account_number,  // vendor account
+                        $debit_account_number = $vendor_account_name->account_code,  // vendor account
                         $debit_account_name =  ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], //vendor account
                         $credit_account_number =  Null, //branch rev account
                         $credit_account_name = Null, //branch rev account
