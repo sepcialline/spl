@@ -137,17 +137,17 @@ class AccountTreeController extends Controller
 
 
         // // $data['journals'] = $query->orderBy('id','desc')->groupBy('number')->pluck('number');
-        $data['entries'] = $query->orderBy('id', 'desc')->paginate(50);
+        $data['entries'] = $query->orderBy('id', 'desc')->paginate(50)->appends(request()->query());
 
 
 
         $query_total = AccountingEntries::query();
-
-        if (Request()->from || Request()->to) {
-            $from = Request()->from ? Carbon::parse(Request()->from)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
-            $to = Request()->to ? Carbon::parse(Request()->to)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
-            $query_total->whereBetween('transaction_date', [$from, $to]);
-        }
+        $query_total->whereBetween('transaction_date', [$from, $to]);
+        // if (Request()->from || Request()->to) {
+        //     $from = Request()->from ? Carbon::parse(Request()->from)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+        //     $to = Request()->to ? Carbon::parse(Request()->to)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+        //     $query_total->whereBetween('transaction_date', [$from, $to]);
+        // }
 
         if (Request()->account && Request()->account != 0) {
             $query_total->where(function ($query) {
