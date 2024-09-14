@@ -41,9 +41,16 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
+
     @yield('VendorsCss')
 
-
+    <style>
+        .card {
+            box-shadow: 1px 1px 3px !important;
+            border-radius: 15px !important;
+            border: 1px solid #ffd20000 !important;
+        }
+    </style>
     <!-- Page CSS -->
 
     <!-- Helpers -->
@@ -55,13 +62,13 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('build/assets/js/config.js') }}"></script>
 
-    <style>
+    {{-- <style>
         .card {
             background-clip: padding-box;
             box-shadow: -8px 14px 10px rgba(38, 60, 85, 0.16);
             border: 1px solid #ffd200 !important;
         }
-    </style>
+    </style> --}}
 </head>
 
 <body>

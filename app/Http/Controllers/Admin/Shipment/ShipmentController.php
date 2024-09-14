@@ -576,7 +576,7 @@ class ShipmentController extends Controller
 
     public function dailyShipmentRider()
     {
-        $data['riders'] = Rider::select('id', 'name')->get();
+        $data['riders'] = Rider::where('status',1)->select('id', 'name')->get();
 
         $data['from'] = Carbon::now()->format('Y-m-d 00:00:01');
         $data['to'] = Carbon::now()->format('Y-m-d 23:59:59');

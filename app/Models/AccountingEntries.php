@@ -26,11 +26,15 @@ class AccountingEntries extends Model
     }
 
 
-    public function cost_center(){
+    public function costCenter(){
         return $this->belongsTo(CarPLate::class, 'cost_center','id');
+    }
+    public function branch(){
+        return $this->belongsTo(Branches::class, 'branch_id','id');
     }
     public function compoundWith()
     {
         return $this->hasMany(AccountingEntries::class, 'compound_entry_with', 'id');
     }
+    
 }

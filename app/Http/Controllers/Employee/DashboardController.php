@@ -63,4 +63,16 @@ class DashboardController extends Controller
     {
         //
     }
+
+    public function ReadNotification($id)
+    {
+        $userUnreadNotification = auth()->user()
+        ->unreadNotifications
+        ->where('id', $id)
+        ->first();
+        if ($userUnreadNotification) {
+            $userUnreadNotification->markAsRead();
+        }
+        return back();
+    }
 }

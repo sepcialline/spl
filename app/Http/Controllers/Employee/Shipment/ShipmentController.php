@@ -363,7 +363,7 @@ class ShipmentController extends Controller
         }
         if ($company->has_stock == 1) {
 
-            $products = Product::where('company_id', $request->company_id)->get();
+            $products = Product::where('company_id', $request->company_id)->with('branch')->get();
             return response()->json(['code' => 200, 'data' => $products, 'vendor_rate' => $vendor_rate]);
         } else {
             return response()->json(['code' => 202, 'vendor_rate' => $vendor_rate]);
@@ -372,8 +372,16 @@ class ShipmentController extends Controller
 
     public function shipmentProdcutDetails(Request $request)
     {
-        if (ProductDetails::where('product_id', $request->product_id)->where('branch_id', $request->branch_created_id)->exists()) {
-            $product_details = ProductDetails::where('product_id', $request->product_id)->where('branch_id', $request->branch_created_id)->select('id', 'quantity')->first();
+        // if (ProductDetails::where('product_id', $request->product_id)->where('branch_id', $request->branch_created_id)->exists()) {
+        //     $product_details = ProductDetails::where('product_id', $request->product_id)->where('branch_id', $request->branch_created_id)->select('id', 'quantity')->first();
+        //     if ($product_details->quantity > 0) {
+        //         return response()->json(['code' => '200', 'data' => $product_details->quantity]);
+        //     }
+        // } else {
+        //     return response()->json(['code' => '202', 'msg' => 'this product is not in your warehouse']);
+        // }
+        if (ProductDetails::where('product_id', $request->product_id)->exists()) {
+            $product_details = ProductDetails::where('product_id', $request->product_id)->select('id', 'quantity')->first();
             if ($product_details->quantity > 0) {
                 return response()->json(['code' => '200', 'data' => $product_details->quantity]);
             }
@@ -660,5 +668,88 @@ class ShipmentController extends Controller
     {
         $filepath = public_path('build/assets/shipments.xlsx');
         return Response::download($filepath);
+    }
+
+    public function assignToRiderByScan()
+    {
+        $date_from = Carbon::now()->format('y-m-d');
+        $date_to = Carbon::now()->format('y-m-d');
+        $data['shipments'] = array();
+        if (request()->rider_id) {
+            $data['shipments'] = Shipment::where('rider_id', request()->rider_id)->whereBetween('delivered_date', [$date_from, $date_to])->with('Client')->get();
+        }
+        $data['riders'] = Rider::where('status', 1)->select('id', 'name')->get();
+        $data['shipment_statuses'] = ShipmentStatuses::whereIn('id', [1, 2, 6, 7, 8, 9, 10])->select('id', 'name')->get();
+        return view('employee.shipment.scan_to_rider', $data);
+    }
+
+    public function assignToRiderByScanQr(Request $request)
+    {
+        $rider_id = Null;
+        if ($request->rider_id == 0) {
+            $rider_id = Null;
+        } else {
+            $rider_id = $request->rider_id;
+        }
+        $shipment = Shipment::where('shipment_no', $request->shipment_no)->with('Client')->with('emirate')->with('city')->with('Company')->with('paymentMethod')->first();
+        if ($shipment->status_id == 3 || $shipment->status_id == 6 || $shipment->status_id == 7 || $shipment->status_id == 8) {
+            toastr()->warning('عذرا دورة حياة الشحنة منتهية');
+            return redirect()->back();
+        }
+        if ($shipment && $shipment->rider_id != $rider_id) {
+
+            $shipment->update([
+                'rider_id' => $rider_id,
+                'status_id' => 2,
+                'delivered_date' => Carbon::now()->format('Y-m-d')
+            ]);
+
+
+            $fees_type = FeesType::where('id', $shipment->fees_type_id)->first()->name;
+            $payment_method = PaymentMethods::where('id', $shipment->payment_method_id)->first()->name;
+
+
+            $rider = $shipment->rider_id;
+            $action = ' اسناد الشحنة بالقارئ من قبل المسؤول';
+            Tracking::create([
+                'shipment_id' => $shipment->id,
+                'user_id' => Auth::guard('employee')->user()->id ?? Auth::id(),
+                'status_id' => $shipment->status_id,
+                'rider_id' => $rider,
+                'guard' => 'employee',
+                'notes' => Auth::guard('employee')->user()->name,
+                'time' => Carbon::now()->format('y-m-d h:m'),
+                'action' => $action,
+                'shipment_amount' => $shipment->shipment_amount,
+                'delivery_fees' => $shipment->delivery_fees,
+                'delivery_extra_fees' => $shipment->delivery_extra_fees,
+                'company_id' => $shipment->company_id,
+                'notes' => $shipment->shipment_notes
+            ]);
+            toastr()->success('done');
+            return redirect()->back();
+        } else {
+            toastr()->warning('something has not done');
+            return redirect()->back();
+        }
+    }
+
+    public function shipments_remove_rider(Request $request)
+    {
+        $shipment = Shipment::where('shipment_no', $request->shipment_no)->first();
+        if ($shipment) {
+            $shipment->update([
+                'rider_id' => Null,
+                'status_id' => 10,
+                'delivered_date' => Carbon::now()->format('Y-m-d')
+            ]);
+            $guard = 'employee';
+            $action = 'ازالة السائق من الشحنة';
+            $rider = null;
+            ShipmentHelper::shipmentTracking($shipment, $guard, $action, $rider);
+
+            toastr()->success('removed');
+            return redirect()->back();
+        }
     }
 }

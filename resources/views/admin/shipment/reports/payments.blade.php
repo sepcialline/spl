@@ -1,7 +1,7 @@
 <x-app-layout>
 
     @section('title')
-        {{ __('admin.reports') }} | {{ __('admin.payments') }}
+        {{ __('admin.reports') }} | {{ __('admin.companies_balance') }}
     @endsection
 
     @section('VendorsCss')
@@ -36,7 +36,7 @@
 
         <h4 class="py-3 breadcrumb-wrapper mb-4">
             <span class="text-muted fw-light">{{ __('admin.reports') }} / </span>
-            {{ __('admin.payments') }}
+            {{ __('admin.companies_balance') }}
         </h4>
 
         <div class="card">
@@ -142,10 +142,11 @@
         </div>
         <hr>
         <div class="card-header">
-            {{ __('admin.from') }}
+            {{-- {{ __('admin.from') }}
             {{ Carbon\Carbon::parse(Request()->date_to)->subDay(30)->format('Y-m-d') }}
-            {{ __('admin.to') }} {{ Request()->date_to }}
-            <strong>{{ $last_30_days_vendor_account ?? 0 }} </strong>
+            {{ __('admin.to') }} {{ Request()->date_to }} --}}
+            الرصيد السابق
+            <strong>{{ $last_balance ?? 0 }} </strong>
         </div>
         @if (isset($payments) && count($payments) > 0)
 
@@ -154,6 +155,17 @@
 
                     <div class="card-body">
                         <div class="mb-3">
+                            @auth('admin')
+                            @role('Super Admin')
+                                    <form action="{{ route('admin.posted_journal_voucher') }}"
+                                        method="post" target="">
+                                        @csrf
+                                        <button type='submit'
+                                            class='btn btn-sm btn-success'>+</button>
+                                    </form>
+
+                            @endrole
+                        @endauth
                             {{-- <div class="float-start my-2">@include('includes.shipment_table_reports',['shipments'=>$shipments])</div> --}}
                             {{-- <div class="float-end my-2"><input type="search" class="form-control" placeholder="{{__('admin.search_text')}}"></div> --}}
                             {{-- <a href="" target="_blank" rel="noopener noreferrer"><i class="bx bx-printer">{{}}</i></a> --}}
@@ -177,7 +189,7 @@
                                         <th>{{ __('admin.delivery_fees') }}</th>
                                         <th>{{ __('admin.due_amount_for_vendor') }}</th>
                                         <th>{{ __('admin.pay/dont_pay') }}</th>
-                                        <th>posted</th>
+                                        <th>updated_by</th>
                                     </tr>
 
                                 </thead>
@@ -215,18 +227,9 @@
                                             <td>{{ $payment->amount }}</td>
                                             <td>{{ $payment->delivery_fees }}</td>
                                             <td>{{ $payment->due_amount }}</td>
-                                            <td>{{ $payment->is_vendor_get_due == 0 ? __('admin.no') : __('admin.yes') }}
-                                            </td>
-                                            <td>
-                                                @if ($payment->posted_journal_voucher == 0)
-                                                    <form action="" method="post">
+                                            <td>{{ $payment->is_vendor_get_due == 0 ? __('admin.no') : __('admin.yes') }}</td>
+                                            <td>{{ $payment->updated_by ?? '' }}</td>
 
-                                                    </form>
-                                                @else
-                                                    yes
-                                                @endif
-
-                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -353,73 +356,9 @@
                         </table>
 
                     </div>
-                    {{-- <div>
-                        <table class="table">
-                            <tr>
-                                <th>{{ __('admin.cash_on_delivery') }}</th>
-                                <td>{{ $cash_on_delivery }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.income') }}</th>
-                                <td>{{ $cod_sp_income }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.vendor_account') }}</th>
-                                <td>{{ $cod_vendor_balance }} {{ __('admin.currency') }}</td>
-                            </tr>
-
-                        </table>
-
-                    </div>
-                    <div>
-                        <table class="table">
-                            <tr>
-                                <th>{{ __('admin.transfer_to_Bank') }}</th>
-                                <td>{{ $transfer_to_Bank }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.income') }}</th>
-                                <td>{{ $tr_bank_sp_income }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.vendor_account') }}</th>
-                                <td>{{ $tr_bank_vendor_balance }} {{ __('admin.currency') }}</td>
-                            </tr>
-
-                        </table>
-
-                    </div>
-                    <div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>{{ __('admin.transfer_to_vendor_company') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td> {{ $transfer_to_vendor_company }} {{ __('admin.currency') }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </div> --}}
-
                 </div>
                 <hr>
-                {{-- <div class="d-flex justify-content-around">
-                    <div>
-                        <table class="table">
-                            <thead><tr><th>{{__('admin.due_amount_for_vendor')}}</th></tr></thead>
-                            <tbody><tr><td>  {{$vendor_amount_due}} {{__('admin.currency')}}</td></tr></tbody>
-                        </table>
 
-                    </div>
-                    <div>
-
-
-                    </div>
-                </div> --}}
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -459,100 +398,7 @@
                 </table>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <div class="row py-2 my-2">
-                    <h3>آخر ثلاثين يوم الى تاريخ {{ Request()->date_to }}</h3>
-                    <table class="table table-striped-columns">
-                        <thead>
-                            <tr>
-                                <th>اليوم</th>
-                                <th>السالب</th>
-                                <th>الموجب</th>
-                                <th>المجوع</th>
-                                <th>المجوع مع تحويل السالب لصفر</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $sum_array_30 =array(); @endphp
-                            @php $sum_convert_to_zero_array_30 =array(); @endphp
-                            @foreach ($days as $key => $value)
-                                @php $sum_array_30 [] = $days_30_1[$key] +  $days_30_2[$key]@endphp
-                                @php $sum_convert_to_zero_array_30 [] = ($days_30_1[$key] +  $days_30_2[$key] < 0 ) ? '(0)'  : $days_30_1[$key] +  $days_30_2[$key] @endphp
-                                <tr>
-                                    <td>{{ $value }}</td>
-                                    <td>{{ $days_30_1[$key] }}</td>
-                                    <td>{{ $days_30_2[$key] }}</td>
-                                    <td>{{ $days_30_1[$key] + $days_30_2[$key] }}</td>
-                                    <td> {{ $days_30_1[$key] + $days_30_2[$key] < 0 ? $days_30_1[$key] + $days_30_2[$key] . ' تصبح (0)' : $days_30_1[$key] + $days_30_2[$key] }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td>{{ array_sum($sum_array_30) }}</td>
-                                <td>{{ array_sum($sum_convert_to_zero_array_30) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
 
-
-            </div>
-
-            {{-- <div class="row">
-                <div class="col">
-                    <h4>{{ __('admin.branch_branch_manager') }}</h4>
-                    <table class="table table-striped-columns">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>{{ __('admin.branch_branch_name') }}</th>
-                                <th>{{ __('admin.vendors_companies') }}</th>
-                                <th>شحنات داخلية</th>
-                                <th>شحنات خارجية</th>
-                                <th>مبلغ للفرع الرئيسي</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @php
-                                $i = 1;
-                                $sum_inside_payments = 0;
-                                $outside_payments = 0;
-                                $outside_payments_delivery_fees = 0;
-                            @endphp
-                            @foreach ($summary_branches as $summary_branch)
-                                @php
-                                    $sum_inside_payments = $sum_inside_payments + $summary_branch['inside_payments'];
-                                    $outside_payments = $outside_payments + $summary_branch['outside_payments'];
-                                    $outside_payments_delivery_fees = $outside_payments_delivery_fees + $summary_branch['outside_payments_delivery_fees'];
-                                @endphp
-                                <tr>
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $summary_branch['branch_name'] }}</td>
-                                    <td>{{ $summary_branch['vendor'] }}</td>
-                                    <td>{{ $summary_branch['inside_payments'] }}</td>
-                                    <td>{{ $summary_branch['outside_payments'] }}</td>
-                                    <td>{{ $summary_branch['outside_payments_delivery_fees'] }}</td>
-                                </tr>
-                            @endforeach
-                            <tr style="background: #ffs200">
-                                <td>{{__('admin.total')}}</td>
-                                <td></td>
-                                <td></td>
-                                <td> {{$sum_inside_payments}}</td>
-                                <td> {{$outside_payments}}</td>
-                                <td> {{$outside_payments_delivery_fees}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div> --}}
-
-        </div>
 
         @section('VendorsJS')
             <!-- Vendors JS -->

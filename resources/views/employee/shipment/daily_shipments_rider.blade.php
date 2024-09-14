@@ -96,18 +96,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php $i = 1; @endphp
+                            @php
+                                $i = 1;
+                                $net = 0;
+                            @endphp
                             @foreach ($all_shipments as $shipment)
+                                @php $net=$net+$shipment->shipment->delivery_fees  @endphp
                                 {{-- @php $shipment  = App\Models\Shipment::where('id',$tracking->shipment_id)->first(); @endphp --}}
                                 <tr>
                                     {{-- <input type="hidden" id="id" value="{{ $shipment->id }}"> --}}
                                     <td>{{ $i++ }}</td>
                                     <td><span
                                             class="{{ $shipment->Status->html_code }}">{{ $shipment->Status->name }}</span>
-                                            {{ $shipment->shipment->is_external_order == 1 ? '(خارجية)' : '' }}
+                                        {{ $shipment->shipment->is_external_order == 1 ? '(خارجية)' : '' }}
                                     </td>
                                     <td>
-                                         {{-- {!! DNS2D::getBarcodeHTML("$shipment->shipment_no", 'DATAMATRIX') !!} --}}
+                                        {{-- {!! DNS2D::getBarcodeHTML("$shipment->shipment_no", 'DATAMATRIX') !!} --}}
                                         <span>{{ $shipment->shipment->shipment_no ?? '' }}#{{ $shipment->shipment->shipment_refrence ?? '' }}</span>
                                     </td>
                                     <td>{{ $shipment->shipment->Client->name ?? '' }} <br>
@@ -121,7 +125,7 @@
                                     </td> --}}
                                     <td>{{ $shipment->shipment->rider_should_recive }} {{ __('admin.currency') }}</td>
                                     <td>
-                                        {{ $shipment->shipment->shipment_notes ?? ''}}
+                                        {{ $shipment->shipment->shipment_notes ?? '' }}
                                     </td>
 
 
@@ -206,6 +210,7 @@
                         @endforeach
                         <th>{{ __('admin.cash_on_hand') }}</th>
                         <th>{{ __('admin.commission') }}</th>
+                        <th>{{ __('admin.net_income') }}</th>
                     </tr>
                     <tbody>
                         <tr>
@@ -218,6 +223,7 @@
                             @endforeach
                             <td>{{ $cod - $sum_expenses }} {{ __('admin.currency') }}</td>
                             <td>{{ $commissions }} {{ __('admin.currency') }}</td>
+                            <td>{{ $net ?? 0 }} {{ __('admin.currency') }}</td>
                         </tr>
                     </tbody>
                 </table>

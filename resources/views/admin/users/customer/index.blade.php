@@ -46,7 +46,7 @@
                         <input type="hidden" class="_token" id="_token" value="{{ csrf_token() }}" />
                         <thead>
                             <tr>
-                                {{-- <th></th> --}}
+                                <th>#</th>
                                 <th>{{ __('admin.user_management_rider_name') }}</th>
                                 <th>{{ __('admin.user_management_rider_mobile') }}</th>
                                 <th>{{ __('admin.user_management_rider_email') }}</th>
@@ -55,14 +55,22 @@
                         </thead>
 
                         <tbody id="original" class="table-body table-border-bottom-0">
+                            @php $i=1; @endphp
                             @foreach ($data as $item)
                                 {{-- @php $roles = $item->getRoleNames(); @endphp --}}
 
                                 <tr>
+                                    <td>{{$i++}}</td>
                                     <td>
                                         <div class="avatar me-2">
+                                            @if ($item->image)
                                             <img src="{{ asset('build/assets/img/uploads/avatars/' . $item->image) }}"
-                                                alt="Avatar" class="rounded-circle me-2" /> {{ $item->name }}
+                                                alt="Avatar" class="rounded-circle me-2" />
+                                        @else
+                                            <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}"
+                                                alt="Avatar" class="rounded-circle me-2" />
+                                        @endif
+                                                 {{ $item->name }}
                                         </div>
                                     </td>
 

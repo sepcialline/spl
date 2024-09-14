@@ -44,8 +44,15 @@
                                     {{ __('admin.warehouse_products') }}</div>
                             </a>
                         </li>
+                        <li class="menu-item">
+                            <a href="{{ route('employee.warehouse_report_index') }}"
+                                class="menu-link {{ Request::routeIs('employee.warehouse_report_index') ? 'active' : '' }}">
+                                <div data-i18n="{{ __('admin.warehouse_report') }}">
+                                    {{ __('admin.warehouse_report') }}</div>
+                            </a>
+                        </li>
                     @endif
-                    @if (Auth::guard('employee')->user()->can('mployee-warehouse-transfer-request'))
+                    {{-- @if (Auth::guard('employee')->user()->can('mployee-warehouse-transfer-request'))
                         <li class="menu-item">
                             <a href="{{ route('employee.transfer_index') }}"
                                 class="menu-link {{ Request::routeIs('employee.transfer_index') ? 'active' : '' }}">
@@ -53,8 +60,8 @@
                                     {{ __('admin.warehouse_transfer') }}</div>
                             </a>
                         </li>
-                    @endif
-                    @if (Auth::guard('employee')->user()->can('employee-warehouse-delivered_quantity'))
+                    @endif --}}
+                    {{-- @if (Auth::guard('employee')->user()->can('employee-warehouse-delivered_quantity'))
                         <li class="menu-item">
                             <a href="{{ route('employee.transfer_product_index') }}"
                                 class="menu-link {{ Request::routeIs('employee.transfer_product_index') ? 'active' : '' }}">
@@ -62,7 +69,7 @@
                                     {{ __('admin.transfer_product') }}</div>
                             </a>
                         </li>
-                    @endif
+                    @endif --}}
 
                 </ul>
             </li>
@@ -160,11 +167,18 @@
                     @endif
 
                     @if (Auth::guard('employee')->user()->can('employee-Shipment-assign rider'))
-                        <li class="menu-item">
+                        {{-- <li class="menu-item">
                             <a href="{{ route('employee.shipments_assign_to_rider') }}"
                                 class="menu-link {{ Request::routeIs('employee.shipments_assign_to_rider') ? 'active' : '' }}">
                                 <div data-i18n="{{ __('admin.assign_shipments_to_rider') }}">
                                     {{ __('admin.assign_shipments_to_rider') }}</div>
+                            </a>
+                        </li> --}}
+                        <li class="menu-item">
+                            <a href="{{ route('employee.shipments_assign_to_rider_by_scan') }}"
+                                class="menu-link {{ Request::routeIs('employee.shipments_assign_to_rider_by_scan') ? 'active' : '' }}">
+                                <div data-i18n="{{ __('admin.assign_shipments_to_riderby_scan') }}">
+                                    {{ __('admin.assign_shipments_to_riderby_scan') }}</div>
                             </a>
                         </li>
                     @endif
@@ -192,6 +206,13 @@
             </ul>
         </li>
     @endif
+    <li class="menu-item {{ request()->is('*/*/compensation_request') ? '  active open' : '' }}">
+        <a href="{{ route('employee.compensation_request_index') }}" class="menu-link">
+            <i class='bx bx-building-house'></i>
+            <div data-i18n="{{ __('admin.compensation_request') }}">{{ __('admin.compensation_request') }}</div>
+        </a>
+    </li>
+
     {{-- expenses --}}
     @if (Auth::guard('employee')->user()->can('employee-Expense-show-page'))
         <li class="menu-item {{ request()->is('*/*/expenses') ? '  active open' : '' }}">

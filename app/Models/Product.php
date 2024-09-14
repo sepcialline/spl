@@ -15,4 +15,8 @@ class Product extends Model
     public function vendorCompany(){
         return $this->belongsTo(VendorCompany::class,'company_id');
     }
+
+    public function branch(){
+        return $this->belongsTo(Branches::class,'branch_id');
+    }
 }

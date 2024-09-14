@@ -69,9 +69,17 @@
                                                     class="rounded-circle me-2" />
                                             </div>
                                         </td> --}}
-                                    <td><img src="{{ asset('build/assets/img/uploads/avatars/' . $item->image) }}"
+                                    <td>
+                                        @if($item->image)
+                                        <img src="{{ asset('build/assets/img/uploads/avatars/' . $item->image) }}"
                                             alt="Avatar" class="rounded-circle me-2"
-                                            style="width: 50px" />{{ $item->name }}</td>
+                                            style="width: 50px" />
+                                            @else
+                                            <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}"
+                                            alt="Avatar" class="rounded-circle me-2"
+                                            style="width: 50px" />
+                                            @endif
+                                            {{ $item->name }}</td>
                                     <td>{{ $item->mobile }}</td>
                                     <td>{{ $item->email }}</td>
                                     <td>{{ $item->branch->branch_name }}</td>

@@ -18,8 +18,13 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->image) }}" alt="avatar"
-                                class="rounded-circle img-fluid" style="width: 150px;">
+                            @if ($data->image)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->image) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                             <h5 class="my-3">{{ $data->name }}</h5>
                             <p class="text-muted mb-1">{{ $data->emirate->name }}
                                 :{{ $data->city_id ?? __('admin.not_assigned') }} </p>

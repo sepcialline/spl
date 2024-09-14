@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Admin;
 use App\Models\Rider;
 use App\Models\Tracking;
-use App\Models\User;
-use App\Models\VendorCompany;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\VendorCompany;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -27,8 +28,20 @@ class DashboardController extends Controller
             'companies' => $companies,
         ];
 
-        $data['trackings'] = Tracking::whereIn('status_id',[4,6])->whereDate('time',Carbon::now()->format('Y-m-d'))->orderBy('id','desc')->get();
+        $data['trackings'] = Tracking::whereIn('status_id', [4, 6])->whereDate('time', Carbon::now()->format('Y-m-d'))->orderBy('id', 'desc')->get();
         //return [$admins, $users, $riders, $companies];
         return view('admin.dashboard.dashboard', $data);
+    }
+
+    public function ReadNotification($id)
+    {
+        $userUnreadNotification = auth()->user()
+        ->unreadNotifications
+        ->where('id', $id)
+        ->first();
+        if ($userUnreadNotification) {
+            $userUnreadNotification->markAsRead();
+        }
+        return back();
     }
 }

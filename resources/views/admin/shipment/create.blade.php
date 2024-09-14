@@ -385,11 +385,11 @@ is-invalid
                                         <div class="row">
                                             <div class="mb-3 col">
                                                 <h6>{{ __('admin.is_external_order') }}</h6>
-                                                <label class="switch switch-primary">
+                                                {{-- <label class="switch switch-primary">
                                                     <input type="checkbox" class="switch-input is_external_order"
                                                         data-url="" name="is_external_order"
                                                         id="is_external_order" />
-                                                    <span class="switch-toggle-slider" style="width: 150px">
+                                                    <span class="switch-toggle-slider" style="width: 75px">
                                                         <span class="switch-on">
                                                             <span>{{__('admin.external')}}</span>
                                                         </span>
@@ -397,16 +397,22 @@ is-invalid
                                                             <span>{{__('admin.internal')}}</span>
                                                         </span>
                                                     </span>
-                                                    {{-- <span class="switch-label">Primary</span> --}}
-                                                </label>
+                                                </label> --}}
+
+                                                <select name="is_external_order" id="is_external_order"
+                                                    class="form-control">
+                                                    <option value="0">{{ __('admin.internal') }}</option>
+                                                    <option value="1">{{ __('admin.external') }}</option>
+                                                    <option value="2">{{ __('admin.interational') }}</option>
+                                                </select>
                                             </div>
-                                            <div class="mb-3 col">
+                                            {{-- <div class="mb-3 col">
                                                 <h6>{{ __('admin.Including_vat?') }}</h6>
                                                 <label class="switch switch-success">
                                                     <input type="checkbox" class="switch-input Including_vat"
-                                                        data-url="" name="Including_vat" checked readonly
+                                                        data-url="" name="Including_vat" checked
                                                         id="Including_vat" />
-                                                    <span class="switch-toggle-slider" style="width: 150px">
+                                                    <span class="switch-toggle-slider" style="width: 100px">
                                                         <span class="switch-on">
                                                             <span>{{__('admin.Including_vat')}}</span>
                                                         </span>
@@ -415,7 +421,7 @@ is-invalid
                                                         </span>
                                                     </span>
                                                 </label>
-                                            </div>
+                                            </div> --}}
                                         </div>
 
 

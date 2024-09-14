@@ -10,6 +10,8 @@ class AuthController extends Controller
 {
     public function Login()
     {
+        // return '<h2>الموقع تحت الصيانة شاكرين صابركم<h2>
+        // <h2>System under maintenance .. thank you<h2>';
         return view('vendor.auth.login');
     }
 
@@ -20,7 +22,7 @@ class AuthController extends Controller
         try {
             //code...
             if ((Auth::guard('vendor')->attempt(['mobile' => $check['mobile'], 'password' => $check['password']]) ||
-                Auth::guard('vendor')->attempt(['email' => $check['mobile'], 'password' => $check['password']])) && Auth::guard('vendor')->user()->company->status == 1) {
+                Auth::guard('vendor')->attempt(['email' => $check['mobile'], 'password' => $check['password']])) && Auth::guard('vendor')->user()->status == 1) {
 
                 toastr()->success('login Successfully');
                 //return back();

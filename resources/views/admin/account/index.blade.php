@@ -58,7 +58,9 @@
             <span class="fw-light text-muted">{{ __('admin.accounts_chart_of_accounts') }} /</span>
             {{ __('admin.accounts_accounts_chart_of_accounts_list') }}
         </h4>
-
+        <h3 class="text-danger text-center">يرجى الانتباه</h3>
+        <p class="text-danger text-center"> عند تغيير أي معلومة تخص أي فرع يرجى الدخول للفرع نفسه من خلال الدخول </br>
+            لادارة الأفرع في السايدبار الجانبي من ثم الدخول للمعلومات المحاسبية لكل فرع</p>
 
         <div class="row">
             <div class="col">
@@ -97,7 +99,7 @@
                                 <select id="level" class="form-select js-example-basic-single" name="level"
                                     required>
                                     {{-- <option value="">{{ __('admin.please_select') }}</option> --}}
-                                    @for ($i = 1; $i <= 4; $i++)
+                                    @for ($i = 1; $i <= 5; $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
@@ -143,6 +145,7 @@
                                     {{-- <option  selected disabled>{{ __('admin.please_select') }}</option> --}}
                                     <option value="0">{{ __('admin.credit') }}</option>
                                     <option value="1">{{ __('admin.debit') }}</option>
+                                    <option value="2">{{ __('admin.debit') }} | {{ __('admin.credit') }} </option>
                                 </select>
                             </div>
                             <div class="mb-1">

@@ -23,4 +23,9 @@ class AccountTree extends Model
     {
         return $this->hasMany(AccountTree::class, 'account_parent')->with('accounts');
     }
+
+    public function allChildrenAccounts()
+    {
+        return $this->childrenAccounts()->with('allChildrenAccounts');
+    }
 }

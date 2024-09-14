@@ -22,10 +22,8 @@
             <form method="POST" class=" needs-validation" novalidate
                 action="{{ route('admin.vendors_company_update') }}" enctype="multipart/form-data" class="card-body">
                 @csrf
-                <input type="hidden" name="company_id" value="{{$company->id}}">
-                <input type="hidden" name="vendor_id" value="{{$vendor->id}}">
                 <div class="row pt-3  g-3 ">
-
+                    <input type="hidden" name="company_id" value="{{$company->id}}">
                     <div class="col-md-6">
                         <label class="form-label"
                             for="branch_english_name">{{ __('admin.vendors_companies_company_english_name') }}</label>
@@ -50,8 +48,7 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label"
-                            for="branch_english_address">{{ __('admin.vendors_companies_company_vendor_rate') }}</label>
+                        <label class="form-label" for="branch_english_address">{{ __('admin.delivery_fees') }}</label>
                         <input required type="text" name="vendor_rate" id="vendor_rate" class="form-control"
                             placeholder="{{ __('admin.vendors_companies_company_vendor_rate') }}"
                             value="{{ $company->vendor_rate }}" />
@@ -62,24 +59,13 @@
 
                     <div class="col-md-3">
                         <label class="form-label"
-                            for="branch_english_address">{{ __('admin.vendors_companies_company_customer_rate') }}</label>
-                        <input required type="text" name="customer_rate" id="customer_rate" class="form-control"
-                            placeholder="{{ __('admin.vendors_companies_company_customer_rate') }}"
-                            value="{{ $company->customer_rate }}" />
-                        @error('customer_rate')
-                            <div class="alert alert-danger">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label"
                             for="branch_english_address">{{ __('admin.vendors_companies_company_sales') }}</label>
 
-                        <select name="sales_id[]" id="sales_id" class="js-example-basic-multiple form-control"
-                            >
-                            <option value="" disabled>{{ __('admin.please_select') }}</option>
+                        <select name="sales_id" id="sales_id" class="js-example-basic-multiple form-control">
+                            <option value="" selected>{{ __('admin.please_select') }}</option>
                             @foreach ($sales as $sale)
                                 <option value="{{ $sale->id }}"
-                                    {{ $sale->id == $company->sales_id ? 'selected' : '' }}>
+                                    {{ $company->sale_id && in_array($sale->id, $company->sale_id) ? 'selected' : '' }}>
                                     {{ $sale->name }}</option>
                             @endforeach
 
@@ -88,15 +74,18 @@
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label"
-                            for="branch_english_address">{{ __('admin.vendors_companies_company_commission_rate') }}</label>
-                        <input required type="text" name="commission_rate" id="commission_rate" class="form-control"
-                            placeholder="{{ __('admin.vendors_companies_company_commission_rate') }}"
-                            value="{{ $company->commission_rate }}" />
-                        @error('commission_rate')
-                            <div class="alert alert-danger">{{ $message }}</div>
-                        @enderror
+
+                    <div class="col">
+                        <label class="form-label" for="branch_id">{{ __('admin.branch_branch_name') }}</label>
+                        <select class="js-example-basic-single" name="branch_id" id="branch_id" required>
+                            <option>{{ __('admin.please_select') }}</option>
+                            @foreach ($branches as $branch)
+                                <option value="{{ $branch->id }}"
+                                    {{ $company->branch_id == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->branch_name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <hr class="my-4 mx-n4" />
@@ -125,9 +114,10 @@
 
                         <select name="city_id" id="city_id" class="js-example-basic-single form-select" required>
                             @foreach ($cities as $city)
-                                <option value="{{ $city->id }}" {{$city->id == $company->city_id ? 'selected' : ''}}>{{ $city->name }}</option>
+                                <option value="{{ $city->id }}"
+                                    {{ $company->city_id == $city->id ? 'selected' : '' }}>{{ $city->name }}
+                                </option>
                             @endforeach
-
                         </select>
                         @error('city_id')
                             <div class="alert alert-danger">{{ $message }}</div>
@@ -139,7 +129,7 @@
 
                         <input required type="text" name="address_en" id="address_en" class="form-control"
                             placeholder="{{ __('admin.vendors_companies_company_english_address') }}"
-                            value="{{ $company->getTranslation('address','en') }}" required />
+                            value="{{ $company->getTranslation('address', 'en') }}" required />
                         @error('address_en')
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
@@ -148,12 +138,25 @@
                         <label class="form-label"
                             for="address_ar">{{ __('admin.vendors_companies_company_arabic_address') }}</label>
 
-                        <input required type="text" name="address_ar" id="address_ar" class="form-control"
-                            required placeholder="{{ __('admin.vendors_companies_company_arabic_address') }}"
-                            value="{{ $company->getTranslation('address','ar') }}" />
+                        <input required type="text" name="address_ar" id="address_ar" class="form-control" required
+                            placeholder="{{ __('admin.vendors_companies_company_arabic_address') }}"
+                            value="{{ $company->getTranslation('address', 'ar') }}" />
                         @error('address_ar')
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="phone_number">{{ __('admin.landline') }}</label>
+                        <input type="text" value="{{ $company?->phone_number }}" name="phone_number"
+                            class="form-control phone" id="phone_number">
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="mobile_number">{{ __('admin.mobile') }}</label>
+                        <input type="text" name="mobile_number" value="{{ $company?->mobile_number }}"
+                            class="form-control phone" id="mobile_number">
+
                     </div>
                 </div>
 
@@ -168,7 +171,7 @@
                                 <input required type="text" id="description" name="description" required
                                     class="form-control  @error('description') is-invalid @enderror"
                                     placeholder="{{ __('admin.vendors_companies_company_description') }}"
-                                    value="{{ $company->description }}"
+                                    value="{{ $company?->description }}"
                                     aria-label="{{ __('admin.vendors_companies_company_description') }}" />
                                 @error('description')
                                     <div class="alert alert-danger">{{ $message }}</div>
@@ -181,8 +184,10 @@
                                 <select name="status" value="{{ old('status') }}"
                                     class="form-select  @error('status') is-invalid @enderror" id="status"
                                     aria-label="is_main select example">
-                                    <option value="1" {{$company->status == 1 ? 'selected' : ''}}>{{ __('admin.active') }}</option>
-                                    <option value="0" {{$company->status == 0 ? 'selected' : ''}}>{{ __('admin.deactivate') }}</option>
+                                    <option value="1" {{ $company->status == 1 ? 'selected' : '' }}>
+                                        {{ __('admin.active') }}</option>
+                                    <option value="0" {{ $company->status == 0 ? 'selected' : '' }}>
+                                        {{ __('admin.deactivate') }}</option>
                                 </select>
                                 @error('status')
                                     <div class="alert alert-danger">{{ $message }}</div>
@@ -192,11 +197,13 @@
                             <div class="col-md-4">
                                 <label for="is_main"
                                     class="form-label">{{ __('admin.vendors_companies_company_has_stock') }}</label>
-                                <select name="has_stock" value="{{ old('has_stock') }}"
+                                <select name="has_stock"
                                     class="form-select  @error('has_stock') is-invalid @enderror" id="has_stock"
                                     aria-label="is_main select example">
-                                    <option value="0" {{$company->has_stock == 0 ? 'selected' : ''}}>{{ __('admin.no') }}</option>
-                                    <option value="1" {{$company->has_stock == 1 ? 'selected' : ''}}>{{ __('admin.yes') }}</option>
+                                    <option value="0" {{ $company->has_stock == 0 ? 'selected' : '' }}>
+                                        {{ __('admin.no') }}</option>
+                                    <option value="1" {{ $company->has_stock == 1 ? 'selected' : '' }}>
+                                        {{ __('admin.yes') }}</option>
                                 </select>
                                 @error('has_stock')
                                     <div class="alert alert-danger">{{ $message }}</div>
@@ -205,11 +212,13 @@
                             <div class="col-md-4">
                                 <label for="is_main"
                                     class="form-label">{{ __('admin.vendors_companies_company_has_api') }}</label>
-                                <select name="has_api" value="{{ old('has_api') }}"
+                                <select name="has_api"
                                     class="form-select  @error('has_api') is-invalid @enderror" id="has_api"
                                     aria-label="is_main select example">
-                                    <option value="0" {{$company->has_api == 0 ? 'selected' : ''}}>{{ __('admin.no') }}</option>
-                                    <option value="1" {{$company->has_api == 1 ? 'selected' : ''}}>{{ __('admin.yes') }}</option>
+                                    <option value="0" {{ $company->has_api == 0 ? 'selected' : '' }}>
+                                        {{ __('admin.no') }}</option>
+                                    <option value="1" {{ $company->has_api == 1 ? 'selected' : '' }}>
+                                        {{ __('admin.yes') }}</option>
                                 </select>
                                 @error('has_api')
                                     <div class="alert alert-danger">{{ $message }}</div>
@@ -218,33 +227,12 @@
 
 
                         </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="bank_name"
-                                    class="form-label">{{ __('admin.vendors_companies_company_bank_name') }}</label>
-                                <input class="form-control @error('bank_name') is-invalid @enderror"
-                                    value="{{ $company->bank_name }}" id="bank_name" name="bank_name">
-                                @error('bank_name')
-                                    <div class="alert alert-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="iban"
-                                    class="form-label">{{ __('admin.vendors_companies_company_iban') }}</label>
-                                <input class="form-control @error('iban') is-invalid @enderror"
-                                    value="{{ $company->iban }}" id="bank_name" name="iban">
-                                @error('iban')
-                                    <div class="alert alert-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
 
-
-                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label"
                                     for="map_longitude">{{ __('admin.setting_map_longitude') }}</label>
-                                <input required type="text" id="map_longitude" value="{{ $company->longitude }}"
+                                <input required type="text" id="map_longitude" value="{{ $company?->longitude }}"
                                     class="form-control  @error('map_longitude') is-invalid @enderror"
                                     name="map_longitude" {{-- value="25.405216" --}}
                                     placeholder="{{ __('admin.setting_map_longitude') }}" />
@@ -255,7 +243,7 @@
                             <div class="col-md-6">
                                 <label class="form-label"
                                     for="map_latitude">{{ __('admin.setting_map_latitude') }}</label>
-                                <input required type="text" value="{{ $company->latitude }}" id="map_latitude"
+                                <input required type="text" value="{{ $company?->latitude }}" id="map_latitude"
                                     class="form-control  @error('map_latitude') is-invalid @enderror"
                                     name="map_latitude" {{-- value="55.513641" --}}
                                     placeholder="{{ __('admin.setting_map_latitude') }}" />
@@ -267,7 +255,7 @@
 
                         <div class="col-md-4 my-4">
                             <div class="avatar avatar-xl mb-3">
-                                <img id="avatar" src="{{ asset('build/assets/img/uploads/logos/'.$company->logo) }}"
+                                <img id="avatar" src="{{ asset('build/assets/img/uploads/logos/'.$company->logo.'') }}"
                                     alt="{{ __('admin.user_management_admin_avatar') }}">
                             </div>
                             <label for="logo"
@@ -300,95 +288,69 @@
                         </div>
                     </div>
 
-
-                    <hr class="my-4">
-
-                    <div class="row py-2">
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_name_ar">{{ __('admin.vendors_companies_vendor_name_ar') }}</label>
-                            <input required type="text" id="vendor_name_ar" value="{{ $vendor->getTranslation('name','ar') }}"
-                                class="form-control  @error('vendor_name_ar') is-invalid @enderror"
-                                name="vendor_name_ar"
-                                placeholder="{{ __('admin.vendors_companies_vendor_name_ar') }}" />
-                            @error('vendor_name_ar')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_name_en">{{ __('admin.vendors_companies_vendor_name_en') }}</label>
-                            <input required type="text" value="{{$vendor->getTranslation('name','en') }}" id="vendor_name_en"
-                                class="form-control  @error('vendor_name_en') is-invalid @enderror"
-                                name="vendor_name_en"
-                                placeholder="{{ __('admin.vendors_companies_vendor_name_en') }}" />
-                            @error('vendor_name_en')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <div class="row my-4">
+                        <label for="vendor"
+                            class="form-label">{{ __('admin.vendors_companies_company_owner_name') }}</label>
+                        <select class="js-example-basic-single" name="vendor">
+                            <option value="">{{ __('admin.please_select') }}</option>
+                            @foreach ($vendors as $vendor)
+                                <option value="{{ $vendor->id }}"
+                                    {{ $company->vendor_id == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    <div class="row py-2">
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_mobile">{{ __('admin.vendors_companies_vendor_mobile') }}</label>
-                            <input required type="text" id="vendor_mobile" value="{{ $vendor->mobile }}"
-                                class="form-control  @error('vendor_mobile') is-invalid @enderror"
-                                name="vendor_mobile"
-                                placeholder="{{ __('admin.vendors_companies_vendor_mobile') }}" />
-                            @error('vendor_mobile')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_email">{{ __('admin.vendors_companies_vendor_email') }}</label>
-                            <input required type="email" value="{{ $vendor->email }}" id="vendor_email"
-                                class="form-control  @error('vendor_email') is-invalid @enderror" name="vendor_email"
-                                placeholder="{{ __('admin.vendors_companies_vendor_email') }}" />
-                            @error('vendor_email')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                    <hr>
 
-                    <div class="row py-2">
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="password">{{ __('admin.vendors_companies_vendor_password') }}</label>
-                            <input  type="text" id="password"
-                                class="form-control  @error('password') is-invalid @enderror" name="password"
-                                placeholder="{{ __('admin.user_management_admin_password') }}" />
-                            @error('password')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
                     <div class="row">
-                        {{-- <div class="col-md-6">
-                            <label class="form-label"
-                                for="password_confirmation">{{ __('admin.vendors_companies_vendor_repeat_password') }}</label>
-                            <input  type="text" id="password_confirmation"
-                                class="form-control  @error('password_confirmation') is-invalid @enderror"
-                                name="password_confirmation"
-                                placeholder="{{ __('admin.vendors_companies_vendor_password') }}" />
-                            @error('password_confirmation')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div> --}}
-                        <div class="col-md-6 py-4">
-                            <div class="avatar avatar-xl mb-3">
-                                <img id="vendor_avatar" src="{{ asset('build/assets/img/uploads/vendors/'.$vendor->avatar) }}"
-                                    alt="{{ __('admin.user_management_admin_avatar') }}">
+                        <h3 class="my-4">{{ __('admin.bank_accounts') }}</h3>
+                        <table class='table table-active'>
+                            <thead>
+                                <tr>
+                                    <th>{{ __('admin.bank_name') }}</th>
+                                    <th>IBAN</th>
+                                    <th>{{ __('admin.action') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($company->bankAccounts as $bankAccount)
+                                <input type="hidden" name="banks_name[]" value={{$bankAccount->bank_id}}>
+                                <input type="hidden" name="ibans[]" value={{$bankAccount->iban_number}}>
+                                    <tr>
+                                        <td>{{ $bankAccount->bank->name_bank }}</td>
+                                        <td>{{ $bankAccount->iban_number }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.companies.bank_accounts.destroy', $bankAccount->id) }}"
+                                                onclick="return confirm('{{ __('admin.are_you_sure_delete') }}')"
+                                                class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <div id="bankFields">
+                            <div class="row mb-3 bank-entry">
+                                <div class="col-md-5">
+                                    <label for="bank_name" class="form-label">{{ __('admin.bank_name') }}</label>
+                                    <select name="banks_name[]" id="bank_name" class="js-example-basic-single">
+                                        <option value="">{{ __('admin.please_select') }}</option>
+                                        @foreach ($banks as $bank)
+                                            <option value="{{ $bank->id }}">{{ $bank->name_bank }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="bank_name" class="form-label">IBAN</label>
+                                    <input type="text" name="ibans[]" class="form-control" placeholder="IBAN">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-success" onclick="addBankField()">Add
+                                        Bank</button>
+                                </div>
                             </div>
-                            <label for="logo"
-                                class="form-label">{{ __('admin.vendors_companies_vendor_avatar') }}</label>
-                            <input class="form-control @error('vendor_avatar') is-invalid @enderror"
-                                name="vendor_avatar" type="file" id="vendor_avatar"
-                                onchange="document.getElementById('vendor_avatar').src=window.URL.createObjectURL(this.files[0])">
-                            @error('vendor_avatar')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
 
@@ -456,10 +418,10 @@
         <script src="{{ asset('build/assets/js/form-layouts.js') }}"></script>
         {{-- Map --}}
         <script type="text/javascript">
-            var lng = $('#map_latitude').val();
-            // $('#map_latitude').val(lat);
-            var lat = $('#map_longitude').val();
-            // $('#map_longitude').val(lng);
+            var lng = 55.513641;
+            $('#map_latitude').val({{$company->latitude}});
+            var lat = 25.405216;
+            $('#map_longitude').val({{$company->longitude}});
 
             var markers = [];
             var map;
@@ -802,5 +764,39 @@
                 });
             })
         </script>
+        <script>
+            function addBankField() {
+                const bankFields = document.getElementById('bankFields');
+                const newEntry = document.createElement('div');
+                newEntry.classList.add('row', 'mb-3', 'bank-entry');
+                newEntry.innerHTML = `
+        <div class="col-md-5">
+            <label for="bank_name" class="form-label">{{ __('admin.bank_name') }}</label>
+            <select name="banks_name[]" class="js-example-basic-single">
+                <option value="">{{ __('admin.please_select') }}</option>
+                @foreach ($banks as $bank)
+                    <option value="{{ $bank->id }}">{{ $bank->name_bank }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label for="iban" class="form-label">IBAN</label>
+            <input type="text" name="ibans[]" class="form-control" placeholder="IBAN" required>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger" onclick="removeBankField(this)">Remove</button>
+        </div>
+        `;
+                bankFields.appendChild(newEntry);
+
+                // Initialize Select2 only on the newly added select element
+                $(newEntry).find('.js-example-basic-single').select2();
+            }
+
+            function removeBankField(button) {
+                const bankEntry = button.closest('.bank-entry');
+                bankEntry.remove();
+            }
+        </script>
     @endsection
-    </x-app-layout>
+</x-app-layout>

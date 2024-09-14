@@ -39,19 +39,7 @@
                 <div class="col-md-8 col-sm-12">
                     <div class="card invoice-preview-card">
                         <div class="card-body">
-                            {{-- <div class="row p-sm-3 p-0">
-                                <div class="col-md-12 mb-md-0 mb-4">
-                                    <div class="d-flex svg-illustration mb-4 gap-2">
-                                        <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}"
-                                            width="50%" alt="">
-                                        <span class="app-brand-text h3 mb-0 fw-bold"></span>
-                                    </div>
-                                    <p class="mb-1">{{ __('admin._company_address_') }}</p>
-                                </div>
-                            </div> --}}
 
-                            {{-- <hr class="my-2 mx-n4" /> --}}
-                            {{-- /////////////////   Client Details    //////////// --}}
                             <div class="row p-sm-3 p-0">
                                 <div class="col-md-12 col-sm-12 col-12 mb-sm-0 mb-4">
 
@@ -186,10 +174,10 @@ is-invalid
                                 <div class="mb-3 col">
                                     <label class="form-label"
                                         for="client_name">{{ __('admin.branch_created') }}</label>
-                                    {{-- <input type="text" readonly class="form-control" value="{{Auth::guard('employee')->user()->branch->branch_name}}"> --}}
-                                    {{-- <input type="hidden" name="branch_created_id"
-                                                value="{{ Auth::guard('employee')->user()->branch_id }}"> --}}
-                                    <select
+                                    <input type="text" readonly class="form-control" value="{{Auth::guard('employee')->user()->branch->branch_name}}">
+                                    <input type="hidden" name="branch_created_id"
+                                                value="{{ Auth::guard('employee')->user()->branch_id }}">
+                                    {{-- <select
                                         class="js-example-basic-single form-select @error('branch_created_id') is-invalid @enderror"
                                         name="branch_created_id" id="branch_created_id" required>
                                         <option value="" disabled selected>
@@ -200,13 +188,13 @@ is-invalid
                                                 {{ old('branch_created_id') == $branche->id ? 'selected' : '' }}>
                                                 {{ $branche->branch_name }}</option>
                                         @endforeach
-                                    </select>
-                                    <div class="invalid-feedback">
+                                    </select> --}}
+                                    {{-- <div class="invalid-feedback">
                                         {{ __('admin.this_field_is_required') }}
                                     </div>
                                     @error('branch_created_id')
                                         <div class="alert alert-danger">{{ $message }}</div>
-                                    @enderror
+                                    @enderror --}}
                                 </div>
                                 <div class="mb-3 col">
                                     <label class="form-label"
@@ -406,10 +394,11 @@ is-invalid
                                             <label class="form-label"
                                                 for="client_name">{{ __('admin.shipment_amount') }}</label>
                                             <div class="input-group mb-3">
-                                                <input type="number" id="shipment_amount" name='shipment_amount'
-                                                    value="{{ old('shipment_amount') }}"
-                                                    class="form-control @error('shipment_amount') is-invalid @enderror"
-                                                    required placeholder="" aria-label="" />
+                                                <input type="number" id="shipment_amount" name="shipment_amount"
+                                                value="{{ old('shipment_amount') }}"
+                                                class="form-control @error('shipment_amount') is-invalid @enderror"
+                                                required placeholder="" aria-label=""
+                                                step="0.01" min="0" />
                                                 {{-- <label class="input-group-text"
                                                     for="inputGroupSelect02">{{ __('admin.currency') }}</label> --}}
 
@@ -460,7 +449,7 @@ is-invalid
                                         <div class="row">
                                             <div class="mb-3 col">
                                                 <h6>{{ __('admin.is_external_order') }}</h6>
-                                                <label class="switch switch-primary">
+                                                {{-- <label class="switch switch-primary">
                                                     <input type="checkbox" class="switch-input is_external_order"
                                                         data-url="" name="is_external_order"
                                                         id="is_external_order" />
@@ -472,10 +461,16 @@ is-invalid
                                                             <span>{{__('admin.internal')}}</span>
                                                         </span>
                                                     </span>
-                                                    {{-- <span class="switch-label">Primary</span> --}}
-                                                </label>
+                                                </label> --}}
+
+                                                <select name="is_external_order" id="is_external_order"
+                                                    class="form-control">
+                                                    <option value="0">{{ __('admin.internal') }}</option>
+                                                    <option value="1">{{ __('admin.external') }}</option>
+                                                    <option value="2">{{ __('admin.interational') }}</option>
+                                                </select>
                                             </div>
-                                            <div class="mb-3 col">
+                                            {{-- <div class="mb-3 col">
                                                 <h6>{{ __('admin.Including_vat?') }}</h6>
                                                 <label class="switch switch-success">
                                                     <input type="checkbox" class="switch-input Including_vat"
@@ -490,7 +485,7 @@ is-invalid
                                                         </span>
                                                     </span>
                                                 </label>
-                                            </div>
+                                            </div> --}}
                                         </div>
                                     </div>
                                 </div>
@@ -638,11 +633,11 @@ is-invalid
                                     if (locale === "en") {
                                         $('#shipment_product').append("<option value=" +
                                             value.id +
-                                            ">" + value.name.en + "</option>")
+                                            ">" + value.name.en + ' - ' + value.branch.branch_name.en +"</option>")
                                     } else {
                                         $('#shipment_product').append("<option value=" +
                                             value.id +
-                                            ">" + value.name.ar + "</option>")
+                                            ">" + value.name.ar + ' - ' + value.branch.branch_name.ar + "</option>")
                                     }
 
                                     console.log(value);

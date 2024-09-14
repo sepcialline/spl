@@ -36,6 +36,17 @@ trait HasTranslations
         return $this->getTranslation($key, $this->getLocale(), $this->useFallbackLocale());
     }
 
+    protected function mutateAttributeForArray($key, $value): mixed
+    {
+        if (! $this->isTranslatableAttribute($key)) {
+            return parent::mutateAttributeForArray($key, $value);
+        }
+
+        $translations = $this->getTranslations($key);
+
+        return array_map(fn ($value) => parent::mutateAttributeForArray($key, $value), $translations);
+    }
+
     public function setAttribute($key, $value)
     {
         if ($this->isTranslatableAttribute($key) && is_array($value)) {
@@ -84,7 +95,7 @@ trait HasTranslations
             return $this->mutateAttribute($key, $translation);
         }
 
-        if($this->hasAttributeMutator($key)){
+        if($this->hasAttributeMutator($key)) {
             return $this->mutateAttributeMarkedAttribute($key, $translation);
         }
 
@@ -134,8 +145,7 @@ trait HasTranslations
             $this->{$method}($value, $locale);
 
             $value = $this->attributes[$key];
-        }
-        elseif($this->hasAttributeSetMutator($key)) { // handle new attribute mutator
+        } elseif($this->hasAttributeSetMutator($key)) { // handle new attribute mutator
             $this->setAttributeMarkedMutatedAttributeValue($key, $value);
 
             $value = $this->attributes[$key];
@@ -143,7 +153,7 @@ trait HasTranslations
 
         $translations[$locale] = $value;
 
-        $this->attributes[$key] = $this->asJson($translations);
+        $this->attributes[$key] = json_encode($translations, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         event(new TranslationHasBeenSetEvent($this, $key, $locale, $oldValue, $value));
 
@@ -347,6 +357,20 @@ trait HasTranslations
         $query->where(function (Builder $query) use ($column, $locales) {
             foreach ($locales as $locale) {
                 $query->orWhereNotNull("{$column}->{$locale}");
+            }
+        });
+    }
+
+    public function scopeWhereJsonContainsLocale(Builder $query, string $column, string $locale, mixed $value, string $operand = '='): void
+    {
+        $query->where("{$column}->{$locale}", $operand, $value);
+    }
+
+    public function scopeWhereJsonContainsLocales(Builder $query, string $column, array $locales, mixed $value, string $operand = '='): void
+    {
+        $query->where(function (Builder $query) use ($column, $locales, $value, $operand) {
+            foreach($locales as $locale) {
+                $query->orWhere("{$column}->{$locale}", $operand, $value);
             }
         });
     }

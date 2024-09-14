@@ -33,7 +33,7 @@ class ShipmentController extends Controller
 {
     public function index()
     {
-        $data['companies'] = VendorCompany::select('id', 'name')->get();
+        $data['companies'] = VendorCompany::where('vendor_id',Auth::guard('vendor')->user()->id)->select('id', 'name')->get();
         $data['riders'] = Rider::select('id', 'name')->get();
         $data['payment_methods'] = PaymentMethods::select('id', 'name')->get();
         $data['shipment_status'] = ShipmentStatuses::select('id', 'name')->get();
@@ -58,7 +58,7 @@ class ShipmentController extends Controller
             $date_to = Carbon::parse(request()->date_to)->format('y-m-d');
         }
 
-        $query = Shipment::query()->whereBetween('delivered_date', [$date_from, $date_to])->with('Client')->where('company_id', Auth::guard('vendor')->user()->company_id);
+        $query = Shipment::query()->whereBetween('delivered_date', [$date_from, $date_to])->with('Client')->where('company_id', Request()->company_id);
 
         $request = request();
 
@@ -132,6 +132,7 @@ class ShipmentController extends Controller
         $data['payment_methods'] = PaymentMethods::select('id', 'name')->get();
         $data['fees_types'] = FeesType::select('id', 'name')->get();
         $data['branches'] = Branches::where('is_main', 0)->where('status', 1)->select('id', 'branch_name')->get();
+        $data['vendor_companies'] = VendorCompany::where('vendor_id',Auth::guard('vendor')->user()->id)->select('id','name')->get();
 
 
         $now = Carbon::now();
@@ -194,19 +195,21 @@ class ShipmentController extends Controller
     {
 
         $data = ShipmentHelper::ShipmentViewPrintInvoicePdf($id);
+        $data['vendor_companies'] = VendorCompany::where('vendor_id',Auth::guard('vendor')->user()->id)->select('id','name')->get();
+
         return view('vendor.shipment.edit', $data);
     }
 
     public function update(Request $request)
     {
         $guard = 'vendor';
-
+        
         $states = ShipmentHelper::states($request);
-
+        
         if ($request->input('action') == "just_save") {
             // just save shipment
             $user = ShipmentHelper::checkUser($request, $guard);
-
+            
             $shipment = ShipmentHelper::updateShipment($request, $user, $guard, $states['rider_should_recive'], $states['vendor_due'], $states['specialline_due']);
 
             if ($request->product_ids) {
@@ -238,37 +241,7 @@ class ShipmentController extends Controller
 
 
 
-    public function assignRider(Request $request)
-    {
-        $guard = 'vendor';
-        $rider = Rider::where('id', $request->rider_id)->first();
-        $action = __('admin.assign_shipment_to ') . $rider->name;
-        $shipment = Shipment::where('id', $request->id)->first();
-        if ($shipment) {
-            $shipment->update([
-                'rider_id' => $request->rider_id
-            ]);
-            if ($shipment->update()) {
-                $rider = $shipment->rider_id;
-                ShipmentHelper::shipmentTracking($shipment, $guard, $action,$rider);
-                toastr()->success(__('admin.msg_success_update'));
-                return redirect()->back();
-            }
-        }
-    }
 
-    public function changeStatus(Request $request)
-    {
-
-        $guard = 'vendor';
-
-        $shipment = Shipment::where('id', $request->id)->first();
-
-
-        $shipmentChangeStatus = ShipmentHelper::shipmentChangeStatus($request, $shipment, $guard);
-        toastr()->success(__('admin.msg_success_update'));
-        return redirect()->back();
-    }
 
     public function delete(Request $request)
     {
@@ -393,8 +366,9 @@ class ShipmentController extends Controller
         /////////////////////////////////
         public function multi_invoices()
         {
-            // $data['company'] = VendorCompany::select('id', Auth::guard('vendor')->user()->company_id)->first();
+            $data['vendor_companies'] = VendorCompany::where('vendor_id', Auth::guard('vendor')->user()->id)->get();
             $data['emirates'] = Emirates::select('id', 'name')->get();
+            $data['status_list'] = ShipmentStatuses::select('id','name') ->get();
             return view('vendor.shipment.multi_invoices.multi_invoices', $data);
         }
 

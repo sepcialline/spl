@@ -20,6 +20,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Employee\UserManagment\RoleController;
 use App\Http\Controllers\Employee\UserManagment\UserRiderController;
 use App\Http\Controllers\Vendor\Profile\VendorProfileController;
+use App\Http\Controllers\Vendor\BankAccountController;
+use App\Http\Controllers\Vendor\ServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +48,10 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
         // Start Dashboard
         Route::get('/', [DashboardController::class, 'index'])->name('index'); // روت تسجيل الدخول للادارة
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('index'); // روت تسجيل الدخول للادارة
+
+        Route::get('company_profile/{company_id}', [DashboardController::class, 'company_profile'])->name('company_profile'); 
+        Route::post('company_profile_update', [DashboardController::class, 'company_profile_update'])->name('company_profile_update'); 
+        Route::get('deleteAccountBank/{bank_id}', [DashboardController::class, 'deleteAccountBank'])->name('deleteAccountBank'); 
         // End Dashboard
 
 
@@ -54,9 +60,28 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
         Route::controller(VendorProfileController::class)->group(function () {
             Route::get('/users/vendor/profile', 'index')->name('vendor_profile_index');
             Route::post('/vendor/update_password', 'update_password')->name('vendor_update_password');
+            Route::get('/users/vendor/profile/edit', 'edit')->name('vendor_profile_edit');
+            Route::post('/users/vendor/profile/update', 'update')->name('vendor_profile_update');
         }); //نهاية  admin profile
 
 
+        Route::controller(BankAccountController::class)->group(function(){
+            Route::get('/bank_accounts/{company_id}','show_accounts')->name('bank_accounts');
+            Route::get('/bank_accounts_edit/{id}','edit')->name('bank_accounts_edit');
+            Route::get('/bank_accounts_stop_it/{id}','stop_it')->name('bank_accounts_stop_it');
+            Route::get('/bank_accounts_active_it/{id}','active_it')->name('bank_accounts_active_it');
+            Route::post('/bank_accounts_update','update')->name('bank_accounts_update');
+            Route::get('/update_to_default/{id}','update_to_default')->name('update_to_default');
+        });
+
+        Route::controller(ServiceController::class)->group(function(){
+            Route::get('/services/{company_id}','index')->name('services.index');
+            Route::get('/services/create/{company_id}','create')->name('services.create');
+            Route::post('/services/store','store')->name('services.store');
+            Route::get('/services/edit/{id}','edit')->name('services.edit');
+            Route::post('/services/update','update')->name('services.update');
+            Route::get('/services/show/{id}','show')->name('services.show');
+        });
 
         //بداية employee users
         Route::controller(EmployeeController::class)->group(function () {

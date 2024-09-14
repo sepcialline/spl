@@ -48,16 +48,15 @@
     @yield('VendorsCss')
 
     <style>
-        /* // <uniquifier>: Use a unique and descriptive class name
-        // <weight>: Use a value from 160 to 700 */
-
-        * {
-            font-family: "Readex Pro", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: <weight>;
+        @font-face {
+            font-family: 'Simplified Arabic';
+            src: url('fonts/Simplified Arabic Regular.ttf') format('truetype');
+            font-weight: normal;
             font-style: normal;
-            font-variation-settings:
-                "HEXP" 0;
+        }
+
+        body {
+            font-family: 'Simplified Arabic', sans-serif;
         }
     </style>
 
@@ -75,8 +74,8 @@
     <style>
         .card {
             background-clip: padding-box;
-            box-shadow: -8px 14px 10px rgba(38, 60, 85, 0.16);
-            border: 1px solid #ffd200 !important;
+            box-shadow: 1px 3px 3px rgba(38, 60, 85, 0.16);
+            border: 1px solid #000000 !important;
         }
     </style>
 </head>
@@ -100,6 +99,7 @@
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
+
                     <!-- Content -->
                     {{ $slot }}
                     <!-- / Content -->
@@ -173,7 +173,40 @@
     <!-- Page JS -->
     <script src="{{ asset('build/assets/js/dashboards-analytics.js') }}"></script>
 
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script>
+        // Enable Pusher logging - don't include this in production
+        Pusher.logToConsole = true;
 
+        var pusher = new Pusher('b1f9f902bdb6bf282cdb', {
+            cluster: 'ap2'
+        });
+
+        // الاشتراك في قناة 'specialline'
+        var channel = pusher.subscribe('specialline');
+
+        // الاستماع إلى حدث 'compensation_request'
+        channel.bind('notifications', function(data) {
+            console.log('Received notifications:', data);
+
+            // تحديث محتوى div#noti عند استلام البيانات
+            if (data) {
+                $("#noti").load(window.location.href + " #noti", function(response, status, xhr) {
+                    if (status === "error") {
+                        console.log("Error loading content: " + xhr.status + " " + xhr.statusText);
+                    } else {
+                        console.log("Content updated");
+
+                        // تشغيل الصوت بعد تحديث المحتوى
+                        var audio = new Audio("{{ asset('build/assets/audio/noti_sound.wav') }}");
+                        audio.play().catch(error => {
+                            console.error("Error playing audio:", error);
+                        });
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

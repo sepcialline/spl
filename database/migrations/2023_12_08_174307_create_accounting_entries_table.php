@@ -32,6 +32,9 @@ return new class extends Migration
             $table->tinyInteger('is_posted')->nullable()->default(0)->comment('صفر : غير مرحلة / واحد : مرحلة');
             $table->string('cost_center')->comment("مركز الكلفة في حالة المصاريف")->nullable();
             $table->string('shipment_id')->comment("رقم الشحنة")->nullable();
+            $table->string('branch_id')->comment("الفرع في حال ادخال صرفيات من الفرع")->nullable();
+            $table->string('statment_for_journal')->comment("بيان القيد ككل")->nullable();
+
             $table->string('created_by');
             $table->string('updated_by');
             $table->timestamps();

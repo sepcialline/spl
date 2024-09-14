@@ -15,9 +15,14 @@ return new class extends Migration
             $table->id();
             $table->json('name');
             $table->string('code');
-            // $table->integer('quantity');
             $table->integer('company_id');
-            //$table->integer('branch_id');
+            $table->integer('branch_id')->nullable();
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->tinyInteger('status')->default(0)->comment(' صفر غير فعال وواحد فعال');
+            $table->string('cause_of_reject')->nullable()->comment('سبب الرفض');
+            $table->decimal('price',10,2)->nullable()->comment('السعر');
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

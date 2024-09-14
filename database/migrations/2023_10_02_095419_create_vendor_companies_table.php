@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('sales_id')->nullable();
             $table->integer('account_number')->unique()->nullable();
             $table->json('name');
+            $table->string('slug')->nullable();
             $table->double('vendor_rate', 10, 2)->nullable();
             $table->double('customer_rate', 10, 2)->nullable();
             $table->string('logo', 255)->nullable();
@@ -34,6 +35,10 @@ return new class extends Migration
             $table->string('updated_by')->nullable();
             $table->string('delete_by')->nullable();
             $table->boolean('status')->nullable()->default(true);
+            $table->integer('vendor_id')->nullable();
+            $table->integer('branch_id')->nullable()->comment('الفرع المتفق مع التاجر');
+            $table->string('phone_number')->nullable();
+            $table->string('mobile_number')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

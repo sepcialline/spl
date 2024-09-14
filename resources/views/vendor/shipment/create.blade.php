@@ -75,8 +75,7 @@
                                         <dd class="col-sm-6 d-flex justify-content-md-end">
                                             <div class="w-px-150">
                                                 <input type="text" class="form-control date-picker"
-                                                    {{-- name="delivered_date" value="{{ \Carbon\Carbon::tomorrow() }}" --}}
-                                                    name="delivered_date"
+                                                    {{-- name="delivered_date" value="{{ \Carbon\Carbon::tomorrow() }}" --}} name="delivered_date"
                                                     value="{{ $date ?? \Carbon\Carbon::tomorrow() }}"
                                                     placeholder="YYYY-MM-DD" />
                                             </div>
@@ -213,14 +212,11 @@ is-invalid
                                                 name="company_id" id="company_id" required>
                                                 <option value="" selected>{{ __('admin.please_select') }}
                                                 </option>
-                                                <option value="{{ Auth::guard('vendor')->user()->company_id }}">
-                                                    {{ Auth::guard('vendor')->user()->company->name }}
-                                                </option>
-                                                {{-- @foreach ($companies as $company)
+                                                @foreach ($vendor_companies as $company)
                                                     <option value="{{ $company->id }}"
                                                         {{ old('company_id') == $company->id ? 'selected' : '' }}>
                                                         {{ $company->name }}</option>
-                                                @endforeach --}}
+                                                @endforeach
                                             </select>
                                             <div class="invalid-feedback">{{ __('admin.this_field_is_required') }}
                                             </div>

@@ -18,8 +18,13 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->image) ?? '' }}" alt="avatar"
-                                class="rounded-circle img-fluid" style="width: 150px;">
+                            @if ($data->image)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->image) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                             <h5 class="my-3">{{ $data->name }}</h5>
                             <p class="text-muted mb-1">{{ $data->emirate->name }}
                                 - {{ $data->city->name ?? __('admin.not_assigned') }} </p>
@@ -64,7 +69,8 @@
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <button type="submit" class="btn btn-sm btn-primary me-sm-3 me-1">Submit</button>
+                                            <button type="submit"
+                                                class="btn btn-sm btn-primary me-sm-3 me-1">Submit</button>
                                             <button type="reset" class="btn btn-sm btn-label-secondary"
                                                 data-bs-dismiss="modal" aria-label="Close">
                                                 {{ __('admin.close') }}

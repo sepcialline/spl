@@ -40,8 +40,8 @@
                             <div class="row p-sm-3 p-0">
                                 <div class="col-md-6 mb-md-0 mb-4">
                                     <div class="d-flex svg-illustration mb-4 gap-2">
-                                        <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}" width="50%"
-                                            alt="">
+                                        <img src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}"
+                                            width="50%" alt="">
                                         <span class="app-brand-text h3 mb-0 fw-bold"></span>
                                     </div>
                                     <p class="mb-1">{{ __('admin._company_address_') }}</p>
@@ -106,8 +106,8 @@
                                             <div class="input-group">
                                                 {{-- <span class="input-group-text" id="basic-addon1">971</span> --}}
                                                 <input type="number" id="client_phone" name="client_phone"
-                                                    value="{{ substr($user->mobile, 3) }}"  maxlength = "12"  oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
-                                                    class="form-control @error('client_phone') is-invalid @enderror"
+                                                    value="{{ $user->mobile }}" maxlength = "12"
+                                                    oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" class="form-control @error('client_phone')is-invalid @enderror"
                                                     required placeholder="9715xxxxxxxx" aria-label="" />
                                                 <div class="invalid-feedback">{{ __('admin.this_field_is_required') }}
                                                     @error('client_phone')
@@ -119,7 +119,7 @@
                                         </div>
                                         <div class="mb-3 col">
                                             <label class="form-label"
-                                                for="client_name">{{ __('admin.shipments_client_name') }}/{{__('admin.another_number')}}</label>
+                                                for="client_name">{{ __('admin.shipments_client_name') }}/{{ __('admin.another_number') }}</label>
                                             <input type="text" class="form-control" id="client_name"
                                                 name="client_name" placeholder="" value="{{ $user->name }}"
                                                 required />
@@ -218,9 +218,14 @@
                                                 name="company_id" id="company_id" required>
                                                 <option value="" selected>{{ __('admin.please_select') }}
                                                 </option>
-                                                <option value="{{ Auth::guard('vendor')->user()->company_id }}">
+                                                @foreach ($vendor_companies as $company)
+                                                    <option value="{{ $company->id }}"
+                                                        {{ $shipment->company_id  == $company->id ? 'selected' : '' }}>
+                                                        {{ $company->name }}</option>
+                                                @endforeach
+                                                {{-- <option value="{{ Auth::guard('vendor')->user()->company_id }}">
                                                     {{ Auth::guard('vendor')->user()->company->name }}
-                                                </option>
+                                                </option> --}}
                                             </select>
                                             <div class="invalid-feedback">{{ __('admin.this_field_is_required') }}
                                             </div>

@@ -29,10 +29,26 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
-        $data = Product::get();
-        return view('admin.products.index', compact('data'));
+
+        $data['companies'] = VendorCompany::where('status',1)->where('has_stock',1)->get();
+        $data['branchs']= Branches::where('is_main',0)->where('status',1)->get();
+
+        $query = Product::query()->where('status',1);
+
+        if(Request()->company_id && Request()->company_id != 0){
+            $query->where('company_id', Request()->company_id);
+        }
+
+        if(Request()->branch_id && Request()->branch_id != 0){
+            $query->where('branch_id', Request()->branch_id);
+        }
+
+
+        $data['data'] = $query->orderBy('branch_id', 'ASC')->get();
+
+        return view('admin.products.index', $data);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -123,5 +139,9 @@ class ProductController extends Controller
         //
         Product::find($id)->delete();
         return response(['success' => 1], 200);
+    }
+
+    public function approved(Request $request){
+        $product = Product::find($request->id)->update(['status'=>1]);
     }
 }

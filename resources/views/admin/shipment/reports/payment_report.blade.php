@@ -68,10 +68,8 @@
             </div>
         </div>
         <div class="card-header">
-            {{-- {{ __('admin.from') }} --}}
-            {{-- {{ Carbon\Carbon::parse(Request()->date_to)->subDay(30)->format('Y-m-d') }} --}}
-            {{-- {{ __('admin.to') }} {{ Request()->date_to }} --}}
-            <strong>{{ $last_30_days_vendor_account ?? 0 }}</strong>
+
+            <strong>{{ $last_balance ?? 0 }}</strong>
         </div>
         @if (isset($payments) && count($payments) > 0)
             <div class="card" id="content_table">
@@ -80,15 +78,20 @@
                         <div class="mb-3">
                             {{-- <div class="float-start my-2">@include('includes.shipment_table_reports',['shipments'=>$shipments])</div> --}}
                             {{-- <div class="float-end my-2"><input type="search" class="form-control" placeholder="{{__('admin.search_text')}}"></div> --}}
-                            <form action="{{route('admin.payments_download')}}" method="post" enctype="multipart/form-data">
+                            <form action="{{ route('admin.payments_download') }}" method="post"
+                                enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" name="company_id" value="{{Request()->company_id}}">
-                                <input type="hidden" name="rider_id" value="{{Request()->rider_id}}">
-                                <input type="hidden" name="payment_method_id" value="{{Request()->payment_method_id}}">
-                                <input type="hidden" name="branch_created" value="{{Request()->branch_created}}">
-                                <input type="hidden" name="date_from" value="{{\Carbon\Carbon::parse(Request()->date_from)->format('Y-m-d')}}">
-                                <input type="hidden" name="date_to" value="{{\Carbon\Carbon::parse(Request()->date_to)->format('Y-m-d')}}">
-                                <button type="submit" class="btn btn-label-success"><i class="bx bx-export" style="color:green"></i></button>
+                                <input type="hidden" name="company_id" value="{{ Request()->company_id }}">
+                                <input type="hidden" name="rider_id" value="{{ Request()->rider_id }}">
+                                <input type="hidden" name="payment_method_id"
+                                    value="{{ Request()->payment_method_id }}">
+                                <input type="hidden" name="branch_created" value="{{ Request()->branch_created }}">
+                                <input type="hidden" name="date_from"
+                                    value="{{ \Carbon\Carbon::parse(Request()->date_from)->format('Y-m-d') }}">
+                                <input type="hidden" name="date_to"
+                                    value="{{ \Carbon\Carbon::parse(Request()->date_to)->format('Y-m-d') }}">
+                                <button type="submit" class="btn btn-label-success"><i class="bx bx-export"
+                                        style="color:green"></i></button>
                             </form>
                         </div>
                         <table class="table table-striped table-bordered my-2">
@@ -166,77 +169,91 @@
         <hr>
         <div class="card">
             <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div class="mx-1">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="background-color:#ffd200" rowspan="2">{{ __('admin.cod') }}</th>
+                                <th style="">{{ __('admin.total') }}</th>
+                                <th style="">{{ __('admin.net_income') }}</th>
+                                <th style="">{{ __('admin.vendor_account') }}</th>
+                            </tr>
+                            @php $total_cash_on_delivery = 0; @endphp
+                            @php $total_cod_sp_income = 0; @endphp
+                            @php $total_cod_vendor_balance = 0; @endphp
+
+                            @foreach ($summary_accounts as $account)
+                                @php $total_cash_on_delivery =$account['cash_on_delivery'] + $total_cash_on_delivery; @endphp
+                                @php $total_cod_sp_income =$account['cod_sp_income'] + $total_cod_sp_income; @endphp
+                                @php $total_cod_vendor_balance = $account['cod_vendor_balance']+ $total_cod_vendor_balance; @endphp
+                            @endforeach
+                            <tr>
+                                <td>{{ $total_cash_on_delivery }}</td>
+                                <td>{{ $total_cod_sp_income }}</td>
+                                <td>{{ $total_cod_vendor_balance }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="background-color:#ffd200" rowspan="2">{{ __('admin.transfer_to_Bank') }}</th>
+                                <th>{{ __('admin.total') }}</th>
+                                <th>{{ __('admin.net_income') }}</th>
+                                <th>{{ __('admin.vendor_account') }}</th>
+                            </tr>
+                            @php $total_transfer_to_Bank = 0; @endphp
+                            @php $total_tr_bank_sp_income = 0; @endphp
+                            @php $total_tr_bank_vendor_balance = 0; @endphp
+                            @foreach ($summary_accounts as $account)
+                                @php $total_transfer_to_Bank =$account['transfer_to_Bank'] + $total_transfer_to_Bank; @endphp
+                                @php $total_tr_bank_sp_income =$account['tr_bank_sp_income'] + $total_tr_bank_sp_income; @endphp
+                                @php $total_tr_bank_vendor_balance = $account['tr_bank_vendor_balance']+ $total_tr_bank_vendor_balance; @endphp
+                            @endforeach
+                            <tr>
+                                <td>{{ $total_transfer_to_Bank }}</td>
+                                <td>{{ $total_tr_bank_sp_income }}</td>
+                                <td>{{ $total_tr_bank_vendor_balance }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="background-color:#ffd200" rowspan="2">{{ __('admin.transfer_to_vendor_company') }}
+                                </th>
+                                <th>{{ __('admin.vendor_account') }}</th>
+                            </tr>
+                            @php $total_transfer_to_vendor_company = 0; @endphp
+                            @foreach ($summary_accounts as $account)
+                                @php $total_transfer_to_vendor_company = $account['transfer_to_vendor_company'] +  $total_transfer_to_vendor_company; @endphp
+                            @endforeach
+                            <tr>
+                                <td>{{ $total_transfer_to_vendor_company }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <hr>
                 <div class="d-flex justify-content-around">
                     <div>
                         <table class="table">
                             <tr>
-                                <th>{{ __('admin.total') }}</th>
+                                <th style="background-color:#ffd200">{{ __('admin.total') }}</th>
                                 <td>{{ $total }} {{ __('admin.currency') }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('admin.net_income') }}</th>
+                                <th style="background-color:#ffd200">{{ __('admin.net_income') }}</th>
                                 <td>{{ $net_income }} {{ __('admin.currency') }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('admin.vendor_account') }}</th>
+                                <th style="background-color:#ffd200">{{ __('admin.vendor_account') }}</th>
                                 <td>{{ $vendor_account }} {{ __('admin.currency') }}</td>
                             </tr>
 
                         </table>
 
                     </div>
-                    <div>
-                        <table class="table">
-                            <tr>
-                                <th>{{ __('admin.cash_on_delivery') }}</th>
-                                <td>{{ $cash_on_delivery }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.income') }}</th>
-                                <td>{{ $cod_sp_income }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.vendor_account') }}</th>
-                                <td>{{ $cod_vendor_balance }} {{ __('admin.currency') }}</td>
-                            </tr>
-
-                        </table>
-
-                    </div>
-                    <div>
-                        <table class="table">
-                            <tr>
-                                <th>{{ __('admin.transfer_to_Bank') }}</th>
-                                <td>{{ $transfer_to_Bank }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.income') }}</th>
-                                <td>{{ $tr_bank_sp_income }} {{ __('admin.currency') }}</td>
-                            </tr>
-                            <tr>
-                                <th>{{ __('admin.vendor_account') }}</th>
-                                <td>{{ $tr_bank_vendor_balance }} {{ __('admin.currency') }}</td>
-                            </tr>
-
-                        </table>
-
-                    </div>
-                    <div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>{{ __('admin.transfer_to_vendor_company') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td> {{ $transfer_to_vendor_company }} {{ __('admin.currency') }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </div>
-
                 </div>
                 <hr>
 

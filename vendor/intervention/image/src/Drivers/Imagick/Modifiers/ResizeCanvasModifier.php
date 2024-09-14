@@ -5,16 +5,11 @@ declare(strict_types=1);
 namespace Intervention\Image\Drivers\Imagick\Modifiers;
 
 use ImagickDraw;
-use Intervention\Image\Drivers\DriverSpecialized;
 use Intervention\Image\Interfaces\ImageInterface;
-use Intervention\Image\Interfaces\ModifierInterface;
-use Intervention\Image\Interfaces\SizeInterface;
+use Intervention\Image\Interfaces\SpecializedInterface;
+use Intervention\Image\Modifiers\ResizeCanvasModifier as GenericResizeCanvasModifier;
 
-/**
- * @method SizeInterface cropSize(ImageInterface $image)
- * @property mixed $background
- */
-class ResizeCanvasModifier extends DriverSpecialized implements ModifierInterface
+class ResizeCanvasModifier extends GenericResizeCanvasModifier implements SpecializedInterface
 {
     public function apply(ImageInterface $image): ImageInterface
     {
@@ -38,23 +33,25 @@ class ResizeCanvasModifier extends DriverSpecialized implements ModifierInterfac
                 $draw = new ImagickDraw();
                 $draw->setFillColor($background);
 
-                $delta = abs($resize->pivot()->x());
+                $delta_width = abs($resize->pivot()->x());
+                $delta_height = $resize->pivot()->y() * -1;
 
-                if ($delta > 0) {
+                if ($delta_width > 0) {
                     $draw->rectangle(
                         0,
-                        0,
-                        $delta - 1,
-                        $resize->height()
+                        $delta_height,
+                        $delta_width - 1,
+                        $delta_height + $size->height() - 1
                     );
                 }
 
                 $draw->rectangle(
-                    $size->width() + $delta,
-                    0,
+                    $size->width() + $delta_width,
+                    $delta_height,
                     $resize->width(),
-                    $resize->height()
+                    $delta_height + $size->height() - 1
                 );
+
                 $frame->native()->drawImage($draw);
             }
 

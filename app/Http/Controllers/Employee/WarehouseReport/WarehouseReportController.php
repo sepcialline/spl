@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Employee\WarehouseReport;
 
+use Carbon\Carbon;
+use App\Models\Product;
+use App\Models\Branches;
+use App\Models\Shipment;
+use App\Models\WarehouseLog;
+use Illuminate\Http\Request;
+use App\Models\VendorCompany;
 use App\Helpers\ShipmentHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Branches;
-use App\Models\Product;
-use App\Models\Shipment;
-use App\Models\VendorCompany;
-use App\Models\WarehouseLog;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WarehouseReportController extends Controller
 {
@@ -19,11 +20,9 @@ class WarehouseReportController extends Controller
      */
     public function index()
     {
-        //
-        // return request();
-        $companies = VendorCompany::get();
-        $branches = Branches::get();
-        $products = Product::get();
+        $branch = Auth::guard('employee')->user()->branch_id;
+        $companies = VendorCompany::where('status',1)->where('has_stock',1)->where('branch_id',$branch)->get();
+        $products = Product::where('branch_id',$branch)->get();
         $date_from = Carbon::today()->format('y-m-d');
         $date_to = Carbon::today()->format('y-m-d');
         if (request()->date_from) {
@@ -32,7 +31,7 @@ class WarehouseReportController extends Controller
         if (request()->date_to) {
             $date_to = Carbon::parse(request()->date_to)->format('y-m-d');
         }
-        $query = WarehouseLog::query()->whereBetween('date', [$date_from, $date_to]);
+        $query = WarehouseLog::query()->whereBetween('date', [$date_from, $date_to])->where('branch_id', $branch);
         $from = $date_from;
         $to = $date_to;
         if (request()->company_id && request()->company_id != 0) {
@@ -46,10 +45,10 @@ class WarehouseReportController extends Controller
         }
         if (request()->input('action') == 'report') {
             $query = $query->orderby('date', 'desc')->get();
-            return  view('employee.warehouse_report.reports.warehouse_report', compact('companies', 'branches', 'products', 'from', 'to', 'query'));
+            return  view('employee.warehouse_report.reports.warehouse_report', compact('companies', 'products', 'from', 'to', 'query'));
         } else {
             $query = $query->orderby('date', 'desc')->paginate(10);
-            return view('employee.warehouse_report.index', compact('companies', 'branches', 'products', 'from', 'to', 'query'));
+            return view('employee.warehouse_report.index', compact('companies', 'products', 'from', 'to', 'query'));
         }
     }
 

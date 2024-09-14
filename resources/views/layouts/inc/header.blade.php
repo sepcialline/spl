@@ -10,23 +10,46 @@
             <!-- Search -->
             <div class="navbar-nav align-items-center">
                 <div class="nav-item navbar-search-wrapper mb-0">
-                    <form action="{{route('admin.shipment.search')}}" method="post">
-                    @csrf
-                    <a class="nav-item nav-link search-toggler px-0" href="javascript:void(0);">
-                        <i class="bx bx-search-alt bx-sm"></i>
-                        <span class="d-none d-md-inline-block text-muted">
-                            <input type="search" name="search" class="form-control"
-                            value="{{Request()->search ?? ''}}"
-                            style="background-color:#ffffff00 ; border:none" placeholder="{{__('admin.search')}}">
-                        </span>
-                    </a>
-                    <input type="submit" style="display:none"/>
-                </form>
+                    <form action="{{ route('admin.shipment.search') }}" method="post">
+                        @csrf
+                        <a class="nav-item nav-link search-toggler px-0" href="javascript:void(0);">
+                            <i class="bx bx-search-alt bx-sm"></i>
+                            <span class="d-none d-md-inline-block text-muted">
+                                <input type="search" name="search" class="form-control"
+                                    value="{{ Request()->search ?? '' }}" style="background-color:#ffffff ; border:none"
+                                    placeholder="{{ __('admin.search_text') }}">
+                            </span>
+                        </a>
+                        <input type="submit" style="display:none" />
+                    </form>
                 </div>
             </div>
             <!-- /Search -->
 
             <ul class="navbar-nav flex-row align-items-center ms-auto">
+                {{-- <li class="nav-item dropdown-language dropdown me-2 me-xl-0">
+                    @if (auth()->guard('admin')->user()->hasAnyRole(['Super Admin', 'Accountant']))
+                        <form class="row" method="get" action="{{route('admin.account.journals')}}">
+                            <div class="col-auto mx-0">
+                                <label class="visually-hidden" for="autoSizingInput">{{__('admin.number_voucher')}}</label>
+                                <input type="text" name="number" class="form-control" id="autoSizingInput" placeholder="{{__('admin.number_voucher')}}">
+                            </div>
+
+                            <div class="col-auto mx-0">
+                                <select class="form-select" name="journal_type_id" id="autoSizingSelect">
+                                    <option value="0" selected>{{__('admin.please_select')}}</option>
+                                    @foreach (App\Models\JounalType::get() as $type)
+                                    <option value="{{$type->id}}">{{$type->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-auto mx-0">
+                                <button type="submit" class="btn btn-label-facebook">{{__('admin.search')}}</button>
+                            </div>
+                        </form>
+                    @endif
+                </li> --}}
                 <!-- Language -->
                 <li class="nav-item dropdown-language dropdown me-2 me-xl-0">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -54,61 +77,79 @@
 
 
                 <!-- Notification -->
-                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-                    <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
-                        data-bs-auto-close="outside" aria-expanded="false">
-                        <i class="bx bx-bell bx-sm"></i>
-                        <span class="badge bg-danger rounded-pill badge-notifications">5</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end py-0">
-                        <li class="dropdown-menu-header border-bottom">
-                            <div class="dropdown-header d-flex align-items-center py-3">
-                                <h5 class="text-body mb-0 me-auto">Notification</h5>
-                                <a href="javascript:void(0)" class="dropdown-notifications-all text-body"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i
-                                        class="bx fs-4 bx-envelope-open"></i></a>
-                            </div>
-                        </li>
-                        <li class="dropdown-notifications-list scrollable-container">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0 me-3">
-                                            <div class="avatar">
-                                                <img src="{{ asset('build/assets/img/avatars/1.png') }}" alt
-                                                    class="w-px-40 h-auto rounded-circle" />
+                <div id="noti">
+                    <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
+                        <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            <i class="bx bx-bell bx-sm"></i>
+                            <span
+                                class="badge bg-danger rounded-pill badge-notifications">{{ Auth::guard('admin')->user()->unreadNotifications->count() }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end py-0" style="max-height: 500px;overflow-y: scroll;">
+                            <li class="dropdown-menu-header border-bottom">
+                                <div class="dropdown-header d-flex align-items-center py-3">
+                                    <h5 class="text-body mb-0 me-auto">{{ __('admin.notification') }}</h5>
+                                    {{-- <a href="javascript:void(0)" class="dropdown-notifications-all text-body"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Mark all as read"><i
+                                            class="bx fs-4 bx-envelope-open"></i></a> --}}
+                                </div>
+                            </li>
+                            @foreach (Auth::guard('admin')->user()->unreadNotifications as $notification)
+                                <li class="dropdown-notifications-list scrollable-container">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                                            <div class="d-flex">
+                                                <div class="flex-shrink-0 me-3">
+                                                    <div class="avatar">
+                                                        <img src="{{ asset('build/assets/img/avatars/1.png') }}" alt
+                                                            class="w-px-40 h-auto rounded-circle" />
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">{{ $notification->data['title'] }}</h6>
+                                                    <p class="mb-0">{{ $notification->data['company'] }}</p>
+                                                    <p class="">{{ $notification->data['created_by'] }}</p>
+
+                                                    <small
+                                                        class="text-muted">{{ \Carbon\Carbon::parse($notification->created_at)->diffForHumans() }}</small>
+                                                </div>
+                                                <div class="flex-shrink-0 dropdown-notifications-actions">
+                                                    <a href="javascript:void(0)" {{-- class="dropdown-notifications-read" --}}>
+                                                        {{-- <span
+                                                            class="badge badge-dot"></span> --}}
+                                                        <span style="font-size: 10px">
+                                                            {{ $notification->data['number'] }}</span></a>
+                                                    <a href="{{ route('admin.ReadNotification', $notification->id) }}"
+                                                        class="dropdown-notifications-archive"><span
+                                                            class="bx bx-x"></span></a>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">Congratulation Lettie 🎉</h6>
-                                            <p class="mb-0">Won the monthly best seller gold badge</p>
-                                            <small class="text-muted">1h ago</small>
-                                        </div>
-                                        <div class="flex-shrink-0 dropdown-notifications-actions">
-                                            <a href="javascript:void(0)" class="dropdown-notifications-read"><span
-                                                    class="badge badge-dot"></span></a>
-                                            <a href="javascript:void(0)" class="dropdown-notifications-archive"><span
-                                                    class="bx bx-x"></span></a>
-                                        </div>
-                                    </div>
+                                        </li>
+                                    </ul>
                                 </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-menu-footer border-top">
-                            <a href="javascript:void(0);" class="dropdown-item d-flex justify-content-center p-3">
-                                View all notifications
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                            @endforeach
+                            {{-- <li class="dropdown-menu-footer border-top">
+                                <a href="{}" class="dropdown-item d-flex justify-content-center p-3">
+                                    View all notifications
+                                </a>
+                            </li> --}}
+                        </ul>
+
+                    </li>
+                </div>
                 <!--/ Notification -->
 
                 <!-- User -->
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                         <div class="avatar avatar-online">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . Auth::guard('admin')->user()->photo) }}"
-                                alt class="rounded-circle">
+                            @if (Auth::guard('admin')->user()->photo)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . Auth::guard('admin')->user()->photo) }}"
+                                    alt class="rounded-circle">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt
+                                    class="rounded-circle">
+                            @endif
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -117,8 +158,13 @@
                                 <div class="d-flex">
                                     <div class="flex-shrink-0 me-3">
                                         <div class="avatar avatar-online">
-                                            <img src="{{ asset('build/assets/img/uploads/avatars/' . Auth::guard('admin')->user()->photo) }}"
-                                                alt class="rounded-circle">
+                                            @if (Auth::guard('admin')->user()->photo)
+                                                <img src="{{ asset('build/assets/img/uploads/avatars/' . Auth::guard('admin')->user()->photo) }}"
+                                                    alt class="rounded-circle">
+                                            @else
+                                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt
+                                                    class="rounded-circle">
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">

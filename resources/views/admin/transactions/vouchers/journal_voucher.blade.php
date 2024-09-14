@@ -6,55 +6,23 @@
     @section('VendorsCss')
         <link rel="stylesheet" href="{{ asset('build/assets/vendor/libs/select2/select2.css') }}" />
         <style>
-            body {
-                font-family: Arial, sans-serif;
+            .readonly {
+                background: #eee;
+                /* لون الخلفية الرمادي */
             }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 20px;
-                border: 1px solid #000;
-            }
-
-            table th,
-            table td {
-                border: 1px solid #000;
-                padding: 8px;
-                text-align: center;
-                font-size: 14px;
-                font-weight: normal;
-            }
-
-            table th {
-                background-color: #f2f2f2;
+            .alert-message {
+                color: red;
                 font-weight: bold;
             }
 
-            .add-btn,
-            .delete-btn {
+            .add-row-btn {
                 margin-top: 10px;
-                padding: 8px 16px;
-                font-size: 14px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                cursor: pointer;
-            }
-
-            .delete-btn:disabled {
-                background-color: #ccc;
-                cursor: not-allowed;
-            }
-
-            .add-btn:hover,
-            .delete-btn:hover {
-                background-color: #45a049;
             }
         </style>
     @endsection
-    <div class="container-xxl flex-grow-1 container-p-y">
 
+    <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="py-3 breadcrumb-wrapper mb-4">
             <span class="text-muted fw-light">{{ __('admin.transactions') }} / </span>
             {{ __('admin.journal_voucher') }}
@@ -62,76 +30,186 @@
 
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('admin.account.store_journal_voucher') }}" method="post" id="journalForm" class="row g-3 needs-validation" novalidate>
+                @if (session('error'))
+                    <div class="alert-message">{{ session('error') }}</div>
+                @endif
+
+                <div class="row my-4">
+                    <div class="col-md-3">
+                        <div class="d-flex justify-content-end">
+                            <input type="hidden" class="form-control" name="number" value="{{ $number }}">
+                            <a class="btn btn-label-facebook"
+                                href="{{ route('admin.account.edit_journal_voucher', $number - 1) }}">
+                                <i class="bx bxs-direction-right"></i>
+                            </a>
+                            <input type="text" disabled class="form-control" value="{{ $number }}">
+                            <a class="btn btn-label-facebook"
+                                href="{{ route('admin.account.edit_journal_voucher', $number + 1) }}">
+                                <i class="bx bxs-direction-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <form id="searchForm" action="{{ route('admin.account.edit_journal_voucher', ':number') }}"
+                            method="get">
+                            <input type="text" id="searchNumber" class="form-control" name="search_number"
+                                placeholder="{{ __('admin.number_voucher') }}">
+                            <button type="submit" class="btn btn-primary btn-sm d-none">
+                        </form>
+                    </div>
+                </div>
+
+                <form action="{{ route('admin.account.store_journal_voucher') }}" method="post"
+                    class="row g-3 needs-validation" novalidate>
                     @csrf
                     <div class="row mt-2">
                         <div class="form-group col-4">
                             <label for="exampleFormControlInput1">{{ __('admin.date') }}</label>
-                            <input type="date" name="date" class="form-control" value="{{ Carbon\Carbon::now()->format('Y-m-d') }}">
+                            <input type="date" name="date" class="form-control"
+                                value="{{ Carbon\Carbon::now()->format('Y-m-d') }}">
                         </div>
+                        <div class="form-group col">
+                            <label for="exampleFormControlInput1">{{ __('admin.statment') }}</label>
+                            <textarea name="statment_for_journal" class="form-control" id="" cols="" rows="1" required></textarea>
+                        </div>
+
                     </div>
 
-                    <table>
+                    <table class="table table-bordered" id="entries-table">
                         <thead>
                             <tr>
-                                <th style="width: 16%">{{ __('admin.credit') }}/ {{ __('admin.amount') }}</th>
-                                <th style="width: 16%">{{ __('admin.debit') }}/ {{ __('admin.amount') }}</th>
-                                <th style="width: 29%">{{ __('admin.statment') }}</th>
-                                <th style="width: 16%">{{ __('admin.cost_center') }}</th>
-                                <th style="width: 10%">{{ __('admin.shipment_no') }}</th>
-                                <th style="width: 2%">#</th>
+                                <th width="15%">{{ __('admin.account_name') }}</th>
+                                <th width="15%">{{ __('admin.credit') }}</th>
+                                <th width="15%">{{ __('admin.debit') }}</th>
+                                <th width="15%">{{ __('admin.cost_center') }}</th>
+                                <th width="15%">{{ __('admin.statment') }}</th>
+                                <th width="15%">{{ __('admin.branch_branch_name') }}</th>
+                                <th width="5%">{{ __('admin.actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody id="entries">
-                            <tr class="entry">
-                                <td style="width: 16%">
-                                    <select name="credit_account_id[]" class="js-example-basic-single">
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}</option>
+                        <tbody id="table-body">
+                            <!-- Add two initial rows here -->
+                            <tr class="entry-row">
+                                <td class="p-0">
+                                    <select name="account_id[]" class="js-example-basic-single" required>
+                                        <option value="" selected disabled>{{ __('admin.please_select') }}
+                                        </option>
                                         @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
+                                            <option value="{{ $account->id }}">{{ $account->account_name }} |
+                                                {{ $account->account_code }}</option>
                                         @endforeach
                                     </select>
-                                    <br>
-                                    <input type="number" placeholder="example 100" class="form-control credit-amount" step="0.01" name="credit_amount[]">
                                 </td>
-                                <td style="width: 16%">
-                                    <select name="debit_account_id[]" class="js-example-basic-single">
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}</option>
-                                        @foreach ($accounts as $account)
-                                            <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
-                                        @endforeach
-                                    </select>
-                                    <br>
-                                    <input type="number" placeholder="example 100" class="form-control debit-amount" step="0.01" name="debit_amount[]">
+                                <td class="p-0">
+                                    <input type="text" name="credit[]" class="form-control credit">
                                 </td>
-                                <td style="width: 29%">
-                                    <textarea name="statments[]" placeholder="هنا أكتب البيان" class="form-control" cols="30" rows="3" required></textarea>
+                                <td class="p-0">
+                                    <input type="text" name="debit[]" class="form-control debit">
                                 </td>
-                                <td style="width: 16%">
-                                    <select name="cost_centers[]" class="js-example-basic-single">
-                                        <option value="" selected disabled>{{ __('admin.please_select') }}</option>
+                                <td>
+                                    <select name="cost_center[]" id="" class="js-example-basic-single">
+                                        <option value="" selected>{{ __('admin.please_select') }}
+                                        </option>
                                         @foreach ($cars as $car)
-                                            <option value="{{ $car->id }}">{{ $car->car_name }} | {{ $car->car_plate }}</option>
+                                            <option value="{{ $car->id }}">{{ $car->car_name }} |
+                                                {{ $car->car_plate }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </td>
-                                <td style="width: 10%"><input type="text" class="form-control" name="shipment_refrence[]"></td>
-                                <td style="width: 2%"><button type="button" class="delete-btn btn btn-danger btn-sm p-1" onclick="deleteRow(this)"><i class="fa fa-delete-left"></i></button></td>
+                                <td>
+                                    <textarea name="statment[]" class="form-control" id="" cols="" rows="1" required></textarea>
+                                </td>
+                                <td>
+                                    <select name="branch_id[]" id="" class="js-example-basic-single">
+                                        <option value="" selected>{{ __('admin.please_select') }}
+                                        </option>
+                                        @foreach ($branchs as $branh)
+                                            <option value="{{ $branh->id }}">{{ $branh->branch_name }} </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td class="p-0 text-center">
+                                    <button type="button" class="btn btn-danger btn-sm delete-row-btn">-</button>
+                                </td>
+                            </tr>
+                            <tr class="entry-row">
+                                <td class="p-0">
+                                    <select name="account_id[]" class="js-example-basic-single" required>
+                                        <option value="" selected disabled>{{ __('admin.please_select') }}
+                                        </option>
+                                        @foreach ($accounts as $account)
+                                            <option value="{{ $account->id }}">{{ $account->account_name }} |
+                                                {{ $account->account_code }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td class="p-0">
+                                    <input type="text" name="credit[]" class="form-control credit">
+                                </td>
+                                <td class="p-0">
+                                    <input type="text" name="debit[]" class="form-control debit">
+                                </td>
+                                <td>
+                                    <select name="cost_center[]" id="" class="js-example-basic-single">
+                                        <option value="" selected>{{ __('admin.please_select') }}
+                                        </option>
+                                        @foreach ($cars as $car)
+                                            <option value="{{ $car->id }}">{{ $car->car_name }} |
+                                                {{ $car->car_plate }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <textarea name="statment[]" class="form-control" id="" cols="" rows="1" required></textarea>
+                                </td>
+                                <td>
+                                    <select name="branch_id[]" id="" class="js-example-basic-single">
+                                        <option value="" selected>{{ __('admin.please_select') }}
+                                        </option>
+                                        @foreach ($branchs as $branh)
+                                            <option value="{{ $branh->id }}">{{ $branh->branch_name }} </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td class="p-0 text-center">
+                                    <button type="button" class="btn btn-danger btn-sm delete-row-btn">-</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
-                    <button type="button" class="add-btn btn btn-primary btn-sm" onclick="addEntry()">إضافة سطر جديد</button>
-                    <br>
-                    <div class="form-group col-12">
-                        <label for="totalCredit">مجموع الدائن: </label>
-                        <span id="totalCredit">0.00</span>
+
+
+                    <!-- Total and Difference row -->
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-active ">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">{{ __('admin.credit') }}</th>
+                                        <th class="text-center">{{ __('admin.debit') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-center" id="total-credit">0.00</td>
+                                        <td class="text-center" id="total-debit">0.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="form-group col-12">
-                        <label for="totalDebit">مجموع المدين: </label>
-                        <span id="totalDebit">0.00</span>
+
+
+                    <div class="my-2">
+                        <button type="button" class="btn btn-label-info add-row-btn" id="add-row-btn">اضافة
+                            سطر</button>
+                        <button type="submit" class="btn btn-label-secondary save-btn" name="save_type"
+                            value="save_print">{{ __('admin.save_and_print') }}</button>
+                        <button type="submit" class="btn btn-label-secondary save-btn" name="save_type"
+                            value="save">{{ __('admin.just_save') }}</button>
                     </div>
-                    <button type="submit" class="btn btn-success btn-sm" id="submit-btn" disabled>حفظ القيود</button>
-                    <div id="error-message" class="text-danger"></div>
                 </form>
             </div>
         </div>
@@ -140,123 +218,203 @@
     @section('VendorsJS')
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
+             $(document).ready(function() {
+                $('.js-example-basic-single').select2({
+                    width: 370
+                });
+            });
+            $(document).on('select2:open', () => {
+                document.querySelector('.select2-search__field').focus();
+            });
+        </script>
+        <script type="text/javascript">
             $(document).ready(function() {
-                $('.js-example-basic-single').select2();
-                $(document).on('select2:open', () => {
-                    document.querySelector('.select2-search__field').focus();
+                // Initialize select2 for existing selects
+                function initializeSelect2() {
+                    $(".js-example-basic-single").select2();
+                }
+
+                initializeSelect2();
+
+                // Function to handle adding new rows
+                $('#add-row-btn').on('click', function() {
+                    const tableBody = $('#table-body');
+
+                    // Create a new row
+                    const newRow = `
+                        <tr class="entry-row">
+                            <td class="p-0">
+                                <select name="account_id[]" class="js-example-basic-single" required>
+                                    <option value="" selected disabled>{{ __('admin.please_select') }}</option>
+                                    @foreach ($accounts as $account)
+                                        <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="p-0">
+                                <input type="text" name="credit[]" class="form-control credit">
+                            </td>
+                            <td class="p-0">
+                                <input type="text" name="debit[]" class="form-control debit">
+                            </td>
+                            <td>
+                                <select name="cost_center[]" id="" class="js-example-basic-single">
+                                        <option value="" selected>{{ __('admin.please_select') }}</option>
+                                        @foreach ($cars as $car)
+                                            <option value="{{ $car->id }}">{{ $car->car_name }} | {{ $car->car_plate }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <textarea name="statment[]" class="form-control" id="" cols="" rows="1" required></textarea>
+                                </td>
+                                <td>
+                                    <select name="branch_id[]" id="" class="js-example-basic-single">
+                                        <option value="" selected>{{ __('admin.please_select') }}</option>
+                                        @foreach ($branchs as $branh)
+                                            <option value="{{ $branh->id }}">{{ $branh->branch_name }} </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                            <td class="p-0 text-center">
+                                <button type="button" class="btn btn-danger btn-sm delete-row-btn">-</button>
+                            </td>
+                        </tr>
+                    `;
+
+                    // Append the new row to the table body
+                    tableBody.append(newRow);
+
+                    // Reinitialize select2 for the new row
+                    initializeSelect2();
                 });
 
-                // Add focus event listener to open Select2 dropdown
-                $('.select2').on('focus', function() {
-                    $(this).select2('open');
+                // Function to handle row deletion
+                $('#table-body').on('click', '.delete-row-btn', function() {
+                    $(this).closest('tr').remove();
+                    checkBalance(); // Recalculate the balance after a row is deleted
                 });
 
-                function calculateTotals() {
-                    let totalCredit = 0;
-                    let totalDebit = 0;
-
-                    $('.credit-amount').each(function() {
-                        totalCredit += parseFloat($(this).val()) || 0;
-                    });
-
-                    $('.debit-amount').each(function() {
-                        totalDebit += parseFloat($(this).val()) || 0;
-                    });
-
-                    $('#totalCredit').text(totalCredit.toFixed(2));
-                    $('#totalDebit').text(totalDebit.toFixed(2));
-
-                    if (totalCredit === totalDebit) {
-                        $('#submit-btn').prop('disabled', false);
-                        $('#error-message').text('');
+                // Function to toggle input fields based on balance
+                function toggleInput(input, otherInput) {
+                    if (input.value) {
+                        otherInput.setAttribute('readonly', true);
+                        otherInput.classList.add('readonly');
                     } else {
-                        $('#submit-btn').prop('disabled', true);
-                        $('#error-message').text('يجب أن يكون مجموع الدائن والمدين متساوي.');
+                        otherInput.removeAttribute('readonly');
+                        otherInput.classList.remove('readonly');
                     }
                 }
 
-                $(document).on('input', '.credit-amount, .debit-amount', calculateTotals);
-                $(document).on('change', '.js-example-basic-single', calculateTotals);
+                function checkBalance() {
+                    let totalCredit = 0;
+                    let totalDebit = 0;
 
-                calculateTotals();  // Call once to set initial state
-            });
+                    $('input.credit').each(function() {
+                        totalCredit += parseFloat($(this).val()) || 0;
+                    });
 
-            function addEntry() {
-                const entriesTable = document.getElementById('entries');
-                const newRow = document.createElement('tr');
-                newRow.classList.add('entry');
-                newRow.innerHTML = `
-                    <td style="width: 16%">
-                        <select name="credit_account_id[]" class="js-example-basic-single">
-                            <option value="" selected disabled>{{ __('admin.please_select') }}</option>
-                            @foreach ($accounts as $account)
-                                <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
-                            @endforeach
-                        </select>
-                        <br>
-                        <input type="number" placeholder="example 100" class="form-control credit-amount" step="0.01" name="credit_amount[]">
-                    </td>
-                    <td style="width: 16%">
-                        <select name="debit_account_id[]" class="js-example-basic-single">
-                            <option value="" selected disabled>{{ __('admin.please_select') }}</option>
-                            @foreach ($accounts as $account)
-                                <option value="{{ $account->id }}">{{ $account->account_name }} | {{ $account->account_code }}</option>
-                            @endforeach
-                        </select>
-                        <br>
-                        <input type="number" placeholder="example 100" class="form-control debit-amount" step="0.01" name="debit_amount[]">
-                    </td>
-                    <td style="width: 29%">
-                        <textarea name="statments[]" placeholder="هنا أكتب البيان" class="form-control" cols="30" rows="3" required></textarea>
-                    </td>
-                    <td style="width: 16%">
-                        <select name="cost_centers[]" class="js-example-basic-single">
-                            <option value="" selected disabled>{{ __('admin.please_select') }}</option>
-                            @foreach ($cars as $car)
-                                <option value="{{ $car->id }}">{{ $car->car_name }} | {{ $car->car_plate }}</option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td style="width: 10%"><input type="text" class="form-control" name="shipment_refrence[]"></td>
-                    <td style="width: 2%"><button type="button" class="delete-btn btn btn-danger btn-sm p-1" onclick="deleteRow(this)"><i class="fa fa-delete-left"></i></button></td>
-                `;
-                entriesTable.appendChild(newRow);
-                $('#entries').find('.js-example-basic-single').select2();
-                checkDeleteButton();
-            }
+                    $('input.debit').each(function() {
+                        totalDebit += parseFloat($(this).val()) || 0;
+                    });
 
-            function deleteRow(btn) {
-                const row = btn.closest('tr');
-                row.parentNode.removeChild(row);
-                checkDeleteButton();
-                calculateTotals();  // Recalculate totals after row deletion
-            }
+                    if (totalCredit === totalDebit && totalCredit > 0 && totalDebit > 0) {
+                        $('.save-btn').removeAttr('disabled');
+                    } else {
+                        $('.save-btn').attr('disabled', true);
+                    }
+                }
 
-            function checkDeleteButton() {
-                const deleteButtons = document.querySelectorAll('.delete-btn');
-                if (deleteButtons.length === 1) {
-                    deleteButtons[0].disabled = true; // تعطيل زر الحذف إذا كان هناك سطر واحد فقط
-                } else {
-                    deleteButtons.forEach(btn => {
-                        btn.disabled = false;
+                // Initialize event listeners for existing rows
+                function initializeRow(row) {
+                    const creditInput = row.find('input.credit');
+                    const debitInput = row.find('input.debit');
+
+                    creditInput.on('input', function() {
+                        toggleInput(creditInput[0], debitInput[0]);
+                        checkBalance();
+                    });
+
+                    debitInput.on('input', function() {
+                        toggleInput(debitInput[0], creditInput[0]);
+                        checkBalance();
                     });
                 }
+
+                $('tr.entry-row').each(function() {
+                    initializeRow($(this));
+                });
+
+                // Add event listener for newly added rows
+                $('#table-body').on('input', 'input.credit, input.debit', function() {
+                    checkBalance();
+                });
+
+                // Disable form submission if there are invalid fields
+                (function() {
+                    'use strict'
+                    var forms = document.querySelectorAll('.needs-validation')
+                    Array.prototype.slice.call(forms)
+                        .forEach(function(form) {
+                            form.addEventListener('submit', function(event) {
+                                if (!form.checkValidity()) {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                }
+                                form.classList.add('was-validated')
+                            }, false)
+                        })
+                })()
+            });
+        </script>
+
+        <script>
+            document.getElementById('searchForm').addEventListener('submit', function(event) {
+                event.preventDefault(); // منع الإرسال التلقائي للنموذج
+
+                // الحصول على الرقم المدخل
+                var number = document.getElementById('searchNumber').value;
+
+                // تعديل الرابط في الفورم
+                var formAction = this.action.replace(':number', number);
+
+                // تعيين الرابط المعدل للنموذج
+                this.action = formAction;
+
+                // إرسال النموذج بعد التعديل
+                this.submit();
+            });
+        </script>
+
+        <script>
+            // Function to calculate totals and difference
+            function updateTotalsAndDifference() {
+                let totalCredit = 0;
+                let totalDebit = 0;
+
+                $('.credit').each(function() {
+                    const creditValue = parseFloat($(this).val()) || 0;
+                    totalCredit += creditValue;
+                });
+
+                $('.debit').each(function() {
+                    const debitValue = parseFloat($(this).val()) || 0;
+                    totalDebit += debitValue;
+                });
+
+                $('#total-credit').text(totalCredit.toFixed(2));
+                $('#total-debit').text(totalDebit.toFixed(2));
+                $('#balance-difference').text((totalDebit - totalCredit).toFixed(2));
             }
 
-            (function() {
-                'use strict'
-                var forms = document.querySelectorAll('.needs-validation')
-                Array.prototype.slice.call(forms)
-                    .forEach(function(form) {
-                        form.addEventListener('submit', function(event) {
-                            if (!form.checkValidity()) {
-                                event.preventDefault()
-                                event.stopPropagation()
-                            }
-                            form.classList.add('was-validated')
-                        }, false)
-                    })
-            })()
+            // Update totals and difference on input change
+            $(document).on('input', '.credit, .debit', function() {
+                updateTotalsAndDifference();
+            });
+
+            // Trigger update on initial load
+            updateTotalsAndDifference();
         </script>
     @endsection
 </x-app-layout>

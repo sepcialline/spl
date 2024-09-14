@@ -37,7 +37,7 @@
                     <div class="row">
                         <div class="col-md-3 mb-4">
                             <label for="select2Multiple" class="form-label">{{ __('admin.company_list') }}</label>
-                            <select id="select2Multiple1" class="select2 form-select" name="company_id">
+                            <select id="select2Multiple" class="select2 form-select" name="company_id">
                                 <option value="0">
                                     {{ __('admin.all') }}</option>
                                 @foreach ($companies as $company)
@@ -47,7 +47,7 @@
                             </select>
                         </div>
                         <div class="col-md-3 mb-4">
-                            <label for="select2Multiple" class="form-label">{{ __('admin.emirates') }}</label>
+                            <label for="select2Multiple1" class="form-label">{{ __('admin.emirates') }}</label>
                             <select id="select2Multiple1" class="select2 form-select" name="emirate_id">
                                 <option value="0">
                                     {{ __('admin.all') }}</option>
@@ -58,8 +58,8 @@
                             </select>
                         </div>
                         <div class="col-md-3 mb-4">
-                            <label for="select2Multiple" class="form-label">{{ __('admin.status') }}</label>
-                            <select id="select2Multiple1" class="select2 form-select" name="status_id">
+                            <label for="select2Multiple2" class="form-label">{{ __('admin.status') }}</label>
+                            <select id="select2Multiple2" class="select2 form-select" name="status_id">
                                 <option value="0">
                                     {{ __('admin.all') }}</option>
                                 @foreach ($statuess as $statues)

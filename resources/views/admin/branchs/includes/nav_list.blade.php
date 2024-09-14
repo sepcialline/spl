@@ -11,7 +11,7 @@
             <i class="bx bx-money me-1"></i>
             {{ __('admin.vat_on_sales') }}</a>
     </li>
-    <li class="nav-item" style="font-size: 12px">
+    {{-- <li class="nav-item" style="font-size: 12px">
         <a class="nav-link {{ $active === 'vat_on_purchase' ? 'active' : '' }}"
             href="{{ route('admin.branch_account_details_vat_on_purchase', $branch->id) }}">
             <i class="bx bx-money me-1"></i>
@@ -22,6 +22,6 @@
             href="{{ route('admin.branch_account_details_exp', $branch->id) }}">
             <i class="bx bx-money me-1"></i>
             {{ __('admin.accounts_expenses') }}</a>
-    </li>
+    </li> --}}
 
 </ul>

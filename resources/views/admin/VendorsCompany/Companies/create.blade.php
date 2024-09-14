@@ -47,8 +47,7 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label"
-                            for="branch_english_address">{{ __('admin.vendors_companies_company_vendor_rate') }}</label>
+                        <label class="form-label" for="branch_english_address">{{ __('admin.delivery_fees') }}</label>
                         <input required type="text" name="vendor_rate" id="vendor_rate" class="form-control"
                             placeholder="{{ __('admin.vendors_companies_company_vendor_rate') }}"
                             value="{{ old('vendor_rate') }}" />
@@ -57,7 +56,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    {{-- <div class="col-md-3">
                         <label class="form-label"
                             for="branch_english_address">{{ __('admin.vendors_companies_company_customer_rate') }}</label>
                         <input required type="text" name="customer_rate" id="customer_rate" class="form-control"
@@ -66,14 +65,13 @@
                         @error('customer_rate')
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
-                    </div>
+                    </div> --}}
                     <div class="col-md-3">
                         <label class="form-label"
                             for="branch_english_address">{{ __('admin.vendors_companies_company_sales') }}</label>
 
-                        <select name="sales_id" id="sales_id" class="js-example-basic-multiple form-control"
-                            >
-                            <option value=""  selected>{{ __('admin.please_select') }}</option>
+                        <select name="sales_id" id="sales_id" class="js-example-basic-multiple form-control">
+                            <option value="" selected>{{ __('admin.please_select') }}</option>
                             @foreach ($sales as $sale)
                                 <option value="{{ $sale->id }}">{{ $sale->name }}</option>
                             @endforeach
@@ -83,15 +81,15 @@
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label"
-                            for="branch_english_address">{{ __('admin.vendors_companies_company_commission_rate') }}</label>
-                        <input required type="text" name="commission_rate" id="commission_rate" class="form-control"
-                            placeholder="{{ __('admin.vendors_companies_company_commission_rate') }}"
-                            value="{{ old('commission_rate') }}" />
-                        @error('commission_rate')
-                            <div class="alert alert-danger">{{ $message }}</div>
-                        @enderror
+
+                    <div class="col">
+                        <label class="form-label" for="branch_id">{{ __('admin.branch_branch_name') }}</label>
+                        <select class="js-example-basic-single" name="branch_id" id="branch_id" required>
+                            <option>{{ __('admin.please_select') }}</option>
+                            @foreach ($branches as $branch)
+                                <option value="{{ $branch->id }}" {{old('branch_id') == $branch->id ? 'selected' : ''}}>{{ $branch->branch_name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <hr class="my-4 mx-n4" />
@@ -105,7 +103,7 @@
                             <option value="{{ old('emirate_id') }}" disabled selected>{{ __('admin.please_select') }}
                             </option>
                             @foreach ($emirates as $emirate)
-                                <option value="{{ $emirate->id }}">{{ $emirate->name }}</option>
+                                <option value="{{ $emirate->id }}" {{old('emirate_id') == $emirate->id ? 'selected' : ''}}>{{ $emirate->name }}</option>
                             @endforeach
                         </select>
                         @error('emirate_id')
@@ -145,6 +143,17 @@
                         @error('address_ar')
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="phone_number">{{ __('admin.landline') }}</label>
+                        <input type="text" name="phone_number" class="form-control phone" id="phone_number">
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="mobile_number">{{ __('admin.mobile') }}</label>
+                        <input type="text" name="mobile_number" class="form-control phone" id="mobile_number">
+
                     </div>
                 </div>
 
@@ -209,28 +218,7 @@
 
 
                         </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="bank_name"
-                                    class="form-label">{{ __('admin.vendors_companies_company_bank_name') }}</label>
-                                <input class="form-control @error('bank_name') is-invalid @enderror" required
-                                    value="{{ old('bank_name') }}" id="bank_name" name="bank_name">
-                                @error('bank_name')
-                                    <div class="alert alert-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label for="iban"
-                                    class="form-label">{{ __('admin.vendors_companies_company_iban') }}</label>
-                                <input class="form-control @error('iban') is-invalid @enderror" required
-                                    value="{{ old('iban') }}" id="bank_name" name="iban">
-                                @error('iban')
-                                    <div class="alert alert-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
 
-
-                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label"
@@ -291,96 +279,41 @@
                         </div>
                     </div>
 
-
-                    <hr class="my-4">
-
-                    <div class="row py-2">
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_name_ar">{{ __('admin.vendors_companies_vendor_name_ar') }}</label>
-                            <input required type="text" id="vendor_name_ar" value="{{ old('vendor_name_ar') }}"
-                                class="form-control  @error('vendor_name_ar') is-invalid @enderror"
-                                name="vendor_name_ar"
-                                placeholder="{{ __('admin.vendors_companies_vendor_name_ar') }}" />
-                            @error('vendor_name_ar')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_name_en">{{ __('admin.vendors_companies_vendor_name_en') }}</label>
-                            <input required type="text" value="{{ old('vendor_name_en') }}" id="vendor_name_en"
-                                class="form-control  @error('vendor_name_en') is-invalid @enderror"
-                                name="vendor_name_en"
-                                placeholder="{{ __('admin.vendors_companies_vendor_name_en') }}" />
-                            @error('vendor_name_en')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <div class="row my-4">
+                        <label for="vendor"
+                            class="form-label">{{ __('admin.vendors_companies_company_owner_name') }}</label>
+                        <select class="js-example-basic-single" name="vendor">
+                            <option value="">{{ __('admin.please_select') }}</option>
+                            @foreach ($vendors as $vendor)
+                                <option value="{{ $vendor->id }}" {{ old('vendor') == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                    <div class="row py-2">
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_mobile">{{ __('admin.vendors_companies_vendor_mobile') }}</label>
-                            <input required type="text" id="vendor_mobile" value="{{ old('vendor_mobile') }}"
-                                class="form-control  @error('vendor_mobile') is-invalid @enderror"
-                                name="vendor_mobile"
-                                placeholder="{{ __('admin.vendors_companies_vendor_mobile') }}" />
-                            @error('vendor_mobile')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="vendor_email">{{ __('admin.vendors_companies_vendor_email') }}</label>
-                            <input required type="vendor_email" value="{{ old('vendor_email') }}" id="vendor_email"
-                                class="form-control  @error('vendor_email') is-invalid @enderror" name="vendor_email"
-                                placeholder="{{ __('admin.vendors_companies_vendor_email') }}" />
-                            @error('vendor_email')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                    <hr>
 
-                    <div class="row py-2">
-                        <div class="col-md-6">
-                            <label class="form-label"
-                                for="password">{{ __('admin.vendors_companies_vendor_password') }}</label>
-                            <input required type="text" id="password" value="{{ old('password') }}"
-                                class="form-control  @error('password') is-invalid @enderror" name="password"
-                                placeholder="{{ __('admin.user_management_admin_password') }}" />
-                            @error('password')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
                     <div class="row">
-                        {{-- <div class="col-md-6">
-                            <label class="form-label"
-                                for="password_confirmation">{{ __('admin.vendors_companies_vendor_repeat_password') }}</label>
-                            <input required type="text" id="password_confirmation"
-                                value="{{ old('password_confirmation') }}"
-                                class="form-control  @error('password_confirmation') is-invalid @enderror"
-                                name="password_confirmation"
-                                placeholder="{{ __('admin.vendors_companies_vendor_password') }}" />
-                            @error('password_confirmation')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                        </div> --}}
-                        <div class="col-md-6 py-4">
-                            <div class="avatar avatar-xl mb-3">
-                                <img id="vendor_avatar" src="{{ asset('build/assets/img/avatars/1.png') }}"
-                                    alt="{{ __('admin.user_management_admin_avatar') }}">
+                        <h3 class="my-4">{{ __('admin.bank_accounts') }}</h3>
+                        <div id="bankFields">
+                            <div class="row mb-3 bank-entry">
+                                <div class="col-md-5">
+                                    <label for="bank_name" class="form-label">{{ __('admin.bank_name') }}</label>
+                                    <select name="banks_name[]" id="bank_name" class="js-example-basic-single">
+                                        <option value="">{{ __('admin.please_select') }}</option>
+                                        @foreach ($banks as $bank)
+                                            <option value="{{ $bank->id }}">{{ $bank->name_bank }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="bank_name" class="form-label">IBAN</label>
+                                    <input type="text" name="ibans[]" class="form-control" placeholder="IBAN">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-success" onclick="addBankField()">Add
+                                        Bank</button>
+                                </div>
                             </div>
-                            <label for="logo"
-                                class="form-label">{{ __('admin.vendors_companies_vendor_avatar') }}</label>
-                            <input class="form-control @error('vendor_avatar') is-invalid @enderror"
-                                name="vendor_avatar" type="file" id="vendor_avatar"
-                                onchange="document.getElementById('vendor_avatar').src=window.URL.createObjectURL(this.files[0])">
-                            @error('vendor_avatar')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
 
@@ -759,11 +692,7 @@
             const validator = new FormValidator(form, fields)
             validator.initialize()
         </script>
-        {{-- //sweet alert --}}
-        {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-     <script src="sweetalert2.all.min.js"></script>
-     <script src="sweetalert2.min.js"></script>
-     <link rel="stylesheet" href="sweetalert2.min.css"> --}}
+
         <script>
             $(document).ready(function() {
                 $('.js-example-basic-multiple').select2();
@@ -798,5 +727,39 @@
                 });
             })
         </script>
+        <script>
+            function addBankField() {
+                const bankFields = document.getElementById('bankFields');
+                const newEntry = document.createElement('div');
+                newEntry.classList.add('row', 'mb-3', 'bank-entry');
+                newEntry.innerHTML = `
+        <div class="col-md-5">
+            <label for="bank_name" class="form-label">{{ __('admin.bank_name') }}</label>
+            <select name="banks_name[]" class="js-example-basic-single">
+                <option value="">{{ __('admin.please_select') }}</option>
+                @foreach ($banks as $bank)
+                    <option value="{{ $bank->id }}">{{ $bank->name_bank }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label for="iban" class="form-label">IBAN</label>
+            <input type="text" name="ibans[]" class="form-control" placeholder="IBAN" required>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger" onclick="removeBankField(this)">Remove</button>
+        </div>
+        `;
+                bankFields.appendChild(newEntry);
+
+                // Initialize Select2 only on the newly added select element
+                $(newEntry).find('.js-example-basic-single').select2();
+            }
+
+            function removeBankField(button) {
+                const bankEntry = button.closest('.bank-entry');
+                bankEntry.remove();
+            }
+        </script>
     @endsection
-    </x-app-layout>
+</x-app-layout>

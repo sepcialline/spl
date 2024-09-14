@@ -7,12 +7,13 @@ namespace Intervention\Image\Drivers\Gd\Analyzers;
 use Intervention\Image\Collection;
 use Intervention\Image\Interfaces\ImageInterface;
 
-/**
- * @property int $x
- * @property int $y
- */
 class PixelColorsAnalyzer extends PixelColorAnalyzer
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @see AnalyzerInterface::analyze()
+     */
     public function analyze(ImageInterface $image): mixed
     {
         $colors = new Collection();

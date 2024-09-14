@@ -133,7 +133,7 @@
                     <div class="table-responsive">
                         <table class="table border-top m-0">
                             <thead>
-                                @if ($has_stock == 1 && count($shipment_content ) > 0)
+                                @if ($has_stock == 1 && count($shipment_content) > 0)
                                     @if (count($shipment_content) > 0)
                                         <tr>
                                             <th>#</th>
@@ -148,19 +148,18 @@
                                 @endif
                             </thead>
                             <tbody>
-                                @if ($has_stock == 1 && count($shipment_content ) > 0)
+                                @if ($has_stock == 1 && count($shipment_content) > 0)
                                     @php $i = 1; @endphp
-                                    @if (count($shipment_content ) > 0)
-                                    @foreach ($shipment_content as $content)
-                                    <tr>
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $content->product->name ?? '' }}</td>
-                                        <td>{{ $content->quantity ?? '' }}</td>
+                                    @if (count($shipment_content) > 0)
+                                        @foreach ($shipment_content as $content)
+                                            <tr>
+                                                <td>{{ $i++ }}</td>
+                                                <td>{{ $content->product->name ?? '' }}</td>
+                                                <td>{{ $content->quantity ?? '' }}</td>
 
-                                    </tr>
-                                @endforeach
+                                            </tr>
+                                        @endforeach
                                     @endif
-
                                 @else
                                     <tr>
                                         <td>{{ $shipment_content->content_text ?? '' }}</td>
@@ -231,45 +230,43 @@
         </div>
 
         <div class="card my-2">
-               <h3 class="p-4">{{__('admin.tracking')}}</h3>
+            <h3 class="p-4">{{ __('admin.tracking') }}</h3>
             <div class="card-body">
                 <div class="row">
                     <div class="col">
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>{{__('admin.status')}}</th>
-                                    <th>{{__('admin.user')}}</th>
-                                    <th>{{__('admin.action')}}</th>
-                                    <th>{{__('admin.rider')}}</th>
+                                    <th>{{ __('admin.status') }}</th>
+                                    <th>{{ __('admin.user') }}</th>
+                                    <th>{{ __('admin.action') }}</th>
+                                    <th>{{ __('admin.rider') }}</th>
                                     <th>created_at</th>
-                                    <th>#{{__('admin.date')}}</th>
-                                    <th>{{__('admin.note:')}}</th>
+                                    <th>#{{ __('admin.date') }}</th>
+                                    <th>{{ __('admin.note:') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($trackings as $tracking)
-                                <tr>
-                                    <td>{{$tracking->status->name}}</td>
-                                    <td>
-                                        @if ($tracking->guard=="admin")
-                                        {{App\Models\Admin::where('id',$tracking->user_id)->first()->name}}
-                                        @endif
-                                        @if ($tracking->guard=="rider")
-                                        {{App\Models\Rider::where('id',$tracking->user_id)->first()->name}}
-
-                                        @endif
-                                        @if ($tracking->guard=="employee")
-                                        {{App\Models\Employee::where('id',$tracking->user_id)->first()->name}}
-
-                                        @endif
-                                    </td>
-                                    <td>{{$tracking->action}}</td>
-                                    <td>{{$tracking->Rider->name ?? '-'}}</td>
-                                    <td>{{$tracking->created_at}}</td>
-                                    <td>{{$tracking->time}}</td>
-                                    <td>{{$tracking->notes}}</td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ $tracking->status->name }}</td>
+                                        <td>
+                                            @if ($tracking->guard == 'admin')
+                                                {{ App\Models\Admin::where('id', $tracking->user_id)->first()->name }}
+                                            @endif
+                                            @if ($tracking->guard == 'rider')
+                                                {{ App\Models\Rider::where('id', $tracking->user_id)->first()->name }}
+                                            @endif
+                                            @if ($tracking->guard == 'employee')
+                                                {{ App\Models\Employee::where('id', $tracking->user_id)->first()->name }}
+                                            @endif
+                                        </td>
+                                        <td>{{ $tracking->action }}</td>
+                                        <td>{{ $tracking->Rider->name ?? '-' }}</td>
+                                        <td>{{ $tracking->created_at }}</td>
+                                        <td>{{ $tracking->time }}</td>
+                                        <td>{{ $tracking->notes }}</td>
+                                    </tr>
                                 @endforeach
 
                             </tbody>
@@ -349,7 +346,7 @@
                     @include('includes.shipments_actions.in_progress')
                     @include('includes.shipments_actions.delayed')
                     @include('includes.shipments_actions.transfered')
-                    @include('includes.shipments_actions.delivered')
+                    @include('includes.shipments_actions.delivered', ['shipment' => $shipment])
                     @include('includes.shipments_actions.returned')
                     <div class="mb-3">
                         <label for="invoice-to" class="form-label">{{ __('admin.note:') }}</label>

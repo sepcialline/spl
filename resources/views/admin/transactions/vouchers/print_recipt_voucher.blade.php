@@ -49,20 +49,30 @@
     <script src="{{ asset('build/assets/vendor/js/template-customizer.js') }}"></script>
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('build/assets/js/config.js') }}"></script>
-    {{-- <style>
-        @page {
-            size: A4;
+    <style>
+        @font-face {
+            font-family: 'Simplified Arabic';
+            src: url('fonts/Simplified Arabic Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
 
-    </style> --}}
+        body {
+            font-family: 'Simplified Arabic', sans-serif;
+        }
+    </style>
+
 
 </head>
 
 <body>
     <!-- Content -->
 
-    <div class="invoice-print p-3 " style="border: 2px solid #ffd200">
-        <section class="bg-label-danger px-3 py-3">
+    <div class="invoice-print p-0 m-0 " style="border: 2px solid #ffd200 ; height:100%">
+        <div id="back" style="position: fixed;
+        top: 10px;
+        left: 10px;"> <a href="{{route('admin.account.recipt_voucher')}}"> 🔙</a></div>
+        <section class="bg-label-danger p-4" style="height: 33.3%">
             <div class="row">
                 <div class="col-5">
                     <div class="d-flex svg-illustration mb-3 gap-2">
@@ -78,7 +88,7 @@
                 <div class="col-3">
                     درهم اماراتي AED
 
-                    <input type="number" class="form-control" disabled readonly value="{{ $voucher->credit }}">
+                    <input type="number" class="form-control" disabled readonly value="{{ $credit_amount }}">
                 </div>
             </div>
             <div class="row">
@@ -110,7 +120,7 @@
                 </div>
 
                 <div class=" d-flex  justify-content-evenly mb-4">
-                    <div>Accountant .......................................  المحاسب </div>
+                   <div>Accountant : <u>{{$voucher->created_by}}</u> : المحاسب </div>
                     <div class="d-flex flex-column align-items-center" style="    border: 2px solid #002efb;
                     padding: 0px 42px;">
                         <span style="margin: 0 0px -24px 0px;
@@ -119,12 +129,12 @@
                         <span style=" color: #e06a3b !important;">{{Carbon\Carbon::now()->format('Y-M-d')}}</span>
                         <span style=" color: #9989e8 !important;">ACCOUNTANT المحاسبة</span>
                     </div>
-                    <div>Reciver ............................................ المستلم<div>
+                    <div><div>
                 </div>
         </section>
 
         <hr>
-        <section class=" px-3 py-2">
+        <section class="bg-label-light p-4" style="height: 33.3%">
             <div class="row">
                 <div class="col-5">
                     <div class="d-flex svg-illustration mb-3 gap-2">
@@ -140,7 +150,7 @@
                 <div class="col-3">
                     درهم اماراتي AED
 
-                    <input type="number" class="form-control" disabled readonly value="{{ $voucher->credit }}">
+                    <input type="number" class="form-control" disabled readonly value="{{ $credit_amount }}">
                 </div>
             </div>
             <div class="row">
@@ -172,7 +182,7 @@
                 </div>
 
                 <div class=" d-flex  justify-content-evenly mb-4">
-                    <div>Accountant .......................................  المحاسب </div>
+                   <div>Accountant : <u>{{$voucher->created_by}}</u> : المحاسب </div>
                     <div class="d-flex flex-column align-items-center" style="    border: 2px solid #002efb;
                     padding: 0px 42px;">
                         <span style="margin: 0 0px -24px 0px;
@@ -181,15 +191,16 @@
                         <span style=" color: #e06a3b !important;">{{Carbon\Carbon::now()->format('Y-M-d')}}</span>
                         <span style=" color: #9989e8 !important;">ACCOUNTANT المحاسبة</span>
                     </div>
-                    <div>Reciver ............................................ المستلم<div>
+                    <div><div>
                 </div>
         </section>
+
         <hr>
-        <section class=" px-3 py-2 bg-label-success">
+        <section class="bg-label-linkedin p-4" style="height: 33.3%">
             <div class="row">
                 <div class="col-5">
                     <div class="d-flex svg-illustration mb-3 gap-2">
-                        <img
+                        <img width="50%"
                             src="{{ asset('build/assets/img/logo/logo_' . LaravelLocalization::getCurrentLocale() . '.png') }}">
                     </div>
                     {{-- <p class="mb-1" style="">{{ __('admin._company_address_') }}</p> --}}
@@ -201,7 +212,7 @@
                 <div class="col-3">
                     درهم اماراتي AED
 
-                    <input type="number" class="form-control" disabled readonly value="{{ $voucher->credit }}">
+                    <input type="number" class="form-control" disabled readonly value="{{ $credit_amount }}">
                 </div>
             </div>
             <div class="row">
@@ -233,7 +244,7 @@
                 </div>
 
                 <div class=" d-flex  justify-content-evenly mb-4">
-                    <div>Accountant .......................................  المحاسب </div>
+                   <div>Accountant : <u>{{$voucher->created_by}}</u> : المحاسب </div>
                     <div class="d-flex flex-column align-items-center" style="    border: 2px solid #002efb;
                     padding: 0px 42px;">
                         <span style="margin: 0 0px -24px 0px;
@@ -242,7 +253,7 @@
                         <span style=" color: #e06a3b !important;">{{Carbon\Carbon::now()->format('Y-M-d')}}</span>
                         <span style=" color: #9989e8 !important;">ACCOUNTANT المحاسبة</span>
                     </div>
-                    <div>Reciver ............................................ المستلم<div>
+                    <div><div>
                 </div>
         </section>
     </div>

@@ -18,8 +18,13 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}" alt="avatar"
-                                class="rounded-circle img-fluid" style="width: 150px;">
+                            @if ($data->photo)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                             <h5 class="my-3">{{ $data->name }}</h5>
                             {{-- <p class="text-muted mb-1">{{ $role[0]->name }}</p> --}}
                             <span class="badge rounded-pill bg-label-primary">{{ $role[0]->name }}</span>
@@ -63,10 +68,11 @@
                                             </div>
                                         </div>
                                         <div class="col-12">
-                                            <button type="submit" class="btn btn-sm btn-primary me-sm-3 me-1">{{__('admin.send')}}</button>
+                                            <button type="submit"
+                                                class="btn btn-sm btn-primary me-sm-3 me-1">{{ __('admin.send') }}</button>
                                             <button type="reset" class="btn btn-sm btn-label-secondary"
                                                 data-bs-dismiss="modal" aria-label="Close">
-                                                {{__('admin.close')}}
+                                                {{ __('admin.close') }}
                                             </button>
                                         </div>
                                     </form>

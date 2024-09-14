@@ -26,6 +26,9 @@ return new class extends Migration
             $table->string('updated_by')->nullable();
             $table->string('delete_by')->nullable();
             $table->boolean('status')->nullable()->default(true);
+            $table->integer('nationality_id')->nullable();
+            $table->dateTime('birthdate')->nullable();
+            $table->tinyInteger('gender')->comment('1 male , 2 female');
             $table->softDeletes();
             $table->timestamps();
         });

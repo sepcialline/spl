@@ -6,45 +6,58 @@
             <th>credit</th>
             <th>statment</th>
             <th>account_name</th>
-            <th>shipment_no/cost_center</th>
+            <th>shipment_no/admin.cost_center</th>
         </tr>
     </thead>
     <tbody>
         @foreach ($entries as $entry)
-            @php
-                $count_of_line = App\Models\AccountingEntries::where('number', $entry->number)
-                    ->select('number')
-                    ->get();
-            @endphp
             <tr>
-                <td>{{ $entry->number }}</td>
+                <td>
+                    @if ($entry->journal_type_id == 1)
+                        JV-{{ $entry->number }}
+                    @elseif ($entry->journal_type_id == 2)
+                        CR-{{ $entry->number }}
+                    @elseif($entry->journal_type_id == 3)
+                        CP-{{ $entry->number }}
+                    @else
+                        JS-{{ $entry->number }}
+                    @endif
+                </td>
                 <td>{{ $entry->amount_debit ?? '' }}</td>
                 <td>{{ $entry->amount_credit ?? '' }}</td>
-                <td>{{ $entry->statment ?? '' }}</td>
+                <td>
+                    {{ $entry->statment ? 'بيان الصرف : ' . $entry->statment : '' }}
+                    <span>{{ $entry->shipment?->company->name ?? '' }}</span>-{{ $entry->statment_for_journal ? 'بيان القيد : ' . $entry->statment_for_journal : '' }}
+                </td>
                 <td>{{ $entry?->debit_account_number }} {{ $entry?->debit_account_name }}
-                    {{ $entry?->credit_account_number }} {{ $entry?->credit_account_name }} </td>
-                <td>{{ $entry->shipment ? 'ship#' . $entry?->shipment->shipment_refrence : '' }}
-                    {{ $entry?->cost_center?->car_name }} {{ $entry?->cost_center?->car_plate }}</td>
+                    {{ $entry?->credit_account_number }} {{ $entry?->credit_account_name }}</td>
+                <td>
+                    {{ $entry->shipment ? 'ship#' . $entry?->shipment->shipment_refrence : '' }}-
+                    {{ $entry?->costCenter?->car_name }}-
+                    {{ $entry?->costCenter?->car_plate }}-{{ $entry?->branch?->branch_name }}
+                </td>
             </tr>
         @endforeach
     </tbody>
 </table>
 
+<hr>
+
 <table>
     <tr>
-        <td colspan="2">مجموع القيم</td>
+        <th>الرصيد السابق</th>
+        <td>{{ $total_last_balande ?? 0 }}</td>
     </tr>
     <tr>
-        <td>إجمالي المدين</td>
+        <th>الرصيد المدين</th>
         <td>{{ $total_debit ?? 0 }}</td>
     </tr>
     <tr>
-        <td>إجمالي الدائن</td>
+        <th>الرصيد الدائن</th>
         <td>{{ $total_credit ?? 0 }}</td>
     </tr>
-</table>
-
-<table>
-    <tr><th>المحصلة</th></tr>
-    <tr><td>{{ $total_balance ?? 0 }}</td></tr>
+    <tr>
+        <th>الرصيد</th>
+        <td>{{ $total_last_balande + $total_debit - $total_credit }}</td>
+    </tr>
 </table>

@@ -53,7 +53,7 @@
                             <th>#</th>
                             <th>{{ __('admin.vendors_companies_company_name') }}</th>
                             <th>{{ __('admin.vendors_companies_company_owner_name') }}</th>
-                            <th>{{ __('admin.vendors_companies_company_emirate') }}</th>
+                            <th>{{ __('admin.branch_branch_name') }}</th>
                             <th>{{ __('admin.status') }}</th>
                             <th>{{ __('admin.branch_branch_actions') }}</th>
                         </tr>
@@ -79,28 +79,35 @@
                                     </ul>
                                 </td>
                                 <td>
-                                    @foreach ($company->vendors as $vendor)
-                                        <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
-                                            <li data-bs-toggle="tooltip" data-popup="tooltip-custom"
-                                                data-bs-placement="top" class="avatar avatar-xs pull-up"
-                                                title="Lilian Fuller">
-                                                @if ($vendor->logo)
-                                                    <img src="{{ asset('/build/assets/img/uploads/vendors/' . $vendor->avatar) }}"
-                                                        alt="" class="rounded-circle" />
-                                                @else
-                                                    <img src="{{ asset('/build/assets/img/uploads/avatars/avatar.png') }}"
-                                                        alt="" class="rounded-circle" />
-                                                @endif
-                                            </li>
-                                            <li>
-                                                {{ $vendor->name ?? '' }}
-                                            </li>
-                                    @endforeach
+                                    <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
+                                            class="avatar avatar-xs pull-up" title="Lilian Fuller">
+                                            @if (!empty($company['owner']['avatar']))
+                                                <img src="{{ asset('/build/assets/img/uploads/vendors/' . $company->owner->avatar) }}"
+                                                    alt="" class="rounded-circle" />
+                                            @else
+                                                <img src="{{ asset('/build/assets/img/uploads/avatars/avatar.png') }}"
+                                                    alt="" class="rounded-circle" />
+                                            @endif
+                                        </li>
+                                        <li>
+                                            @if (isset($company->owner->name))
+                                                {{ $company->owner->name }}
+                                            @else
+                                                <span class="text-danger">اربط الشركة بمالكها</span>
+                                            @endif
+                                        </li>
                                     </ul>
                                 </td>
-                                <td>{{ $company->emirate->name }}</td>
                                 <td>
-                                    @can('admin-Employees-change-status')
+                                    @if ($company->branch)
+                                        {{ $company->branch->branch_name }}
+                                    @else
+                                        <span class="text-danger">اربط الشركة بالفرع</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @can('admin-Company-edit')
                                         <label class="switch switch-primary">
                                             <input type="checkbox" class="switch-input status"
                                                 data-url="{{ route('admin.vendors_company_update_status', $company['id']) }}"
@@ -130,9 +137,10 @@
                                         <a data-url="{{ route('admin.vendors_company_delete', $company->id) }}"
                                             class="btn btn-label-danger delete">{{ __('admin.delete') }}</a>
                                     @endcan
-                                    {{-- @can('')
-                                        <a href="" class="btn btn-label-secondary">{{ __('admin.show') }}</a>
-                                        @endcan --}}
+                                    @can('admin-Company-show')
+                                    <a href="{{ route('admin.vendors_company_show', $company->id) }}"
+                                        class="btn btn-label-dark">{{ __('admin.show') }}</a>
+                                @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -146,7 +154,8 @@
                             <th>#</th>
                             <th>{{ __('admin.vendors_companies_company_name') }}</th>
                             <th>{{ __('admin.vendors_companies_company_owner_name') }}</th>
-                            <th>{{ __('admin.vendors_companies_company_emirate') }}</th>
+                            <th>{{ __('admin.branch_branch_name') }}</th>
+                            <th>{{ __('admin.status') }}</th>
                             <th>{{ __('admin.branch_branch_actions') }}</th>
                         </tr>
                     </thead>
@@ -183,16 +192,19 @@
 
         <script>
             $('#form1').keyup(function(event) {
-
+                // تحقق من طول النص المدخل
                 if (event.target.value.length >= 3) {
                     console.log('changed');
                     var searchURL = $(this).data('url');
                     var token = $('#_token').val();
                     console.log(searchURL);
+        
+                    // إخفاء وإظهار الجداول
                     $('#table1').hide();
                     $('#table2').show();
+        
+                    // إرسال طلب AJAX
                     $.ajax({
-
                         type: 'POST',
                         url: searchURL,
                         data: {
@@ -203,38 +215,52 @@
                         success: function(data) {
                             let output = '';
                             console.log(data.results);
+        
+                            // توليد HTML لنتائج البحث
                             data.results.forEach(function(item, index) {
-
                                 console.log(item);
-                                output = output +
-                                    '<tr>' +
-                                    '<td>' + index + 1 + '</td>' +
-                                    '<td>' +
-                                    item.name.en + '|' + item.name.ar + '</td>' +
-
-                                    '<td>' + item.vendors[0].name.en + '|' + item.vendors[0]
-                                    .name.ar + '</td>' +
-                                    '<td>' + item.emirate.name.en + '|' + item.emirate.name.ar +
-                                    '</td>' +
-                                    '<td>' +
-                                    '<a href="edit/' + item.id +
-                                    '" class="btn btn-label-secondary">{{ __('admin.branch_action_edit') }}</a>' +
-                                    '<a id="delete" class="btn btn-label-danger delete" data-url="{{ route('admin.vendors_company_delete', '+ item.id+') }}">{{ __('admin.branch_action_delete') }}</a>' +
-                                    '</td>' +
-                                    '</tr>'
+                                output += '<tr>' +
+                                          '<td>' + (index + 1) + '</td>' +
+                                          '<td>' + item.name.en + ' | ' + item.name.ar + '</td>';
+        
+                                if (item.vendor) {
+                                    output += '<td>' + item.vendor.name.en + ' | ' + item.vendor.name.ar + '</td>';
+                                } else {
+                                    output += '<td>اربط الشركة بمالكها</td>';
+                                }
+        
+                                output += '<td>' + item.branch.branch_name.en + ' | ' + item.branch.branch_name.ar + '</td>' +
+                                          '<td>' +
+                                          '<label class="switch switch-primary">' +
+                                          '<input type="checkbox" class="switch-input status" ' +
+                                          'data-url="{{ route('admin.vendors_company_update_status', ' + item.id + ') }}" ' +
+                                          'name="status" id="status"' + (item.status ? ' checked' : '') + ' />' +
+                                          '<span class="switch-toggle-slider">' +
+                                          '<span class="switch-on"><i class="bx bx-check"></i></span>' +
+                                          '<span class="switch-off"><i class="bx bx-x"></i></span>' +
+                                          '</span>' +
+                                          '</label>' +
+                                          '</td>' +
+                                          '<td>' +
+                                          '<a href="edit/' + item.id + '" class="btn btn-label-secondary">{{ __("admin.branch_action_edit") }}</a>' +
+                                          '<a id="delete" class="btn btn-label-danger delete" data-url="{{ url('admin/vendors_company_delete') }}/' + item.id + '">' + '{{ __("admin.branch_action_delete") }}</a>' +
+                                          '</td>' +
+                                          '</tr>';
                             });
+        
+                            // تحديث الـ DOM بالنتائج
                             $('#search').html(output);
-
                         }
                     });
                 } else {
+                    // إعادة عرض الجدول الأصلي إذا كان الإدخال أقل من 3 حروف
                     $('#table2').hide();
                     $('#table1').show();
-
                 }
-
             });
         </script>
+        
+        
         <script>
             $(document).ready(function() {
                 $('#table2').hide();
@@ -402,7 +428,8 @@
                         //     text: checked?"Branch Activated!":"Branch Deactivated!",
                         //     icon: "info"
                         // });
-                        $('.toast-body').html(`${checked?"Company Vendo Activated!":"Company Vendor Deactivated!"}`);
+                        $('.toast-body').html(
+                            `${checked?"Company Vendo Activated!":"Company Vendor Deactivated!"}`);
                         $('.toast').removeClass("d-none");
                         if (checked) {
 

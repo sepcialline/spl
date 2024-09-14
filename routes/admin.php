@@ -1,42 +1,46 @@
 <?php
 
-use App\Http\Controllers\Admin\Accounting\AccountTreeController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\RecivedController;
 use App\Http\Controllers\Admin\City\CityController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\Branch\BranchController;
+use App\Http\Controllers\Admin\RiderLocationController;
 use App\Http\Controllers\Admin\GeneralSettingController;
+use App\Http\Controllers\Admin\Product\ProductController;
+use App\Http\Controllers\Admin\Shopify\ShopifyController;
+use App\Http\Controllers\Admin\Expenses\ExpensesController;
+use App\Http\Controllers\Admin\Shipment\ShipmentController;
+use App\Http\Controllers\Admin\Transfer\TransferController;
 use App\Http\Controllers\Admin\UserManagment\RoleController;
+use App\Http\Controllers\Admin\Warehouse\WarehouseController;
+use App\Http\Controllers\Admin\Profile\AdminProfileController;
+use App\Http\Controllers\Admin\CompanyVendors\VendorController;
+use App\Http\Controllers\Admin\Shopify\ShopifyOrdersController;
+use App\Http\Controllers\Admin\Accounting\AccountTreeController;
+use App\Http\Controllers\Admin\CompanyVendors\CompanyController;
+use App\Http\Controllers\Admin\UserManagment\EmployeeController;
 use App\Http\Controllers\Admin\FinanceYear\FinanceYearController;
 use App\Http\Controllers\Admin\UserManagment\UserAdminController;
+use App\Http\Controllers\Admin\UserManagment\UserRiderController;
 use App\Http\Controllers\Admin\MailSettings\MailSettingsController;
 use App\Http\Controllers\Admin\Accounting\ChartOfAccountsController;
-use App\Http\Controllers\Admin\CarController;
-use App\Http\Controllers\Admin\CompanyVendors\CompanyController;
-use App\Http\Controllers\Admin\Expenses\ExpensesController;
+use App\Http\Controllers\Admin\Accounting\FinalAccountController;
+use App\Http\Controllers\Admin\CompanyVendors\ServiceRequestController;
+use App\Http\Controllers\Admin\CompensationRequestController;
+use App\Http\Controllers\Admin\UserManagment\UserCustomerController;
+use App\Http\Controllers\Admin\ProductDetails\ProductDetailsController;
+use App\Http\Controllers\Admin\TransferProduct\TransferProductController;
+use App\Http\Controllers\Admin\WarehouseReport\WarehouseReportController;
 use App\Http\Controllers\Admin\FirebaseSettings\FirebaseSettingsController;
 use App\Http\Controllers\Admin\GoogleMapSettings\GoogleMapSettingsController;
-use App\Http\Controllers\Admin\Product\ProductController;
-use App\Http\Controllers\Admin\ProductDetails\ProductDetailsController;
-use App\Http\Controllers\Admin\Profile\AdminProfileController;
-use App\Http\Controllers\Admin\RecivedController;
-use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\RiderLocationController;
-use App\Http\Controllers\Admin\Shipment\ShipmentController;
-use App\Http\Controllers\Admin\Shopify\ShopifyController;
-use App\Http\Controllers\Admin\Shopify\ShopifyOrdersController;
-use App\Http\Controllers\Admin\TransactionController;
-use App\Http\Controllers\Admin\Transfer\TransferController;
-use App\Http\Controllers\Admin\TransferProduct\TransferProductController;
-use App\Http\Controllers\Admin\UserManagment\EmployeeController;
-use App\Http\Controllers\Admin\UserManagment\UserCustomerController;
-use App\Http\Controllers\Admin\UserManagment\UserRiderController;
-use App\Http\Controllers\Admin\Warehouse\WarehouseController;
-use App\Http\Controllers\Admin\WarehouseReport\WarehouseReportController;
 use App\Http\Controllers\Admin\WhatsappSmsSettings\WhatsappSmsSettingsController;
-use App\Http\Controllers\Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,8 +55,8 @@ use App\Http\Controllers\Controller;
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('login', [AuthController::class, 'Login'])->name('login.form'); // روت تسجيل الدخول للادارة
-    Route::post('/login/check', [AuthController::class, 'LoginRequest'])->name('check.login'); // روت التحقق من المستخدم و صلاحية
+    Route::get('login', [AuthController::class, 'Login'])->name('login.form'); //
+    Route::post('/login/check', [AuthController::class, 'LoginRequest'])->name('check.login');
     Route::get('forget', [AuthController::class, 'Forget'])->name('forget_password');
     Route::post('forget/password', [AuthController::class, 'store'])->name('reset_password_link');
 
@@ -63,24 +67,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/logout', [AuthController::class, 'Logout'])->name('logout'); // Logout Route
         // Start Dashboard
-        Route::get('/', [DashboardController::class, 'index'])->name('index'); // روت تسجيل الدخول للادارة
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('index'); // روت تسجيل الدخول للادارة
+        Route::get('/', [DashboardController::class, 'index'])->name('index'); //
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('index'); //
+
+        Route::get('/mark_as_read/{id}', [DashboardController::class, 'ReadNotification'])->name('ReadNotification');
+
         // End Dashboard
 
 
         //start user management
         //بداية admin profile
         Route::controller(AdminProfileController::class)->group(function () {
-            Route::get('/users/admin/profile', 'index')->name('admin_profile_index');
-            // Route::get('/users/admin/add', 'create')->name('users_admin_create');
-            // Route::get('/users/admin/edit/{id}', 'edit')->name('users_admin_edit');
-            // Route::post('/users/admin/update', 'updateAdmin')->name('users_admin_update');
-            // Route::post('/users/admin/store', 'store')->name('users_admin_store');
-            // Route::delete('/users/admin/destroy/{id}', 'destroy')->name('users_admin_destroy');
-            // Route::delete('/users/admin/delete', 'delete_admin')->name('users_admin_delete');
-            // Route::get('/users/admin/{id}', 'show')->name('users_admin_show');
-            // Route::post('/users/admin/search', 'search')->name('users_admin_search');
-            Route::post('/admin/update_password', 'update_password')->name('admin_update_password');
+            Route::get('/users/admin/profile/profile', 'index')->name('admin_profile_index');
+            Route::post('/users/admin/update_password/profile', 'update_password')->name('admin_update_password');
+            Route::get('/users/admin/profile/edit/profile', 'edit')->name('admin_profile_edit');
+            Route::post('/users/admin/profile/update/profile', 'update')->name('admin_profile_update');
+
         }); //نهاية  admin profile
 
         //بداية admin users
@@ -151,11 +153,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/vendors/company/search', 'search')->name('vendors_company_search');
             Route::get('/vendors/company/create', 'create')->name('vendors_company_create');
             Route::post('/vendors/company/store', 'store')->name('vendors_company_store');
+            Route::get('/vendors/company/show/{id}', 'show')->name('vendors_company_show');
             Route::get('/emirate/city/', 'getCieiesByEmirate')->name('vendors_company_get_cities');
             Route::get('/vendors/company/edit/{id}', 'edit')->name('vendors_company_edit');
             Route::post('/vendors/company/update', 'update')->name('vendors_company_update');
             Route::get('/vendors/company/delete/{id}', 'destroy')->name('vendors_company_delete');
-            Route::post('/vendors/ompany/update-status/{id}', 'update_status')->name('vendors_company_update_status');
+            Route::post('/vendors/company/update-status/{id}', 'update_status')->name('vendors_company_update_status');
+            Route::get('vendors/company/bank-delete/{bank_id}', 'deleteAccountBank')->name('companies.bank_accounts.destroy');
+
+        });
+
+        Route::controller(ServiceRequestController::class)->group(function(){
+            Route::get('vendors/company/service_requests','index')->name('services_company_index');
+            Route::get('vendors/company/service_requests/show/{id}','show')->name('services_company_show');
+            Route::get('vendors/company/service_requests/edit/{id}','edit')->name('services_company_edit');
+            Route::post('vendors/company/service_requests/update/{id}','update')->name('services_company_update');
+        });
+
+        Route::controller(CompensationRequestController::class)->group(function () {
+            Route::get('vendors/company/compensation_request', 'index')->name('compensation_request_index');
+            Route::get('vendors/company/compensation_request/create', 'create')->name('compensation_request_create');
+            Route::post('vendors/company/compensation_request/store', 'store')->name('compensation_request_store');
+            Route::get('vendors/company/compensation_request/edit/{id}', 'edit')->name('compensation_request_edit');
+            Route::post('vendors/company/compensation_request/update', 'update')->name('compensation_request_update');
+            Route::get('vendors/company/compensation_request/show/{id}', 'show')->name('compensation_request_show');
+        });
+
+        // vendors
+        Route::controller(VendorController::class)->group(function () {
+            Route::get('/vendors/list', 'index')->name('vendors_index');
+            Route::post('/vendors/search', 'search')->name('vendors_search');
+            Route::get('/vendors/create', 'create')->name('vendors_create');
+            Route::post('/vendors/store', 'store')->name('vendors_store');
+            Route::get('/vendors/show/{id}', 'show')->name('vendors_show');
+            Route::get('/vendors/edit/{id}', 'edit')->name('vendors_edit');
+            Route::post('/vendors/update', 'update')->name('vendors_update');
+            Route::get('/vendors/delete/{id}', 'destroy')->name('vendors_delete');
+            Route::post('/vendors/update-status/{id}', 'update_status')->name('vendors_update_status');
+            Route::post('/vendors/change_password', 'change_password')->name('vendors_change_password');
         });
 
 
@@ -187,18 +222,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/account/transiction/journals', 'journals')->name('account.journals');
             Route::get('/account/transiction/balance_review', 'balance_review')->name('account.balance_review'); // ميزان المراجعة
 
+            Route::post('/account/transiction/journal/delete', 'delete')->name('account.journal.delete');   //delete journal
+
             Route::get('/account/transiction/journal_voucher', 'journalVoucher')->name('account.journal_voucher');
             Route::post('/account/transiction/journal_voucher/store', 'storeJournalVoucher')->name('account.store_journal_voucher');
+            Route::get('/account/transiction/print_journal_voucher/{number}', 'printJournalVoucher')->name('account.print_journal_voucher');
+            Route::get('/account/transiction/edit_journal_voucher/{number}','editJournalVoucher')->name('account.edit_journal_voucher');
+            Route::post('/account/transiction/journal_voucher/update', 'updateJournalVoucher')->name('account.update_journal_voucher');
 
             Route::get('/account/transiction/recipt_voucher', 'reciptVoucher')->name('account.recipt_voucher');
             Route::post('/account/transiction/recipt_voucher/store', 'storeReciptVoucher')->name('account.store_recipt_voucher');
             Route::get('/account/transiction/print_recipt_voucher/{number}', 'printReciptVoucher')->name('account.print_recipt_voucher');
+            Route::get('/account/transiction/edit_recipt_voucher/{number}','editReciptVoucher')->name('account.edit_recipt_voucher');
+            Route::post('/account/transiction/recipt_voucher/update', 'updateReciptVoucher')->name('account.update_recipt_voucher');
+
 
             Route::get('/account/transiction/payment_voucher', 'paymentVoucher')->name('account.payment_voucher');
             Route::post('/account/transiction/payment_voucher/store', 'storepaymentVoucher')->name('account.store_payment_voucher');
             Route::get('/account/transiction/print_payment_voucher/{number}', 'printPaymentVoucher')->name('account.print_payment_voucher');
+            Route::get('/account/transiction/edit_payment_voucher/{number}','editPaymentVoucher')->name('account.edit_payment_voucher');
+            Route::post('/account/transiction/payment_voucher/update', 'updatePaymentVoucher')->name('account.update_payment_voucher');
 
             Route::post('/account/transiction/bulk', 'bulk_payment')->name('account.bulk_payment');
+
+            Route::post('/account/transiction/post_voucher', 'post_voucher')->name('account.post_voucher');
+            Route::post('/account/transiction/edit_voucher/{number}/{type}', 'edit_voucher')->name('account.edit_voucher');
+
+            Route::get('/account/transiction/cacl', 'cacl')->name('account.cacl');
+            Route::post('/account/transiction/calculate', 'calculate')->name('account.calculate');
         });
 
         // Route::get('/account/chart/create', [ChartOfAccountsController::class, 'create'])->name('account.create');
@@ -228,20 +279,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/branch/update', 'updateBranch')->name('branch_update');
             Route::post('/branch/store', 'store')->name('branch_store');
 
-            Route::get('branch/account-details-rev/{id}','show_account_details_page_rev')->name('branch_account_details_rev');
-            Route::get('branch/account-details-vat-on-sales/{id}','show_account_details_page_vat_on_sales')->name('branch_account_details_vat_on_sales');
-            Route::get('branch/account-details-vat-on-purchase/{id}','show_account_details_page_vat_on_purchase')->name('branch_account_details_vat_on_purchase');
-            Route::get('branch/account-details-exp/{id}','show_account_details_page_exp')->name('branch_account_details_exp');
+            Route::get('branch/account-details-rev/{id}', 'show_account_details_page_rev')->name('branch_account_details_rev');
+            Route::get('branch/account-details-vat-on-sales/{id}', 'show_account_details_page_vat_on_sales')->name('branch_account_details_vat_on_sales');
+            Route::get('branch/account-details-vat-on-purchase/{id}', 'show_account_details_page_vat_on_purchase')->name('branch_account_details_vat_on_purchase');
+            Route::get('branch/account-details-exp/{id}', 'show_account_details_page_exp')->name('branch_account_details_exp');
 
-            Route::post('branch/branch_account','store_account_details')->name('store_branch_account_details');
+            Route::post('branch/branch_account', 'store_account_details')->name('store_branch_account_details');
 
             Route::delete('/branch/destroy', 'destroy')->name('branch_destroy');
             Route::post('/branch/{id}', [BranchController::class, 'delete_branch'])->name('branch_delete');
             Route::get('/branch/{id}', 'show')->name('branch_show');
             Route::post('/branch/update-status/{id}', 'updateStatus')->name('branch_status_update');
-
-
-
         }); //نهاية  الفروع
 
         //بداية المناطق
@@ -389,6 +437,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('/warehouse_report/{id}', [WarehouseController::class, 'delete_warehouse'])->name('warehouse_report_delete');
             Route::get('/warehouse_report/{id}', 'show')->name('warehouse_report_show');
             Route::post('/warehouse_report/update-status/{id}', 'updateStatus')->name('warehouse_report_status_update');
+
+
         });
         //نهاية warehouse report
         //بداية  products
@@ -402,7 +452,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/products/destroy/{id}', 'destroy')->name('products_destroy');
             Route::post('/products/{id}', [ProductController::class, 'delete_products'])->name('products_delete');
             Route::get('/products/{id}', 'show')->name('products_show');
-            //  Route::post('/products/update-status/{id}', 'updateStatus')->name('warehouse_status_update');
+            Route::get('/products/approved/{id}', 'approved')->name('product_approved');
 
         });
         //نهاية products
@@ -525,6 +575,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
             Route::post('payments/download', 'payments_export')->name('payments_download');
+
+
+            Route::post('posted_journal_voucher', 'posted_journal_voucher')->name('posted_journal_voucher');
+
+
+
+            Route::get('/companies_balance','companies_balance')->name('companies_balance');
         });
 
 
@@ -542,7 +599,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('pay_to_merchant', 'payToTheMerchant')->name('transactions_pay_to_the_merchant');
         });
 
-        Route::controller(RecivedController::class)->group(function(){
+        Route::controller(RecivedController::class)->group(function () {
             Route::get('/recived_shipment', 'index')->name('recived_shipment_index');
             Route::get('/recived_shipment/add', 'create')->name('recived_shipment_create');
             Route::get('/recived_shipment/edit/{id}', 'edit')->name('recived_shipment_edit');
@@ -555,10 +612,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/recived_shipment/update-status/{id}', 'updateStatus')->name('recived_shipment_status_update');
         });
 
+
+        Route::controller(FinalAccountController::class)->group(function(){
+            Route::get('/account/get_account_report','getAccountReport')->name('account.getAccountReport');
+            // Route::get('/account/profits_and_losses','get_profits_and_losses')->name('account.profits_and_losses');
+        });
+
         Route::controller(RiderLocationController::class)->group(function () {
             Route::get('rider_location', 'index')->name('rider_location');
             Route::get('rider_location_response', 'show')->name('rider_location_response');
         });
+
 
 
     }); //end admin auth area

@@ -17,15 +17,19 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}" alt="avatar"
-                                class="rounded-circle img-fluid" style="width: 150px;">
+                            @if ($data->photo)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                             <h5 class="my-3">{{ $data->name }}</h5>
-                            {{-- <p class="text-muted mb-1">{{ $data->emirate->name }} :{{ $data->city_id??__('admin.not_assigned') }} </p> --}}
-                            {{-- <span class="badge rounded-pill bg-label-primary">{{ $role[0]->name }}</span> --}}
+
                         </div>
                         <div class="d-flex justify-content-around mb-4">
-                            {{-- <a href="edit/{{ $data['id'] }}"
-                                class="btn btn-label-dark">{{ __('admin.branch_action_edit') }}</a> --}}
+                            <a href="{{ route('employee.employee_profile_edit') }}"
+                                class="btn btn-label-dark">{{ __('admin.branch_action_edit') }}</a>
 
                             <a href="{{ $data['id'] }}" data-bs-toggle="modal" data-bs-target="#update_password"
                                 class="btn btn-label-warning">{{ __('admin.change_password') }}</a>
@@ -43,9 +47,7 @@
                                         <h3 class="mb-4">{{ __('admin.change_password') }}</h3>
                                     </div>
 
-                                    <form id="update_passwordForm" class="row g-3 mt-3" method="POST"
-                                        class=" needs-validation" novalidate
-                                        action="{{ route('admin.admin_update_password') }}">
+                                    <form id="update_passwordForm" method="post" action="{{route('employee.employee_update_password')}}" class="row g-3 needs-validation" novalidate>
                                         @csrf
                                         <div class="col-12">
                                             <label class="form-label"
@@ -55,14 +57,14 @@
                                             <div class="input-group input-group-merge mb-2">
 
                                                 <input type="text" id="current_password" name="current_password"
-                                                    class="form-control"
+                                                    required class="form-control"
                                                     placeholder="{{ __('admin.current_password') }}" />
                                             </div>
                                             <label class="form-label"
                                                 for="modalEnableOTPPhone">{{ __('admin.new_password') }}</label>
                                             <div class="input-group input-group-merge">
 
-                                                <input type="text" id="new_password" name="new_password"
+                                                <input type="text" id="new_password" name="new_password" required
                                                     class="form-control"
                                                     placeholder="{{ __('admin.new_password') }}" />
                                             </div>
@@ -87,7 +89,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Full Name</p>
+                                    <p class="mb-0">{{ __('admin.name') }}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     <p class="text-muted mb-0">{{ $data->name }}</p>
@@ -96,7 +98,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Email</p>
+                                    <p class="mb-0">{{ __('admin.email') }}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     <p class="text-muted mb-0">{{ $data->email }}</p>
@@ -105,7 +107,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Phone</p>
+                                    <p class="mb-0">{{ __('admin.mobile') }}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     <p class="text-muted mb-0">{{ $data->mobile }}</p>
@@ -114,7 +116,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Status</p>
+                                    <p class="mb-0">{{ __('admin.status') }}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     {{-- <p class="text-muted mb-0">{{ $data->status==1?'Yes':'No'}}</p> --}}
@@ -124,23 +126,6 @@
                             </div>
 
                             <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <p class="mb-0">Branch</p>
-                                </div>
-                                <div class="col-sm-9">
-                                    <p class="text-muted mb-0">{{ $data->branch->branch_name ?? __('admin.not_assigned') }}</p>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <p class="mb-0">Address</p>
-                                </div>
-                                <div class="col-sm-9">
-                                    <p class="text-muted mb-0">{{ $data->address }}</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -336,6 +321,28 @@
                     });
                 });
             })
+        </script>
+        <script>
+            // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function() {
+                'use strict'
+
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.querySelectorAll('.needs-validation')
+
+                // Loop over them and prevent submission
+                Array.prototype.slice.call(forms)
+                    .forEach(function(form) {
+                        form.addEventListener('submit', function(event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
         </script>
     @endsection
 </x-employee-layout>

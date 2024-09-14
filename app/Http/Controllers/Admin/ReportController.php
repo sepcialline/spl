@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exports\EmiratePostExport;
-use App\Exports\PaymentExport;
 use Carbon\Carbon;
 use App\Models\Rider;
 use App\Models\Cities;
+use App\Models\Company;
 use App\Models\Payment;
 use App\Models\Branches;
 use App\Models\Emirates;
 use App\Models\Settings;
 use App\Models\Shipment;
+use App\Models\AccountTree;
 use Illuminate\Http\Request;
 use App\Models\VendorCompany;
+use App\Exports\PaymentExport;
 use App\Models\PaymentMethods;
 use App\Helpers\ShipmentHelper;
+use App\Http\Middleware\Branch;
 use App\Models\ShipmentStatuses;
+use App\Models\AccountingEntries;
+use App\Exports\EmiratePostExport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\Branch;
-use App\Models\Company;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Calculation\TextData\Format;
 
@@ -57,10 +59,9 @@ class ReportController extends Controller
         $query = Payment::query();
 
         $request = request();
-        $last_30_days = '';
-        $all_payments = ShipmentHelper::searchPayments($request, $query);
-        $last_30_days = ShipmentHelper::searchPayments($request, $query)->whereBetween('date', [Carbon::parse($date_to)->subDay(30)->format('Y-m-d'), $date_to]);
-        $data['payments_last_30_days'] = $last_30_days->pluck('id');
+        $last_balance_days = ''; // it change to all payments not just last 30 days
+        $all_payments = ShipmentHelper::searchPayments($request, clone  $query);
+        $last_balance_days = ShipmentHelper::searchPayments($request, clone  $query)->where('date', '<=', $date_to);
 
 
         // return $all_payments->whereBetween('date', [Carbon::parse($date_to)->subDay(1)->format('Y-m-d'), $date_to])->get();
@@ -124,10 +125,6 @@ class ReportController extends Controller
         $data['total'] = $total;
         $data['net_income'] = $net_income;
         $data['vendor_account'] = $vendor_account;
-        // $data['total'] = Payment::whereIn('id', $all_payments->pluck('id'))->where('deleted_at', Null)->where('payment_method_id', '!=', 3)->sum('amount');
-        // $data['net_income'] =  $sum_cod_sp_income +  $sum_tr_bank_sp_income + (- ($sum_transfer_to_vendor_company));
-        // $data['vendor_account'] =  ($sum_cod_vendor_balance) +  ($sum_tr_bank_vendor_balance) - (- ($sum_transfer_to_vendor_company));
-
 
         // calc vandor due
         $query = Shipment::query()->whereBetween('delivered_date', [$date_from, $date_to]);
@@ -148,7 +145,6 @@ class ReportController extends Controller
 
         // $data['companies_id'] =collect($data['payments'])->groupBy('company_id')->pluck('company_id');
         $data['companies_id'] = Payment::whereIn('id', collect($data['payments'])->pluck('id'))->groupBy('company_id')->pluck('company_id');
-        $data['companies_id_30'] = Payment::whereIn('id', $data['payments_last_30_days'])->groupBy('company_id')->pluck('company_id');
         $data['vendor_amount_due'] =  Payment::whereIn('shipment_id',  $data['shipments_vendor_due']->pluck('id'))->sum('due_amount');
 
 
@@ -186,73 +182,16 @@ class ReportController extends Controller
         }
 
 
-        // return $data;
-        ############# end table summary ###########################################################################
-
-        ############# last 30 days vendor Balance #################################################################
 
 
-
-        $data['last_30_days_vendor_account'] = Payment::whereIn('id', $data['payments_last_30_days'])
-            ->groupBy('date')
-            ->get();
-        $days = array();
-        $sum_days_30_2_with_days = array();
-        $days_30_1 = array();
-        $days_30_1_with_days = array();
-        $days_30_2 = array();
-        $days_30_2_with_days = array();
-        foreach ($data['last_30_days_vendor_account'] as $day) {
-            $pay1 = Payment::whereIn('id', $data['payments_last_30_days'])->where('due_amount', '<', 0)->where('is_vendor_get_due', 0)->whereDate('date', $day->date)->sum('due_amount');
-            $pay2 = Payment::whereIn('id', $data['payments_last_30_days'])->whereDate('date', $day->date)->where('is_vendor_get_due', 0)->where('due_amount', '>', 0)->sum('due_amount');
-            $days_30_1[] = abs($pay1);
-            $days_30_2[] = $pay2;
-            $days[] = $day->date;
-            $days_30_1_with_days[] =  $pay1;
-            $days_30_2_with_days[] = $pay2;
-            $sum_days_30_2_with_days[] = $day->date . '( ' . $pay2 - abs($pay1) . ' AED )';
+        if (Request()->company_id && Request()->company_id != 0) {
+            $last_balance_days->where('company_id', Request()->company_id);
         }
-
-        $data['days'] = $days;
-        $data['days_30_1'] = $days_30_1_with_days;
-        $data['days_30_2'] = $days_30_2_with_days;
-        $data['sum_days_30'] = $sum_days_30_2_with_days;
-        // return [array_sum($days_30_2) - array_sum($days_30_1)];
-        // return $data['last_30_days_vendor_account'];
-
-        $data['last_30_days_vendor_account'] = array_sum($days_30_2) - array_sum($days_30_1);
+        $data['last_balance'] = $last_balance_days->where('is_vendor_get_due', 0)->sum('due_amount');
         ###########################################################################################################
 
 
 
-        ###################### summary branches ####################################################################
-
-        // $branches_ids = $all_payments->groupBy('branch_created')->pluck('branch_created');
-        // $data['summary_branches'] = array();
-
-        // // // $summary_branches_payments = ShipmentHelper::searchPayments($request, $query)->get();
-
-        // foreach ($branches_ids as $branch) {
-        //     $vendors_ids = $all_payments->groupBy('company_id')->where('branch_created',$branch)->pluck('company_id');
-        //     foreach ($vendors_ids as $vendor){
-        //         $payment_vendor_in = ShipmentHelper::searchPayments($request, $query)->where('company_id',$vendor)->where('in_out',0)->get();
-        //         $payment_vendor_out = ShipmentHelper::searchPayments($request, $query)->where('company_id',$vendor)->where('in_out',1)->get();
-
-
-        //     $data['summary_branches'][] =[
-        //         'branch_name'=>Branches::where('id',$branch)->first()->branch_name,
-        //         'vendor'=> VendorCompany::where('id',$vendor)->first()->name,
-        //         'inside_payments'=> count($payment_vendor_in),
-        //         // 'inside_payments_delivery_fees'=>ShipmentHelper::searchPayments($request, $query)->where('branch_created',$branch)->where('in_out',0)->sum('delivery_fees') / 0,
-        //         // 'inside_payments_delivery_fees'=>0,
-        //         'outside_payments'=> count($payment_vendor_out),
-        //         'outside_payments_delivery_fees'=>ShipmentHelper::searchPayments($request, $query)->where('branch_created',$branch)->where('in_out',1)->sum('delivery_fees') / 2,
-        //     ];
-        //     }
-
-    // }
-
-        // return $data['summary_branches'];
 
         ###########################################################################################################
         if (request()->input('action') == 'export') {
@@ -312,47 +251,7 @@ class ReportController extends Controller
 
         $data['company'] = VendorCompany::where('id', $request->company_id)->first();
         $data['setting'] = Settings::first();
-        // اذا مو مقسمة هات مستحقات سبيشل لاين مضروبة بعدد المرات
-        // $data['no_split_shipments'] = Shipment::select('company_id', 'specialline_due', DB::raw('COUNT(*) as count'))
-        //     ->whereBetween('delivered_date', [$date_from, $date_to])
-        //     ->where('company_id', $request->company_id)
-        //     ->where('is_split_payment', 0)
-        //     ->where('status_id', 3)
-        //     ->where('is_rider_has', 0)
-        //     ->where('is_vendor_has', 1)
-        //     ->where('deleted_at', Null)
-        //     ->where('payment_method_id', 3)
-        //     ->where('specialline_due', '<>', 0)
-        //     ->groupBy('specialline_due')
-        //     ->get();
 
-        // // اذا مقسمة هات مستحقات سبيشل لاين ناقص الدفعات المحولة لسبيشل لاين أو مسلنمة كاش
-        // $all_split_shipments = Shipment::select('id', 'company_id', 'specialline_due', DB::raw('COUNT(*) as count'))
-        // ->whereBetween('delivered_date', [$date_from, $date_to])
-        // ->where('company_id', $request->company_id)
-        // ->where('is_split_payment', 1)
-        // ->where('status_id', 3)
-        // ->where('is_rider_has', 0)
-        // ->where('is_vendor_has', 1)
-        // ->where('deleted_at', Null)
-        // ->where('payment_method_id', 3)
-        // ->where('specialline_due', '<>', 0)
-        // ->get();
-
-        // $data['split_shipments'] = [];
-        // foreach ($all_split_shipments as $shipment) {
-        //     $payment_to_cash = Payment::where('shipment_id', $shipment->id)->where('payment_method_id', 1)->first()->amount ?? 0;
-        //     $payment_to_sp = Payment::where('shipment_id', $shipment->id)->where('payment_method_id', 2)->first()->amount ?? 0;
-
-        //     $due = $shipment->specialline_due - ($payment_to_cash + $payment_to_sp);
-        //     if ($due > 0) {
-        //         $data['split_shipments'][] = [
-        //             'company_id' => $shipment->company_id,
-        //             'specialline_due' => $due,
-        //             'count' => 1
-        //         ];
-        //     }
-        // }
 
         $data['shipments'] = array();
         $data['payments'] = Payment::where('company_id', $request->company_id)
@@ -387,5 +286,361 @@ class ReportController extends Controller
     public function payments_export(Request $request)
     {
         return Excel::download(new PaymentExport, '' . Carbon::today()->toDateString() . '.xlsx');
+    }
+
+
+
+    public function posted_journal_voucher(Request $request)
+    {
+        // استخدم eager loading لتحميل العلاقات المرتبطة مسبقاً
+        $payments = Payment::where('posted_journal_voucher', 0)
+            ->whereNull('deleted_at')
+            ->where('date', '>=', Carbon::parse('2024-08-01'))
+            ->with(['shipment', 'company'])
+            ->limit(300)
+            ->get();
+
+        // احدث رقم قيد
+        $latestAccountingEntry =  AccountingEntries::where('journal_type_id', 4)->select('number', 'journal_type_id')->latest()->first();
+
+
+        $voucher_nmber = $latestAccountingEntry ? $latestAccountingEntry->number + 1 : 10000001;
+
+        foreach ($payments as $payment) {
+            $shipment = $payment->shipment;
+            $vendor_account = $payment->company;
+            $branch_delivered_id = $payment->branch_created;
+
+            $vendor_account = VendorCompany::where('id', $payment->company_id)->first();
+            $branch_rev_created = Branches::where('id', $shipment->company->branch_id)->first() ?? Branches::where('id', 2)->first();
+            $branch_rev_delivered = Branches::where('id', $branch_delivered_id)->first();
+            $cash_account = AccountTree::where('is_cash', 1)->first();
+            $bank_account = AccountTree::where('is_bank', 1)->first();
+
+
+            $branch_rev_created_name = AccountTree::where('account_code', $branch_rev_created->revenuse_account)->first();
+            $branch_rev_delivered_name = AccountTree::where('account_code', $branch_rev_delivered->revenuse_account)->first();
+            $branch_created_vat_on_sales = AccountTree::where('account_code', $branch_rev_created->vat_on_sales)->first();
+            $branch_delivered_vat_on_de_sales = AccountTree::where('account_code', $branch_rev_delivered->vat_on_sales)->first();
+            $vendor_account_name = AccountTree::where('account_code', $vendor_account->account_number)->first();
+
+
+
+            // استعلامات للفرع المنشئ والفرع المستلم
+            $branch_rev_created = Branches::find($shipment->branch_created);
+            $branch_rev_delivered = Branches::find($payment->branch_created);
+
+            $cash_account = AccountTree::where('is_cash', 1)->first();
+            $bank_account = AccountTree::where('is_bank', 1)->first();
+
+            if ($vendor_account && $branch_rev_created && $cash_account && $bank_account) {
+                // حسابات الفرع المنشئ والفرع المستلم
+                $created_delivered_branch = [];
+                if ($shipment->company->branch_id != $payment->branch_created) {
+                    $created_delivered_branch = [
+                        '0' => [ // created branch
+                            'code' => $branch_rev_created->revenuse_account,
+                            'name' => ['ar' => $branch_rev_created_name->getTranslation('account_name', 'ar'), 'en' => $branch_rev_created_name->getTranslation('account_name', 'en')],
+                            'vat' => $branch_rev_created->vat_on_sales,
+                            'vat_name' => ['ar' => $branch_created_vat_on_sales->getTranslation('account_name', 'ar'), 'en' => $branch_created_vat_on_sales->getTranslation('account_name', 'en')]
+                        ],
+                        '1' => [ // delivered branch
+                            'code' => $branch_rev_delivered->revenuse_account,
+                            'name' => ['ar' => $branch_rev_delivered_name->getTranslation('account_name', 'ar'), 'en' => $branch_rev_delivered_name->getTranslation('account_name', 'en')],
+                            'vat' => $branch_rev_delivered->vat_on_sales,
+                            'vat_name' => ['ar' => $branch_delivered_vat_on_de_sales->getTranslation('account_name', 'ar'), 'en' => $branch_created_vat_on_sales->getTranslation('account_name', 'en')]
+                        ],
+                    ];
+                } else {
+                    $created_delivered_branch = [
+                        '0' => [ // created branch and delivered
+                            'code' => $branch_rev_created->revenuse_account,
+                            'name' => ['ar' => $branch_rev_created_name->getTranslation('account_name', 'ar'), 'en' => $branch_rev_created_name->getTranslation('account_name', 'en')],
+                            'vat' => $branch_rev_created->vat_on_sales,
+                            'vat_name' => ['ar' => $branch_created_vat_on_sales->getTranslation('account_name', 'ar'), 'en' => $branch_created_vat_on_sales->getTranslation('account_name', 'en')]
+                        ],
+                    ];
+                }
+
+                // حسابات الضرائب والإيرادات
+                foreach ($created_delivered_branch as $key => $value) {
+                    ShipmentHelper::accounting_entries(
+                        $debit_account_number = null,
+                        $debit_account_name = null,
+                        $credit_account_number = $created_delivered_branch[$key]['code'],
+                        $credit_account_name = $created_delivered_branch[$key]['name'],
+                        $statment = null,
+                        $amount_debit = null,
+                        $amount_credit = round(($payment->delivery_fees / (1.05)) / count($created_delivered_branch), 2),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null,
+                        'admin',
+                        $compound_entry_with = null,
+                        $journal_type_id = 4,
+                        null,
+                        null,
+                        $payment->date
+                    );
+                    ShipmentHelper::accounting_entries(
+                        $debit_account_number = null,
+                        $debit_account_name = null,
+                        $credit_account_number = $created_delivered_branch[$key]['vat'],
+                        $credit_account_name = $created_delivered_branch[$key]['vat_name'],
+                        $statment = null,
+                        $amount_debit = null,
+                        $amount_credit = round(($payment->delivery_fees - ($payment->delivery_fees / (1.05))) / count($created_delivered_branch), 2),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null,
+                        'admin',
+                        $compound_entry_with = null,
+                        $journal_type_id = 4, // sell voucher
+                        null,
+                        null,
+                        $payment->date
+                    );
+                }
+
+                // معالجة حسب طريقة الدفع
+                if ($payment->payment_method_id == 1) { // cod
+
+                    /*
+                             * tow journal voucher
+                             * ---- compound_entry_with ----
+                             * 1-1  debit vendor account | credit rev branch (delivery fees) (25 |  (25*100)/1.05)
+                             * 1-2 vat op (debit - credit (1statmtnet) ) credit قيد مركب
+                             * 25 vendor debit | 23,95 rev credit
+                             * 0 vendor debit | 1.05 vat output credit
+                             *
+                             *
+                             *
+                             * 2 - debit cash | credit vendor account (  due_amount )
+                             *
+                             *  3-
+                             *
+                             * المبلغ قبل الضريبة = المبلغ بعد الضريبة ÷ (1 + نسبة الضريبة)
+                             * المبلغ بعد الضريبة = 25 (المبلغ الإجمالي المدفوع)
+                             * نسبة الضريبة = 5% = 0.05
+                             */
+
+                    $enrty1 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $vendor_account_name->account_code,
+                        $debit_account_name = ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')],
+                        $credit_account_number =  Null,
+                        $credit_account_name = Null,
+                        $statment = Null,
+                        $amount_debit = round($payment->delivery_fees, 2),
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+
+
+
+                    // rev with vat
+
+
+
+
+                    $enrty4 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $cash_account->account_code,  //cash
+                        $debit_account_name = ['ar' => $cash_account->getTranslation('account_name', 'ar'), 'en' => $cash_account->getTranslation('account_name', 'en')], //cash
+                        $credit_account_number = Null, //vendor account
+                        $credit_account_name = Null, //vendor account
+                        $statment = Null,
+                        $amount_debit = round($payment->amount, 2),
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+                    $enrty5 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  //cash
+                        $debit_account_name = Null, //cash
+                        $credit_account_number =  $vendor_account_name->account_code, //vendor account
+                        $credit_account_name =  ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], //vendor account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = round($payment->amount, 2),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+                } elseif ($payment->payment_method_id == 2) { // Tr-T-Sp
+                    /*
+                             * tow journal voucher
+                             *
+                             * 1-  debit vendor account | credit rev branch (delivery fees)
+                             * 2 - debit bank | credit vendor account (  due_amount )
+                             */
+                    $enrty1 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $vendor_account_name->account_code,
+                        $debit_account_name = ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')],
+                        $credit_account_number =  Null,
+                        $credit_account_name = Null,
+                        $statment = Null,
+                        $amount_debit = round($payment->delivery_fees, 2),
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+
+
+                    // rev with vat
+                    $enrty4 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = $bank_account->account_code,  // bank
+                        $debit_account_name = ['ar' => $bank_account->getTranslation('account_name', 'ar'), 'en' => $bank_account->getTranslation('account_name', 'en')], // bank
+                        $credit_account_number =  Null, // vendor account
+                        $credit_account_name = Null, // vendor account
+                        $statment = Null,
+                        $amount_debit = round($payment->amount, 2),
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+                    $enrty5 = ShipmentHelper::accounting_entries(
+                        $debit_account_number = Null,  // bank
+                        $debit_account_name = Null, // bank
+                        $credit_account_number =  $vendor_account_name->account_code, // vendor account
+                        $credit_account_name = ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], // vendor account
+                        $statment = Null,
+                        $amount_debit = Null,
+                        $amount_credit = round($payment->amount, 2),
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+                } elseif ($payment->payment_method_id == 3) { // Tr-T-vendor
+                    /*
+                             * one journal voucher
+                             * 1-   from vendor account | to rev branch (delivery fees)
+                             */
+
+                    ShipmentHelper::accounting_entries(
+                        $debit_account_number = $vendor_account_name->account_code,  // vendor account
+                        $debit_account_name =  ['ar' => $vendor_account_name->getTranslation('account_name', 'ar'), 'en' => $vendor_account_name->getTranslation('account_name', 'en')], //vendor account
+                        $credit_account_number =  Null, //branch rev account
+                        $credit_account_name = Null, //branch rev account
+                        $statment = Null,
+                        $amount_debit = round($payment->delivery_fees, 2),
+                        $amount_credit = Null,
+                        $voucher_nmber,
+                        $payment,
+                        $shipment,
+                        null, // cost_center
+                        'admin',
+                        $compound_entry_with = Null,
+                        $journal_type_id = 4,  // sell voucher
+                        Null,
+                        Null,
+                        $payment->date
+                    );
+
+                    // rev with vat
+                }
+
+
+                // تحديث الحالة
+                $payment->update(['posted_journal_voucher' => 1]);
+
+                // تحديث الرقم التالي للقيد
+                $voucher_nmber++;
+            }
+        }
+
+        return redirect()->back();
+    }
+
+
+    public function companies_balance()
+    {
+        // جلب بيانات المجموعات
+        // $data['companies'] = VendorCompany::where('status', 1)->select('id', 'name')->get();
+        // $data['riders'] = Rider::select('id', 'name')->get();
+        // $data['payment_methods'] = PaymentMethods::select('id', 'name')->get();
+        // $data['shipment_status'] = ShipmentStatuses::select('id', 'name')->get();
+        // $data['emirates'] = Emirates::select('id', 'name')->get();
+        // $data['cities'] = Cities::select('id', 'name')->get();
+        // $data['branches'] = Branches::where('is_main', 0)->select('id', 'branch_name')->get();
+
+        // تعيين التاريخ الافتراضي
+        $data['from'] = Carbon::now()->subYear()->format('Y-m-d'); // افتراضياً من سنة مضت
+        $data['to'] = Carbon::now()->format('Y-m-d'); // افتراضياً اليوم
+
+        // تعديل التاريخ بناءً على المدخلات
+        if (request()->has('date_from')) {
+            $data['from'] = Carbon::parse(request()->date_from)->format('Y-m-d');
+        }
+
+        if (request()->has('date_to')) {
+            $data['to'] = Carbon::parse(request()->date_to)->format('Y-m-d');
+        }
+
+        // بناء الاستعلام
+        $data['balances'] =DB::table('payments')
+        ->select(
+            DB::raw('SUM(payments.due_amount) AS due_amount'),
+            DB::raw('JSON_UNQUOTE(JSON_EXTRACT(vendor_companies.name, "$.en")) AS vendor_name_en'),
+            DB::raw('JSON_UNQUOTE(JSON_EXTRACT(vendor_companies.name, "$.ar")) AS vendor_name_ar'),
+            'vendor_companies.vendor_rate'
+        )
+        ->join('vendor_companies', 'payments.company_id', '=', 'vendor_companies.id')
+        ->whereBetween('payments.date', [$data['from'],$data['to']])
+        ->whereNull('payments.deleted_at')
+        ->where('payments.is_vendor_get_due', 0)
+        ->groupBy('payments.company_id')
+        ->having('due_amount', '!=', 0)
+        ->get();
+
+
+        return view('admin.shipment.reports.companies_balance', $data);
     }
 }

@@ -37,4 +37,8 @@ class Vendor extends Authenticatable
     public function company(){
         return $this->belongsTo(VendorCompany::class,'company_id');
     }
+
+    public function companies(){
+        return $this->hasMany(VendorCompany::class,'vendor_id','id');
+    }
 }

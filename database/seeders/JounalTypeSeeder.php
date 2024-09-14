@@ -22,5 +22,8 @@ class JounalTypeSeeder extends Seeder
         JounalType::create([
             'name'=>['ar'=>'سند صرف','en'=>'payment Voucher']
         ]);
+        JounalType::create([
+            'name'=>['ar'=>'قيد مبيعات','en'=>'Sales Voucher']
+        ]);
     }
 }

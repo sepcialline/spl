@@ -82,8 +82,10 @@
                             class="form-select  @error('user_department') is-invalid @enderror" id="user_department"
                             aria-label="user_department select example">
                             @foreach ($departments as $department)
-                            <option value="{{$department->id}}" {{$department->id == $data->department_id ? 'selected' : ''}}>{{$department->name}}</option>
-                        @endforeach
+                                <option value="{{ $department->id }}"
+                                    {{ $department->id == $data->department_id ? 'selected' : '' }}>
+                                    {{ $department->name }}</option>
+                            @endforeach
                             {{-- <option selected>Open this select menu</option> --}}
                             {{-- <option value="0">{{ __('admin.no') }}</option>
                             <option value="1">{{ __('admin.yes') }}</option> --}}
@@ -189,8 +191,8 @@
                     <div class="col-md-12">
                         <label class="form-label"
                             for="admin_address_english">{{ __('admin.user_management_admin_address_english') }}</label>
-                        <input required type="text" name="admin_address_english" id="admin_address_english" required
-                            class="form-control @error('admin_address_english') is-invalid @enderror"
+                        <input required type="text" name="admin_address_english" id="admin_address_english"
+                            required class="form-control @error('admin_address_english') is-invalid @enderror"
                             value="{{ $data->address }}"
                             placeholder="{{ __('admin.user_management_admin_address_english') }}" />
                         @error('admin_address_english')
@@ -226,12 +228,17 @@
                     </div>
                     <div class="col-md-4">
                         <div class="avatar avatar-xl mb-3">
-                            <img id="avatar" src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}"
-                                alt="{{ __('admin.user_management_admin_avatar') }}">
+                            @if ($data->photo)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                         </div>
                         <label for="admin_image"
                             class="form-label">{{ __('admin.user_management_admin_avatar') }}</label>
-                        <input class="form-control" name="admin_image" type="file" id="admin_image" required
+                        <input class="form-control" name="admin_image" type="file" id="admin_image"
                             onchange="document.getElementById('avatar').src=window.URL.createObjectURL(this.files[0])">
                     </div>
                 </div>

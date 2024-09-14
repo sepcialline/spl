@@ -61,31 +61,12 @@
             {{ __('admin.accounts_accounts_chart_of_accounts_list') }}
         </h4>
 
+        <h3 class="text-danger text-center">يرجى الانتباه</h3>
+        <p class="text-danger text-center"> عند تغيير أي معلومة تخص أي فرع يرجى الدخول للفرع نفسه من خلال الدخول </br>
+            لادارة الأفرع في السايدبار الجانبي من ثم الدخول للمعلومات المحاسبية لكل فرع</p>
 
         <div class="row">
-            {{-- <div class="col">
-            <div class="card">
-                <div class="card-body">
-                    <ul id="myUL">
-                        @foreach ($accounts as $account)
-                            <li><span class="caret">{{ $account->account_name }}</span>
-                                <span>{{ $account->account_code }}</span>
-                                <a href="{{ route('admin.account.edit', $account->id) }}">
-                                    <span style="cursor: pointer;"><i class='bx bxs-pencil'></i></span>
-                                </a>
-                                <ul class="nested">
-                                    @foreach ($account->childrenAccounts as $childAccount)
-                                        @include('admin.account.includes.child', [
-                                            'child_account' => $childAccount,
-                                        ])
-                                    @endforeach
-                                </ul>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        </div> --}}
+
             <div class="col">
                 <div class="card">
                     <div class="card-body">
@@ -109,13 +90,14 @@
                             <div class="mb-1">
                                 <label for="defaultSelect" class="form-label">{{ __('admin.parent_account') }}</label>
                                 <select id="parent" class="form-select js-example-basic-single" name="parent">
-                                    <option value="" {{$account->account_parent == Null ? 'selected' : ''}}></option>
+                                    <option value="" {{ $account->account_parent == null ? 'selected' : '' }}>
+                                    </option>
                                     @foreach ($accounts_trees as $account_tree)
-                                            <option value="{{ $account_tree->id }}"
-                                                {{ $account_tree->id == $account->account_parent ? 'selected' : '' }}>
-                                                {{ $account_tree->account_code }} | {{ $account_tree->account_name }}
-                                            </option>
-                                        @endforeach
+                                        <option value="{{ $account_tree->id }}"
+                                            {{ $account_tree->id == $account->account_parent ? 'selected' : '' }}>
+                                            {{ $account_tree->account_code }} | {{ $account_tree->account_name }}
+                                        </option>
+                                    @endforeach
 
 
                                 </select>
@@ -123,17 +105,21 @@
                             <div class="mb-1">
                                 <label for="defaultSelect"
                                     class="form-label">{{ __('admin.accounts_arabic_name') }}</label>
-                                <input type="text" id="name_ar" class="form-control" value="{{$account->getTranslation('account_name','ar')}}" name="name_ar" required>
+                                <input type="text" id="name_ar" class="form-control"
+                                    value="{{ $account->getTranslation('account_name', 'ar') }}" name="name_ar"
+                                    required>
                             </div>
                             <div class="mb-1">
                                 <label for="defaultSelect"
                                     class="form-label">{{ __('admin.accounts_english_name') }}</label>
-                                <input type="text" id="name_en" class="form-control" name="name_en" value="{{$account->getTranslation('account_name','en')}}" required>
+                                <input type="text" id="name_en" class="form-control" name="name_en"
+                                    value="{{ $account->getTranslation('account_name', 'en') }}" required>
                             </div>
                             <div class="mb-1">
                                 <label for="defaultSelect" class="form-label">{{ __('admin.accounts_code') }}</label>
                                 <input type="text" id="account_code"
-                                    class="form-control @error('code') is-invalid @enderror" name="code" value="{{$account->account_code}}" required>
+                                    class="form-control @error('code') is-invalid @enderror" name="code"
+                                    value="{{ $account->account_code }}" required>
                                 @error('code')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
@@ -143,8 +129,10 @@
                                 <select id="account_type" class="form-select js-example-basic-single" name="type"
                                     required>
                                     {{-- <option  selected disabled>{{ __('admin.please_select') }}</option> --}}
-                                    <option value="0" {{$account->account_type == 0 ? 'selected' : ''}}>{{ __('admin.main_account') }}</option>
-                                    <option value="1" {{$account->account_type == 1 ? 'selected' : ''}}>{{ __('admin.secondary_account') }}</option>
+                                    <option value="0" {{ $account->account_type == 0 ? 'selected' : '' }}>
+                                        {{ __('admin.main_account') }}</option>
+                                    <option value="1" {{ $account->account_type == 1 ? 'selected' : '' }}>
+                                        {{ __('admin.secondary_account') }}</option>
                                 </select>
                             </div>
                             <div class="mb-1">
@@ -153,8 +141,12 @@
                                 <select id="account_dc_type" class="form-select js-example-basic-single" required
                                     name="account_dc_type">
                                     {{-- <option  selected disabled>{{ __('admin.please_select') }}</option> --}}
-                                    <option value="0" {{$account->account_dc_type == 0 ? 'selected' : ''}}>{{ __('admin.credit') }}</option>
-                                    <option value="1" {{$account->account_dc_type == 1 ? 'selected' : ''}}>{{ __('admin.debit') }}</option>
+                                    <option value="0" {{ $account->account_dc_type == 0 ? 'selected' : '' }}>
+                                        {{ __('admin.credit') }}</option>
+                                    <option value="1" {{ $account->account_dc_type == 1 ? 'selected' : '' }}>
+                                        {{ __('admin.debit') }}</option>
+                                    <option value="2" {{ $account->account_dc_type == 2 ? 'selected' : '' }}>
+                                        {{ __('admin.debit') }} | {{ __('admin.credit') }} </option>
                                 </select>
                             </div>
                             <div class="mb-1">
@@ -162,9 +154,12 @@
                                 <select id="account_final" class="form-select js-example-basic-single" required
                                     name="account_final">
                                     {{-- <option selected disabled>{{ __('admin.please_select') }}</option> --}}
-                                    <option value="1" {{$account->account_final == 1 ? 'selected' : ''}}>{{ __('admin.budget') }}</option>
-                                    <option value="2" {{$account->account_final == 2 ? 'selected' : ''}}>{{ __('admin.profits_and_losses') }}</option>
-                                    <option value="3" {{$account->account_final == 3 ? 'selected' : ''}}>{{ __('admin.trading') }}</option>
+                                    <option value="1" {{ $account->account_final == 1 ? 'selected' : '' }}>
+                                        {{ __('admin.budget') }}</option>
+                                    <option value="2" {{ $account->account_final == 2 ? 'selected' : '' }}>
+                                        {{ __('admin.profits_and_losses') }}</option>
+                                    <option value="3" {{ $account->account_final == 3 ? 'selected' : '' }}>
+                                        {{ __('admin.trading') }}</option>
                                 </select>
                             </div>
                             <div class="mb-1">

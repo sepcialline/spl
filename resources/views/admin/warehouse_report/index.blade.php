@@ -148,7 +148,7 @@
                                         <td>{{ $item->quantity ?? '' }}</td>
                                         <td>{{ $item->date ?? '' }}</td>
                                         <td>{{ $item->operation->name ?? '' }}</td>
-                                        <td>{{ $item->user->name ?? '' }}</td>
+                                        <td>{{ $item->added_by ?? '' }}</td>
                                         <td>{{ $item->dispatch_ref_no ?? '' }}</td>
                                         <td>{{ $item->notes ?? '' }}</td>
                                         {{-- <td>{{ $shipment->shipment_no ?? '' }} <br>

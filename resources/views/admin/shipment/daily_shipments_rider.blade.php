@@ -95,8 +95,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php $i = 1; @endphp
+                            @php
+                                $i = 1;
+                                $net = 0;
+                            @endphp
                             @foreach ($all_shipments as $shipment)
+                                @if ($shipment->Status->id == 3)
+                                    @php $net= $net + $shipment->delivery_fees; @endphp
+                                @endif
                                 {{-- @php $shipment  = App\Models\Shipment::where('id',$tracking->shipment_id)->first(); @endphp --}}
                                 <tr>
                                     {{-- <input type="hidden" id="id" value="{{ $shipment->id }}"> --}}
@@ -268,6 +274,7 @@
                         @endif
                         <th>عمولة توصيل واستلام</th>
                         <th>{{ __('admin.cash_on_hand') }}</th>
+                        <th>صافي الدخل</th>
                     </tr>
                     <tbody>
                         <tr>
@@ -287,6 +294,7 @@
                             <td>{{ $commissions + $recived_shipments_prize }} {{ __('admin.currency') }}</td>
                             <td>{{ $cod - $sum_expenses - $commissions - $recived_shipments_prize }}
                                 {{ __('admin.currency') }}</td>
+                            <td>{{ $net ?? 0 }}</td>
                         </tr>
                     </tbody>
                 </table>

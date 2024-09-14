@@ -72,8 +72,13 @@
                             <tr>
                                 <td>
                                     <div class="avatar me-2">
-                                        <img src="{{ asset('build/assets/img/uploads/avatars/' . $item->photo) }}"
-                                            alt="Avatar" class="rounded-circle me-2" />
+                                        @if ($item->photo)
+                                            <img src="{{ asset('build/assets/img/uploads/avatars/' . $item->photo) }}"
+                                                alt="Avatar" class="rounded-circle me-2" />
+                                        @else
+                                            <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}"
+                                                alt="Avatar" class="rounded-circle me-2" />
+                                        @endif
                                     </div>
                                 </td>
                                 <td>{{ $item->name }}</td>
@@ -89,47 +94,47 @@
                                 </td>
                                 <td>
                                     @if ($item->id == 1)
-                                    😎
+                                        😎
                                     @else
-                                    @can('admin-admin-Change-Status')
-                                    <label class="switch switch-primary">
-                                        <input type="checkbox" class="switch-input status"
-                                            data-url="{{ route('admin.users_admin_update_status', $item['id']) }}"
-                                            name="status" id="status"
-                                            {{ $item['status'] ? 'checked' : !'checked' }} />
-                                        <span class="switch-toggle-slider">
-                                            <span class="switch-on">
-                                                <i class="bx bx-check"></i>
-                                            </span>
-                                            <span class="switch-off">
-                                                <i class="bx bx-x"></i>
-                                            </span>
-                                        </span>
-                                        {{-- <span class="switch-label">Primary</span> --}}
-                                    </label>
-                                @endcan
+                                        @can('admin-admin-Change-Status')
+                                            <label class="switch switch-primary">
+                                                <input type="checkbox" class="switch-input status"
+                                                    data-url="{{ route('admin.users_admin_update_status', $item['id']) }}"
+                                                    name="status" id="status"
+                                                    {{ $item['status'] ? 'checked' : !'checked' }} />
+                                                <span class="switch-toggle-slider">
+                                                    <span class="switch-on">
+                                                        <i class="bx bx-check"></i>
+                                                    </span>
+                                                    <span class="switch-off">
+                                                        <i class="bx bx-x"></i>
+                                                    </span>
+                                                </span>
+                                                {{-- <span class="switch-label">Primary</span> --}}
+                                            </label>
+                                        @endcan
                                     @endif
 
                                     {{-- {{ $item->status }} --}}
                                 </td>
                                 <td>
                                     @if ($item->id == 1)
-                                    😎
+                                        😎
                                     @else
-                                    @can('admin-admin-show')
-                                        <a href="{{ $item['id'] }}"
-                                            class="btn btn-label-dark">{{ __('admin.branch_action_show') }}</a>
-                                    @endcan
+                                        @can('admin-admin-show')
+                                            <a href="{{ $item['id'] }}"
+                                                class="btn btn-label-dark">{{ __('admin.branch_action_show') }}</a>
+                                        @endcan
 
-                                    @can('admin-admin-edit')
-                                        <a href="edit/{{ $item['id'] }}"
-                                            class="btn btn-label-secondary">{{ __('admin.branch_action_edit') }}</a>
-                                    @endcan
+                                        @can('admin-admin-edit')
+                                            <a href="edit/{{ $item['id'] }}"
+                                                class="btn btn-label-secondary">{{ __('admin.branch_action_edit') }}</a>
+                                        @endcan
 
-                                    @can('admin-admin-delete')
-                                        <a id="delete" class="btn btn-label-danger delete"
-                                            data-url="{{ route('admin.users_admin_destroy', $item['id']) }}">{{ __('admin.branch_action_delete') }}</a>
-                                    @endcan
+                                        @can('admin-admin-delete')
+                                            <a id="delete" class="btn btn-label-danger delete"
+                                                data-url="{{ route('admin.users_admin_destroy', $item['id']) }}">{{ __('admin.branch_action_delete') }}</a>
+                                        @endcan
                                     @endif
                                 </td>
                             </tr>
@@ -190,73 +195,73 @@
 
         {{-- search table --}}
         @if (count($data) > 0)
-        <script>
-            $('#form1').keyup(function(event) {
+            <script>
+                $('#form1').keyup(function(event) {
 
-                if (event.target.value.length >= 3) {
-                    console.log('changed');
-                    var searchURL = $(this).data('url');
-                    var token = $('#_token').val();
-                    console.log(searchURL);
-                    $('#table1').hide();
-                    $('#table2').show();
-                    $.ajax({
+                    if (event.target.value.length >= 3) {
+                        console.log('changed');
+                        var searchURL = $(this).data('url');
+                        var token = $('#_token').val();
+                        console.log(searchURL);
+                        $('#table1').hide();
+                        $('#table2').show();
+                        $.ajax({
 
-                        type: 'POST',
-                        url: searchURL,
-                        data: {
-                            _token: token,
-                            search: event.target.value,
-                        },
-                        dataType: "JSON",
-                        success: function(data) {
-                            let output = '';
-                            console.log(data.results);
-                            data.results.forEach(function(item, index) {
-                                console.log(item);
-                                output = output +
-                                    '<tr>' +
-                                    '<td>' +
-                                    ' <div class="avatar me-2">' +
-                                    '<img src="{{ asset('build/assets/img/uploads/avatars/' . $item->photo) }}" alt="Avatar"' +
-                                    'class="rounded-circle me-2" />' +
-                                    '</div>' +
-                                    '</td>' +
-                                    '<td>' + item.name.en + '</td>' +
-                                    '<td>' + item.mobile + '</td>' +
-                                    '<td>' + item.email + '</td>' +
-                                    '<td>' +
-                                    '@foreach ($roles as $role)' +
-                                    '<span class="badge rounded-pill bg-label-primary">{{ $role }}</span>' +
-                                    '@endforeach' +
-                                    '</td>' +
-                                    '<td>' +
-                                    '<a href=' + item.id + ' ' +
-                                    'class="btn btn-label-dark">{{ __('admin.branch_action_show') }}</a>' +
-                                    '<a href="edit/' + item.id +
-                                    '" class="btn btn-label-secondary">{{ __('admin.branch_action_edit') }}</a>' +
-                                    '<a id="delete" class="btn btn-label-danger delete" data-url="{{ route('admin.users_admin_destroy', '+ item.id+') }}">{{ __('admin.branch_action_delete') }}</a>' +
-                                    '</td>' +
-                                    '</tr>'
-                            });
-                            // $('.table-body2').html(data);
-                            $('#search').html(output);
-                            // Swal.fire(
-                            //     'Deleted!',
-                            //     'Your Branch has been deleted.',
-                            //     'success',
-                            // );
-                            // location.reload();
-                        }
-                    });
-                } else {
-                    $('#table2').hide();
-                    $('#table1').show();
+                            type: 'POST',
+                            url: searchURL,
+                            data: {
+                                _token: token,
+                                search: event.target.value,
+                            },
+                            dataType: "JSON",
+                            success: function(data) {
+                                let output = '';
+                                console.log(data.results);
+                                data.results.forEach(function(item, index) {
+                                    console.log(item);
+                                    output = output +
+                                        '<tr>' +
+                                        '<td>' +
+                                        ' <div class="avatar me-2">' +
+                                        '<img src="{{ asset('build/assets/img/uploads/avatars/' . $item->photo) }}" alt="Avatar"' +
+                                        'class="rounded-circle me-2" />' +
+                                        '</div>' +
+                                        '</td>' +
+                                        '<td>' + item.name.en + '</td>' +
+                                        '<td>' + item.mobile + '</td>' +
+                                        '<td>' + item.email + '</td>' +
+                                        '<td>' +
+                                        '@foreach ($roles as $role)' +
+                                        '<span class="badge rounded-pill bg-label-primary">{{ $role }}</span>' +
+                                        '@endforeach' +
+                                        '</td>' +
+                                        '<td>' +
+                                        '<a href=' + item.id + ' ' +
+                                        'class="btn btn-label-dark">{{ __('admin.branch_action_show') }}</a>' +
+                                        '<a href="edit/' + item.id +
+                                        '" class="btn btn-label-secondary">{{ __('admin.branch_action_edit') }}</a>' +
+                                        '<a id="delete" class="btn btn-label-danger delete" data-url="{{ route('admin.users_admin_destroy', '+ item.id+') }}">{{ __('admin.branch_action_delete') }}</a>' +
+                                        '</td>' +
+                                        '</tr>'
+                                });
+                                // $('.table-body2').html(data);
+                                $('#search').html(output);
+                                // Swal.fire(
+                                //     'Deleted!',
+                                //     'Your Branch has been deleted.',
+                                //     'success',
+                                // );
+                                // location.reload();
+                            }
+                        });
+                    } else {
+                        $('#table2').hide();
+                        $('#table1').show();
 
-                }
+                    }
 
-            });
-        </script>
+                });
+            </script>
         @endif
 
         {{-- Ajax --}}

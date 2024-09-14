@@ -51,33 +51,17 @@
                     <div class="row">
                         <div class="col-md-3 mb-4">
                             <label for="select2Multiple" class="form-label">{{ __('admin.vendors_company') }}</label>
-                            {{-- <select id="select2Multiple1" class="select2 form-select" name="company_id">
-                                <option value="0" {{ request()->company_id == 0 ? 'selected' : '' }}>
-                                    {{ __('admin.all') }}</option>
+                            <select id="select2Multiple1" class="select2 form-select" name="company_id">
+                                <option value="">{{ __('admin.select') }}</option>
                                 @foreach ($companies as $company)
                                     <option value="{{ $company->id }}"
                                         {{ request()->company_id == $company->id ? 'selected' : '' }}>
                                         {{ $company->name }}</option>
                                 @endforeach
-                            </select> --}}
-                            <input type="hidden" class="form-control"
-                                value="{{ Auth::guard('vendor')->user()->company_id }}">
-                            <input type="text" class="form-control"
-                                value="{{ Auth::guard('vendor')->user()->company->name }}">
-                        </div>
-                        {{-- <div class="col-md-3 mb-4">
-                            <label for="select2Multiple"
-                                class="form-label">{{ __('admin.user_management_rider_list') }}</label>
-                            <select id="select2Multiple2" class="select2 form-select" name="rider_id">
-                                <option value="0" {{ request()->rider_id == 0 ? 'selected' : '' }}>
-                                    {{ __('admin.all') }}</option>
-                                @foreach ($riders as $rider)
-                                    <option value="{{ $rider->id }}"
-                                        {{ request()->rider_id == $rider->id ? 'selected' : '' }}>
-                                        {{ $rider->name }}</option>
-                                @endforeach
                             </select>
-                        </div> --}}
+                        </div>
+
+
                         <div class="col-md-3 mb-4">
                             <label for="select2Multiple"
                                 class="form-label">{{ __('admin.payment_method_list') }}</label>

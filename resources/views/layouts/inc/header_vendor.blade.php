@@ -17,7 +17,7 @@
                         <span class="d-none d-md-inline-block text-muted">
                             <input type="search" name="search" class="form-control"
                             value="{{Request()->search ?? ''}}"
-                            style="background-color:#ffffff00 ; border:none" placeholder="{{__('admin.search')}}">
+                            style="background-color:#ffffff ; border:none" placeholder="{{__('admin.search')}}">
                         </span>
                     </a>
                     <input type="submit" style="display:none"/>
@@ -107,8 +107,13 @@
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                         <div class="avatar avatar-online">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . Auth::guard('vendor')->user()->photo) }}"
+                            @if(Auth::guard('vendor')->user()->avatar)
+                            <img src="{{ asset('build/assets/img/uploads/vendors/' . Auth::guard('vendor')->user()->avatar) }}"
                                 alt class="rounded-circle">
+                                @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}"
+                                alt class="rounded-circle">
+                                @endif
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -117,8 +122,13 @@
                                 <div class="d-flex">
                                     <div class="flex-shrink-0 me-3">
                                         <div class="avatar avatar-online">
-                                            <img src="{{ asset('build/assets/img/uploads/avatars/' . Auth::guard('vendor')->user()->photo) }}"
+                                            @if(Auth::guard('vendor')->user()->avatar)
+                                            <img src="{{ asset('build/assets/img/uploads/vendors/' . Auth::guard('vendor')->user()->avatar) }}"
                                                 alt class="rounded-circle">
+                                                @else
+                                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}"
+                                                alt class="rounded-circle">
+                                                @endif
                                         </div>
                                     </div>
                                     <div class="flex-grow-1">

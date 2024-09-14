@@ -2,879 +2,261 @@
     @section('title')
         {{ __('admin.dashboard_dashboard') }}
     @endsection
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <div class="row">
-            <!-- Website Analytics-->
-            {{-- <div class="col-lg-6 col-md-12 mb-4">
-            <div class="card">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Website Analytics</h5>
-                <div class="dropdown">
-                  <button
-                    class="btn p-0"
-                    type="button"
-                    id="analyticsOptions"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    <i class="bx bx-dots-vertical-rounded"></i>
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" aria-labelledby="analyticsOptions">
-                    <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body pb-2">
-                <div class="d-flex justify-content-around align-items-center flex-wrap mb-4">
-                  <div class="user-analytics text-center me-2">
-                    <i class="bx bx-user me-1"></i>
-                    <span>Users</span>
-                    <div class="d-flex align-items-center mt-2">
-                      <div class="chart-report" data-color="success" data-series="35"></div>
-                      <h3 class="mb-0">61K</h3>
-                    </div>
-                  </div>
-                  <div class="sessions-analytics text-center me-2">
-                    <i class="bx bx-pie-chart-alt me-1"></i>
-                    <span>Sessions</span>
-                    <div class="d-flex align-items-center mt-2">
-                      <div class="chart-report" data-color="warning" data-series="76"></div>
-                      <h3 class="mb-0">92K</h3>
-                    </div>
-                  </div>
-                  <div class="bounce-rate-analytics text-center">
-                    <i class="bx bx-trending-up me-1"></i>
-                    <span>Bounce Rate</span>
-                    <div class="d-flex align-items-center mt-2">
-                      <div class="chart-report" data-color="danger" data-series="65"></div>
-                      <h3 class="mb-0">72.6%</h3>
-                    </div>
-                  </div>
-                </div>
-                <div id="analyticsBarChart"></div>
-              </div>
-            </div>
-          </div> --}}
 
-            <!-- Referral, conversion, impression & income charts -->
+    @section('VendorsCss')
+        <!-- Page CSS -->
+        <link rel="stylesheet" href="{{ asset('build/assets/vendor/css/pages/page-profile.css') }}" />
+        <!-- Helpers -->
 
 
+    @endsection
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+
+            <!-- Layout container -->
+            <div class="layout-page">
+
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+                    <!-- Content -->
+
+                    <div class="container-xxl flex-grow-1 container-p-y">
 
 
-            {{-- هون الفلوس --}}
-            <div class="col-lg-6 col-md-12">
-                <div class="row">
-                    <!-- Referral Chart-->
-                    {{-- <div class="col-sm-6 col-12 mb-4">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h2 class="mb-1">{{ $sum }} {{ __('admin.currency') }}</h2>
-                                <span class="text-muted">{{ __('admin.amount_for_vendor') }}</span>
-                                <div id="referralLineChart"></div>
+                        <!-- Header -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-4">
+                                    <div class="user-profile-header-banner">
+                                        <img
+                                            src="{{ asset('build/assets/img/pages/profile-banner.png') }}"
+                                            alt="Banner image" class="rounded-top" />
+                                    </div>
+                                    <div
+                                        class="user-profile-header d-flex flex-column flex-sm-row text-sm-start text-center mb-4">
+                                        <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+                                            @if ($vendor->avatar)
+                                                <img src="{{ asset('build/assets/img/uploads/vendors/' . $vendor->avatar) }}"
+                                                    alt="user image"
+                                                    class="d-block h-auto ms-0 ms-sm-4 rounded-3 user-profile-img vendor_image" />
+                                            @else
+                                                <img src="{{ asset('build/assets/img/avatars/1.png') }}"
+                                                    alt="user image"
+                                                    class="d-block h-auto ms-0 ms-sm-4 rounded-3 user-profile-img vendor_image" />
+                                            @endif
+                                        </div>
+                                        <div class="flex-grow-1 mt-3 mt-sm-5">
+                                            <div
+                                                class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-4 flex-md-row flex-column gap-4">
+                                                <div class="user-profile-info">
+                                                    <h4>{{ $vendor->name }}</h4>
+                                                    <ul
+                                                        class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-2">
+                                                        <li class="list-inline-item fw-semibold"><i
+                                                                class="bx bx-mail-send"></i> {{ $vendor?->email }}</li>
+                                                        <li class="list-inline-item fw-semibold"><i
+                                                                class="bx bx-mobile"></i>{{ $vendor?->mobile }}</li>
+                                                        <li class="list-inline-item fw-semibold">
+                                                            <i class="bx bx-calendar-alt"></i>
+                                                            {{ __('admin.joined_date') }}
+                                                            {{ \Carbon\Carbon::parse($vendor?->created_at)->format('Y-m-d') }}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <a href="javascript:void(0)" class="btn btn-label-danger text-nowrap">
+                                                    <i class="bx bx-user-x me-1"></i>{{ __('admin.stop_it') }}
+                                                    <a href="{{ route('vendor.vendor_profile_index') }}"
+                                                        class="btn btn-label-success text-nowrap">
+                                                        <i
+                                                            class="bx bx-user-check me-1"></i>{{ __('admin.my_profile') }}
+                                                    </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div> --}}
-                    {{-- هون نهاية الفلوس --}}
+                        <!--/ Header -->
 
-
-
-
-                    <!-- Conversion Chart-->
-                    {{-- <div class="col-sm-6 col-12 mb-4">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between pb-3">
-                    <div class="conversion-title">
-                      <h5 class="card-title mb-1">Conversion</h5>
-                      <p class="mb-0 text-muted">
-                        60%
-                        <i class="bx bx-chevron-up text-success"></i>
-                      </p>
-                    </div>
-                    <h2 class="mb-0">89k</h2>
-                  </div>
-                  <div class="card-body">
-                    <div id="conversionBarchart"></div>
-                  </div>
-                </div>
-              </div> --}}
-                    <!-- Impression Radial Chart-->
-                    {{-- <div class="col-sm-6 col-12 mb-4">
-                <div class="card">
-                  <div class="card-body text-center">
-                    <div id="impressionDonutChart"></div>
-                  </div>
-                </div>
-              </div> --}}
-                    <!-- Growth Chart-->
-                    {{-- <div class="col-sm-6 col-12">
-                <div class="row">
-                  <div class="col-12 mb-4">
-                    <div class="card">
-                      <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                          <div class="d-flex align-items-center gap-3">
-                            <div class="avatar">
-                              <span class="avatar-initial bg-label-primary rounded-circle"
-                                ><i class="bx bx-user fs-4"></i
-                              ></span>
+                        {{-- <!-- Navbar pills -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <ul class="nav nav-pills flex-column flex-sm-row mb-4">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="pages-profile-user.html"><i
+                                                class="bx bx-user me-1"></i> Profile</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="javascript:void(0);"><i
+                                                class="bx bx-group me-1"></i> Teams</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="pages-profile-projects.html"><i
+                                                class="bx bx-grid-alt me-1"></i> Projects</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="pages-profile-connections.html"><i
+                                                class="bx bx-link-alt me-1"></i> Connections</a>
+                                    </li>
+                                </ul>
                             </div>
-                            <div class="card-info">
-                              <h5 class="card-title mb-0 me-2">$38,566</h5>
-                              <small class="text-muted">Conversion</small>
-                            </div>
-                          </div>
-                          <div id="conversationChart"></div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 mb-4">
-                    <div class="card">
-                      <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                          <div class="d-flex align-items-center gap-3">
-                            <div class="avatar">
-                              <span class="avatar-initial bg-label-warning rounded-circle"
-                                ><i class="bx bx-dollar fs-4"></i
-                              ></span>
-                            </div>
-                            <div class="card-info">
-                              <h5 class="card-title mb-0 me-2">$53,659</h5>
-                              <small class="text-muted">Income</small>
-                            </div>
-                          </div>
-                          <div id="incomeChart"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div> --}}
-                </div>
-            </div>
-            <!--/ Referral, conversion, impression & income charts -->
+                        <!--/ Navbar pills --> --}}
 
-            <!-- Activity -->
-            {{-- <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3 mb-4">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0">Activity</h5>
-              </div>
-              <div class="card-body">
-                <ul class="p-0 m-0">
-                  <li class="d-flex mb-4 pb-2">
-                    <div class="avatar avatar-sm flex-shrink-0 me-3">
-                      <span class="avatar-initial rounded-circle bg-label-primary"
-                        ><i class="bx bx-cube"></i
-                      ></span>
-                    </div>
-                    <div class="d-flex flex-column w-100">
-                      <div class="d-flex justify-content-between mb-1">
-                        <span>Total Sales</span>
-                        <span class="text-muted">$2,459</span>
-                      </div>
-                      <div class="progress" style="height: 6px">
-                        <div
-                          class="progress-bar bg-primary"
-                          style="width: 40%"
-                          role="progressbar"
-                          aria-valuenow="40"
-                          aria-valuemin="0"
-                          aria-valuemax="100"></div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="d-flex mb-4 pb-2">
-                    <div class="avatar avatar-sm flex-shrink-0 me-3">
-                      <span class="avatar-initial rounded-circle bg-label-success"
-                        ><i class="bx bx-dollar"></i
-                      ></span>
-                    </div>
-                    <div class="d-flex flex-column w-100">
-                      <div class="d-flex justify-content-between mb-1">
-                        <span>Income</span>
-                        <span class="text-muted">$8,478</span>
-                      </div>
-                      <div class="progress" style="height: 6px">
-                        <div
-                          class="progress-bar bg-success"
-                          style="width: 80%"
-                          role="progressbar"
-                          aria-valuenow="80"
-                          aria-valuemin="0"
-                          aria-valuemax="100"></div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="d-flex mb-4 pb-2">
-                    <div class="avatar avatar-sm flex-shrink-0 me-3">
-                      <span class="avatar-initial rounded-circle bg-label-warning"
-                        ><i class="bx bx-trending-up"></i
-                      ></span>
-                    </div>
-                    <div class="d-flex flex-column w-100">
-                      <div class="d-flex justify-content-between mb-1">
-                        <span>Budget</span>
-                        <span class="text-muted">$12,490</span>
-                      </div>
-                      <div class="progress" style="height: 6px">
-                        <div
-                          class="progress-bar bg-warning"
-                          style="width: 80%"
-                          role="progressbar"
-                          aria-valuenow="80"
-                          aria-valuemin="0"
-                          aria-valuemax="100"></div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="d-flex mb-2">
-                    <div class="avatar avatar-sm flex-shrink-0 me-3">
-                      <span class="avatar-initial rounded-circle bg-label-danger"
-                        ><i class="bx bx-check"></i
-                      ></span>
-                    </div>
-                    <div class="d-flex flex-column w-100">
-                      <div class="d-flex justify-content-between mb-1">
-                        <span>Tasks</span>
-                        <span class="text-muted">$184</span>
-                      </div>
-                      <div class="progress" style="height: 6px">
-                        <div
-                          class="progress-bar bg-danger"
-                          style="width: 25%"
-                          role="progressbar"
-                          aria-valuenow="25"
-                          aria-valuemin="0"
-                          aria-valuemax="100"></div>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div> --}}
-            <!--/ Activity -->
+                        <!-- Teams Cards -->
+                        <div class="row g-4">
+                            <h3>{{ __('admin.company_list') }}</h3>
+                            @foreach ($companies as $company)
+                                <div class="col-xl-4 col-lg-6 col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <a href="javascript:;" class="d-flex align-items-center">
+                                                    <div class="avatar avatar-sm me-2">
+                                                        @if ($company->logo)
+                                                            <img src="{{ asset('build/assets/img/uploads/logos/' . $company->logo) }}"
+                                                                alt="Avatar" class="rounded-circle" />
+                                                        @else
+                                                            <img src="{{ asset('build/assets/img/avatars/1.png') }}"
+                                                                alt="Avatar" class="rounded-circle" />
+                                                        @endif
 
-            <!-- Profit Report & Registration -->
-            {{-- <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3">
-            <div class="row">
-              <div class="col-12 col-sm-6 col-md-12 mb-4">
-                <div class="card h-100">
-                  <div class="card-header">
-                    <h5 class="card-title mb-0">Profit Report</h5>
-                  </div>
-                  <div class="card-body d-flex align-items-end justify-content-between">
-                    <div class="d-flex justify-content-between align-items-center gap-3 w-100">
-                      <div class="d-flex align-content-center">
-                        <div class="chart-report" data-color="danger" data-series="25"></div>
-                        <div class="chart-info">
-                          <h5 class="mb-0">$12k</h5>
-                          <small class="text-muted">2020</small>
-                        </div>
-                      </div>
-                      <div class="d-flex align-content-center">
-                        <div class="chart-report" data-color="info" data-series="50"></div>
-                        <div class="chart-info">
-                          <h5 class="mb-0">$64k</h5>
-                          <small class="text-muted">2021</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-12 col-sm-6 col-md-12 mb-4">
-                <div class="card">
-                  <div class="card-header pb-2">
-                    <h5 class="card-title mb-0">Registration</h5>
-                  </div>
-                  <div class="card-body pb-2">
-                    <div class="d-flex justify-content-between align-items-end gap-3">
-                      <div class="mb-3">
-                        <div class="d-flex align-content-center">
-                          <h5 class="mb-1">58.4k</h5>
-                          <i class="bx bx-chevron-up text-success"></i>
-                        </div>
-                        <small class="text-success">12.8%</small>
-                      </div>
-                      <div id="registrationsBarChart"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> --}}
-            <!--/ Profit Report & Registration -->
-
-            <!-- Sales -->
-            {{-- <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3 mb-4">
-            <div class="card">
-              <div class="card-header d-flex align-items-start justify-content-between">
-                <div class="card-title mb-0">
-                  <h5 class="m-0 me-2">Sales</h5>
-                  <small class="card-subtitle text-muted">Calculated in latest 7 days</small>
-                </div>
-                <div class="dropdown">
-                  <button
-                    class="btn p-0"
-                    type="button"
-                    id="salesReport"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    <i class="bx bx-dots-vertical-rounded"></i>
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" aria-labelledby="salesReport">
-                    <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body">
-                <div id="salesChart"></div>
-                <ul class="p-0 m-0">
-                  <li class="d-flex mb-3">
-                    <span class="text-primary me-2"><i class="bx bx-up-arrow-alt bx-sm"></i></span>
-                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                      <div class="me-2">
-                        <h6 class="mb-0 lh-1">Best Selling</h6>
-                        <small class="text-muted">Saturday</small>
-                      </div>
-                      <div class="item-progress">28.6k</div>
-                    </div>
-                  </li>
-                  <li class="d-flex">
-                    <span class="text-secondary me-2"><i class="bx bx-down-arrow-alt bx-sm"></i></span>
-                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                      <div class="me-2">
-                        <h6 class="mb-0 lh-1">Lowest Selling</h6>
-                        <small class="text-muted">Thursday</small>
-                      </div>
-                      <div class="item-progress">7.9k</div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div> --}}
-            <!--/ Sales -->
-
-            <!-- Growth Chart-->
-            {{-- <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3 mb-4">
-            <div class="card">
-              <div class="card-body text-center">
-                <div class="dropdown mb-4">
-                  <button
-                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                    type="button"
-                    id="dropdownMenuButtonSec"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    2020
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButtonSec">
-                    <a class="dropdown-item" href="javascript:void(0);">2022</a>
-                    <a class="dropdown-item" href="javascript:void(0);">2021</a>
-                    <a class="dropdown-item" href="javascript:void(0);">2020</a>
-                  </div>
-                </div>
-                <div id="growthRadialChart"></div>
-                <h6 class="mb-0 mt-5">62% Growth in 2022</h6>
-              </div>
-            </div>
-          </div> --}}
-            <!-- Growth Chart-->
-
-            <!-- Finance Summary -->
-            {{-- <div class="col-md-7 col-lg-7 mb-4 mb-md-0">
-            <div class="card h-100">
-              <div class="card-header d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center me-3">
-                  <img src="{{ asset('build/assets/img/avatars/4.png') }}" alt="Avatar" class="rounded-circle me-3" width="54" />
-                  <div class="card-title mb-0">
-                    <h5 class="mb-0">Financial Report for Kiara Cruiser</h5>
-                    <small class="text-muted">Awesome App for Project Management</small>
-                  </div>
-                </div>
-                <div class="dropdown btn-pinned">
-                  <button
-                    class="btn p-0"
-                    type="button"
-                    id="financoalReport"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    <i class="bx bx-dots-vertical-rounded"></i>
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" aria-labelledby="financoalReport">
-                    <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="d-flex flex-wrap gap-4 mb-5 mt-4">
-                  <div class="d-flex flex-column me-2">
-                    <h6>Start Date</h6>
-                    <span class="badge bg-label-success">02 APR 22</span>
-                  </div>
-                  <div class="d-flex flex-column me-2">
-                    <h6>End Date</h6>
-                    <span class="badge bg-label-danger">06 MAY 22</span>
-                  </div>
-                  <div class="d-flex flex-column me-2">
-                    <h6>Members</h6>
-                    <ul class="list-unstyled me-2 d-flex align-items-center avatar-group mb-0">
-                      <li
-                        data-bs-toggle="tooltip"
-                        data-popup="tooltip-custom"
-                        data-bs-placement="top"
-                        title="Vinnie Mostowy"
-                        class="avatar avatar-xs pull-up">
-                        <img class="rounded-circle" src="{{ asset('build/assets/img/avatars/5.png') }}" alt="Avatar" />
-                      </li>
-                      <li
-                        data-bs-toggle="tooltip"
-                        data-popup="tooltip-custom"
-                        data-bs-placement="top"
-                        title="Allen Rieske"
-                        class="avatar avatar-xs pull-up">
-                        <img class="rounded-circle" src="{{ asset('build/assets/img/avatars/12.png') }}" alt="Avatar" />
-                      </li>
-                      <li
-                        data-bs-toggle="tooltip"
-                        data-popup="tooltip-custom"
-                        data-bs-placement="top"
-                        title="Julee Rossignol"
-                        class="avatar avatar-xs pull-up">
-                        <img class="rounded-circle" src="{{ asset('build/assets/img/avatars/6.png') }}" alt="Avatar" />
-                      </li>
-                      <li
-                        data-bs-toggle="tooltip"
-                        data-popup="tooltip-custom"
-                        data-bs-placement="top"
-                        title="Ellen Wagner"
-                        class="avatar avatar-xs pull-up">
-                        <img class="rounded-circle" src="{{ asset('build/assets/img/avatars/14.png') }}" alt="Avatar" />
-                      </li>
-                      <li
-                        data-bs-toggle="tooltip"
-                        data-popup="tooltip-custom"
-                        data-bs-placement="top"
-                        title="Darcey Nooner"
-                        class="avatar avatar-xs pull-up">
-                        <img class="rounded-circle" src="{{ asset('build/assets/img/avatars/10.png') }}" alt="Avatar" />
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="d-flex flex-column me-2">
-                    <h6>Budget</h6>
-                    <span>$249k</span>
-                  </div>
-                  <div class="d-flex flex-column me-2">
-                    <h6>Expenses</h6>
-                    <span>$82k</span>
-                  </div>
-                </div>
-                <div class="d-flex flex-column flex-grow-1">
-                  <span class="text-nowrap d-block mb-1">Kiara Cruiser Progress</span>
-                  <div class="progress w-100 mb-3" style="height: 8px">
-                    <div
-                      class="progress-bar bg-primary"
-                      role="progressbar"
-                      style="width: 80%"
-                      aria-valuenow="80"
-                      aria-valuemin="0"
-                      aria-valuemax="100"></div>
-                  </div>
-                </div>
-                <span
-                  >I distinguish three main text objectives. First, your objective could be merely to inform
-                  people. A second be to persuade people.</span
-                >
-              </div>
-              <div class="card-footer border-top">
-                <ul class="list-inline mb-0">
-                  <li class="list-inline-item"><i class="bx bx-check"></i> 74 Tasks</li>
-                  <li class="list-inline-item"><i class="bx bx-chat"></i> 678 Comments</li>
-                </ul>
-              </div>
-            </div>
-          </div> --}}
-            <!-- Finance Summary -->
-
-            <!-- Activity Timeline -->
-            {{-- <div class="col-md-5 col-lg-5 mb-0">
-            <div class="card">
-              <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="card-title m-0 me-2">Activity Timeline</h5>
-                <div class="dropdown">
-                  <button
-                    class="btn p-0"
-                    type="button"
-                    id="timelineWapper"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                    <i class="bx bx-dots-vertical-rounded"></i>
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-end" aria-labelledby="timelineWapper">
-                    <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                    <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                  </div>
-                </div>
-              </div>
-              <div class="card-body">
-                <!-- Activity Timeline -->
-                <ul class="timeline">
-                  <li class="timeline-item timeline-item-transparent ps-4">
-                    <span class="timeline-point timeline-point-primary"></span>
-                    <div class="timeline-event pb-2">
-                      <div class="timeline-header mb-1">
-                        <h6 class="mb-0">12 Invoices have been paid</h6>
-                        <small class="text-muted">12 min ago</small>
-                      </div>
-                      <p class="mb-2">Invoices have been paid to the company</p>
-                      <div class="d-flex">
-                        <a href="javascript:void(0)" class="me-3">
-                          <img
-                            src="{{ asset('build/assets/img/icons/misc/pdf.png') }}"
-                            alt="PDF image"
-                            width="23"
-                            class="me-2" />
-                          <span class="fw-bold text-body">Invoices.pdf</span>
-                        </a>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="timeline-item timeline-item-transparent ps-4">
-                    <span class="timeline-point timeline-point-warning"></span>
-                    <div class="timeline-event pb-2">
-                      <div class="timeline-header mb-1">
-                        <h6 class="mb-0">Client Meeting</h6>
-                        <small class="text-muted">45 min ago</small>
-                      </div>
-                      <p class="mb-2">Project meeting with john @10:15am</p>
-                      <div class="d-flex flex-wrap">
-                        <div class="avatar me-3">
-                          <img src="{{ asset('build/assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div>
-                          <h6 class="mb-0">John Doe (Client)</h6>
-                          <span class="text-muted">CEO of Pixinvent</span>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="timeline-item timeline-item-transparent ps-4">
-                    <span class="timeline-point timeline-point-info"></span>
-                    <div class="timeline-event pb-0">
-                      <div class="timeline-header mb-1">
-                        <h6 class="mb-0">Create a new project for client</h6>
-                        <small class="text-muted">2 Day Ago</small>
-                      </div>
-                      <p class="mb-2">5 team members in a project</p>
-                      <div class="d-flex align-items-center avatar-group">
-                        <div
-                          class="avatar avatar-sm pull-up"
-                          data-bs-toggle="tooltip"
-                          data-popup="tooltip-custom"
-                          data-bs-placement="top"
-                          title="Vinnie Mostowy">
-                          <img src="{{ asset('build/assets/img/avatars/5.png') }}" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div
-                          class="avatar avatar-sm pull-up"
-                          data-bs-toggle="tooltip"
-                          data-popup="tooltip-custom"
-                          data-bs-placement="top"
-                          title="Marrie Patty">
-                          <img src="{{ asset('build/assets/img/avatars/12.png') }}" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div
-                          class="avatar avatar-sm pull-up"
-                          data-bs-toggle="tooltip"
-                          data-popup="tooltip-custom"
-                          data-bs-placement="top"
-                          title="Jimmy Jackson">
-                          <img src="{{ asset('build/assets/img/avatars/9.png') }}" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div
-                          class="avatar avatar-sm pull-up"
-                          data-bs-toggle="tooltip"
-                          data-popup="tooltip-custom"
-                          data-bs-placement="top"
-                          title="Kristine Gill">
-                          <img src="{{ asset('build/assets/img/avatars/6.png') }}" alt="Avatar" class="rounded-circle" />
-                        </div>
-                        <div
-                          class="avatar avatar-sm pull-up"
-                          data-bs-toggle="tooltip"
-                          data-popup="tooltip-custom"
-                          data-bs-placement="top"
-                          title="Nelson Wilson">
-                          <img src="{{ asset('build/assets/img/avatars/14.png') }}" alt="Avatar" class="rounded-circle" />
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="timeline-end-indicator">
-                    <i class="bx bx-check-circle"></i>
-                  </li>
-                </ul>
-                <!-- /Activity Timeline -->
-              </div>
-            </div>
-          </div> --}}
-            <!--/ Activity Timeline -->
-        </div>
-
-        {{-- <hr>
-        <div class="card">
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>{{ __('admin.number_voucher') }}</th>
-                            <th>{{ __('admin.amount') }}</th>
-                            <th>{{ __('admin.statment') }}</th>
-                            <th>{{ __('admin.date') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $i = 1; @endphp
-                        @foreach ($journals as $journal)
-                            <tr class="py-0 my-0">
-                                <td class="py-0 my-0">{{ $i++ }}</td>
-                                <td class="py-0 my-0">{{ $journal['number'] }}</td>
-                                <td class="py-0 my-0">
-                                    <strong>{{ $journal['debit'] }}</strong>
-                                </td>
-
-                                <td class="py-0 my-0">{{ $journal['statment'] }}</td>
-                                <td>{{ $journal['date'] }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div> --}}
-        <hr>
-        <div class="card" id="content_table">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <h5>{{ __('admin.latest_5_delivered_shipments') }}</h5>
-                    </div>
-                    <table class="table table-striped table-bordered my-2">
-                        <thead>
-                            <tr>
-                                <th width='1%'>#</th>
-                                <th>{{ __('admin.shipments_delivered_Date') }}</th>
-                                <th>{{ __('admin.shipment_no') }}/<br>{{ __('admin.shipment_refrence') }}</th>
-                                <th>{{ __('admin.client') }}</th>
-                                <th>{{ __('admin.shipments_client_address') }}</th>
-                                <th>{{ __('admin.vendors_companies') }}</th>
-                                <th>{{ __('admin.payment_method') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1; @endphp
-                            @foreach ($delivered_shipments as $shipment)
-                                <tr>
-                                    <input type="hidden" id="id" value="{{ $shipment->id }}">
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $shipment->delivered_date ?? '' }}</td>
-                                    <td>{{ $shipment->shipment_no ?? '' }} <br>
-                                        #{{ $shipment->shipment_refrence ?? '' }}</td>
-                                    <td>{{ $shipment->Client->name ?? '' }} <br>
-                                        {{ $shipment->Client?->mobile ?? '' }}</td>
-                                    <td>{{ $shipment->Client?->emirate->name ?? '' }} <br>
-                                        {{ $shipment->Client?->city->name ?? '' }} <br>
-                                        {{ $shipment->Client?->address ?? '' }}</td>
-                                    <td>{{ $shipment->Company->name ?? '' }}</td>
-                                    <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
-
-
-                                </tr>
+                                                    </div>
+                                                    <div class="me-2 text-body h5 mb-0">{{ $company?->name }}</div>
+                                                </a>
+                                                <div class="ms-auto">
+                                                    <ul class="list-inline mb-0 d-flex align-items-center">
+                                                        {{-- <li class="list-inline-item me-0">
+                                                            <a href="javascript:void(0);"
+                                                                class="d-flex align-self-center text-body"><i
+                                                                    class="bx bx-star"></i></a>
+                                                        </li> --}}
+                                                        <li class="list-inline-item">
+                                                            <div class="dropdown">
+                                                                <button type="button"
+                                                                    class="btn dropdown-toggle hide-arrow p-0"
+                                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                                    {{ __('admin.actions') }}
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{ route('vendor.company_profile', $company->id) }}">{{ __('admin.company_profile') }}</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <form
+                                                                            action="{{ route('vendor.shipments_index') }}"
+                                                                            method="get">
+                                                                            <input type="hidden" name="company_id"
+                                                                                value="{{ $company->id }}">
+                                                                            <button class="dropdown-item"
+                                                                                type="submit">{{ __('admin.shipments_shipments_list') }}</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    {{-- <li><a class="dropdown-item"
+                                                                            href="javascript:void(0);">{{ __('admin.payments') }}</a> --}}
+                                                                    </li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{route('vendor.bank_accounts',$company->id)}}">{{ __('admin.bank_accounts') }}</a>
+                                                                    </li>
+                                                                    <li><a class="dropdown-item"
+                                                                            href="{{route('vendor.services.index',$company->id)}}">{{ __('admin.service_request') }}</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <hr class="dropdown-divider" />
+                                                                    </li>
+                                                                    <li>
+                                                                        @if ($company->status == 1)
+                                                                            <a class="dropdown-item text-danger"
+                                                                                href="javascript:void(0);">{{ __('admin.stop_it') }}</a>
+                                                                        @else
+                                                                            <a class="dropdown-item text-primary"
+                                                                                href="javascript:void(0);">{{ __('admin.active_it') }}</a>
+                                                                        @endif
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <p>{{ $company?->description }}</p>
+                                            <p></p>
+                                            <div class="d-flex align-items-center flex-wrap gap-1">
+                                                <div class="d-flex align-items-center">
+                                                    {{-- <ul
+                                                        class="list-unstyled d-flex align-items-center avatar-group mb-0">
+                                                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                            data-bs-placement="top" title="Vinnie Mostowy"
+                                                            class="avatar avatar-sm pull-up">
+                                                            <img class="rounded-circle"
+                                                                src="../../assets/img/avatars/5.png" alt="Avatar" />
+                                                        </li>
+                                                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                            data-bs-placement="top" title="Allen Rieske"
+                                                            class="avatar avatar-sm pull-up">
+                                                            <img class="rounded-circle"
+                                                                src="../../assets/img/avatars/12.png" alt="Avatar" />
+                                                        </li>
+                                                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                            data-bs-placement="top" title="Julee Rossignol"
+                                                            class="avatar avatar-sm pull-up">
+                                                            <img class="rounded-circle"
+                                                                src="../../assets/img/avatars/6.png" alt="Avatar" />
+                                                        </li>
+                                                        <li data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                            data-bs-placement="top" title="George Burrill"
+                                                            class="avatar avatar-sm pull-up">
+                                                            <img class="rounded-circle"
+                                                                src="../../assets/img/avatars/7.png" alt="Avatar" />
+                                                        </li>
+                                                        <li>
+                                                            <small class="text-muted ms-1">+254</small>
+                                                        </li>
+                                                    </ul> --}}
+                                                    <p>{{ __('admin.account_number') }} #
+                                                        <strong>{{ $company?->account_number }}</strong>#
+                                                    </p>
+                                                </div>
+                                                @if ($company->bankAccounts && count($company->bankAccounts) > 0)
+                                                    <div class="ms-auto">
+                                                        @foreach ($company->bankAccounts as $bank)
+                                                            @if($bank->is_default == 1)
+                                                            <a href="javascript:;" class="me-1"><span
+                                                                    class="badge bg-label-primary">{{ $bank?->bank->name_bank }}</span> <br> <span>  {{ str_repeat('*', strlen($bank?->iban_number) - 4) . substr($bank?->iban_number, -4) }}</span>
+                                                            </a>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div class="ms-auto">
+                                                        <span
+                                                            class="text-danger">{{ __('admin.there_no_bank_account_refer_to_this_company') }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <hr>
 
-        <div class="card" id="content_table">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <h5>{{ __('admin.latest_5_returned_shipments') }}</h5>
+                        </div>
+                        <!--/ Teams Cards -->
                     </div>
-                    <table class="table table-striped table-bordered my-2">
-                        <thead>
-                            <tr>
-                                <th width='1%'>#</th>
-                                <th>{{ __('admin.shipments_delivered_Date') }}</th>
-                                <th>{{ __('admin.shipment_no') }}/<br>{{ __('admin.shipment_refrence') }}</th>
-                                <th>{{ __('admin.client') }}</th>
-                                <th>{{ __('admin.shipments_client_address') }}</th>
-                                <th>{{ __('admin.vendors_companies') }}</th>
-                                <th>{{ __('admin.payment_method') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1; @endphp
-                            @foreach ($returned_shipments as $shipment)
-                                <tr>
-                                    <input type="hidden" id="id" value="{{ $shipment->id }}">
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $shipment->delivered_date ?? '' }}</td>
-                                    <td>{{ $shipment->shipment_no ?? '' }} <br>
-                                        #{{ $shipment->shipment_refrence ?? '' }}</td>
-                                    <td>{{ $shipment->Client->name ?? '' }} <br>
-                                        {{ $shipment->Client?->mobile ?? '' }}</td>
-                                    <td>{{ $shipment->Client?->emirate->name ?? '' }} <br>
-                                        {{ $shipment->Client?->city->name ?? '' }} <br>
-                                        {{ $shipment->Client?->address ?? '' }}</td>
-                                    <td>{{ $shipment->Company->name ?? '' }}</td>
-                                    <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
+                    <!-- / Content -->
 
 
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+
                 </div>
+                <!-- Content wrapper -->
             </div>
+            <!-- / Layout page -->
         </div>
 
-        <hr>
-        <div class="card" id="content_table">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <h5>{{ __('admin.latest_5_delayed_shipments') }}</h5>
-                    </div>
-                    <table class="table table-striped table-bordered my-2">
-                        <thead>
-                            <tr>
-                                <th width='1%'>#</th>
-                                <th>{{ __('admin.shipments_delivered_Date') }}</th>
-                                <th>{{ __('admin.shipment_no') }}/<br>{{ __('admin.shipment_refrence') }}</th>
-                                <th>{{ __('admin.client') }}</th>
-                                <th>{{ __('admin.shipments_client_address') }}</th>
-                                <th>{{ __('admin.vendors_companies') }}</th>
-                                <th>{{ __('admin.payment_method') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1; @endphp
-                            @foreach ($delayed_shipments as $shipment)
-                                <tr>
-                                    <input type="hidden" id="id" value="{{ $shipment->id }}">
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $shipment->delivered_date ?? '' }}</td>
-                                    <td>{{ $shipment->shipment_no ?? '' }} <br>
-                                        #{{ $shipment->shipment_refrence ?? '' }}</td>
-                                    <td>{{ $shipment->Client->name ?? '' }} <br>
-                                        {{ $shipment->Client?->mobile ?? '' }}</td>
-                                    <td>{{ $shipment->Client?->emirate->name ?? '' }} <br>
-                                        {{ $shipment->Client?->city->name ?? '' }} <br>
-                                        {{ $shipment->Client?->address ?? '' }}</td>
-                                    <td>{{ $shipment->Company->name ?? '' }}</td>
-                                    <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="card" id="content_table">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <h5>{{ __('admin.latest_5_canceled_shipments') }}</h5>
-                    </div>
-                    <table class="table table-striped table-bordered my-2">
-                        <thead>
-                            <tr>
-                                <th width='1%'>#</th>
-                                <th>{{ __('admin.shipments_delivered_Date') }}</th>
-                                <th>{{ __('admin.shipment_no') }}/<br>{{ __('admin.shipment_refrence') }}</th>
-                                <th>{{ __('admin.client') }}</th>
-                                <th>{{ __('admin.shipments_client_address') }}</th>
-                                <th>{{ __('admin.vendors_companies') }}</th>
-                                <th>{{ __('admin.payment_method') }}</th>
-                                <th>{{ __('admin.note:') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1; @endphp
-                            @foreach ($canceled_shipments as $shipment)
-                                <tr>
-                                    <input type="hidden" id="id" value="{{ $shipment->id }}">
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $shipment->delivered_date ?? '' }}</td>
-                                    <td>{{ $shipment->shipment_no ?? '' }} <br>
-                                        #{{ $shipment->shipment_refrence ?? '' }}</td>
-                                    <td>{{ $shipment->Client->name ?? '' }} <br>
-                                        {{ $shipment->Client?->mobile ?? '' }}</td>
-                                    <td>{{ $shipment->Client?->emirate->name ?? '' }} <br>
-                                        {{ $shipment->Client?->city->name ?? '' }} <br>
-                                        {{ $shipment->Client?->address ?? '' }}</td>
-                                    <td>{{ $shipment->Company->name ?? '' }}</td>
-                                    <td>{{ $shipment->paymentMethod->name ?? '' }}</td>
-                                    <td>{{ $shipment->shipment_notes ?? '' }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="card" id="content_table">
-            <div class="card">
-                <div class="card-body">
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
 
-                    <table class="table table-striped table-bordered my-2">
-                        <thead>
-                            <tr>
-                                <th width='1%'>#</th>
-                                <th>{{ __('admin.products') }}</th>
-                                <th>{{ __('admin.quantity') }}</th>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1; @endphp
-                            @foreach ($products as $product)
-                                @php $product_name  = App\Models\Product::where('id',$product->product_id)->first();@endphp
-                                @if ($product_name)
-                                    <tr>
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $product_name->name ?? '-' }}</td>
-                                        <td>{{ $product->qty }}</td>
-                                        {{-- <td>{{$product->product->name}}</td>
-                                         <td>{{$product->quantity}}</td> --}}
-                                    </tr>
-                                @endif
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+        <div class="drag-target"></div>
     </div>
 </x-vendor-layout>

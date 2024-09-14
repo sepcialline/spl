@@ -5,6 +5,7 @@ namespace App\Imports;
 use Carbon\Carbon;
 use App\Models\Cities;
 use App\Models\Shipment;
+use App\Models\VendorCompany;
 use App\Helpers\ShipmentHelper;
 use Flasher\Laravel\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,9 +19,7 @@ class ShipmentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
 {
     use Importable;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function model(array $row)
     {
@@ -85,7 +84,7 @@ class ShipmentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
 
 
         $guard = 'vendor';
-        $company = Auth::guard('vendor')->user()->company_id;
+        $company = Request()->company_id;
         $city = Cities::where('emirate_id', $client_emirate_id)->first();
         $request = [
             'shipment_refrence' =>  rand(100000, 999999),
@@ -98,7 +97,7 @@ class ShipmentsImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
             'payment_method_id' => $payment_type_id,
             'fees_type_id' => $fees_type_id,
             'shipment_amount' => $row['shipment_amount'],
-            'delivery_fees' => Auth::guard('vendor')->user()->company->vendor_rate,
+            'delivery_fees' => VendorCompany::where('id', Request()->company_id)->first()->vendor_rate,
             'delivery_extra_fees' => 0,
             'delivered_date' => Carbon::tomorrow()->format('y-m-d'),
             'company_id' => $company,

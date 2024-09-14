@@ -35,27 +35,37 @@
                 <form action="{{ route('vendor.shipment_print_vendor_invoices') }}" method="post">
                     @csrf
                     <div class="row">
-                        {{-- <div class="col-md-3 mb-4"> --}}
-                            {{-- <label for="select2Multiple" class="form-label">{{ __('admin.company_list') }}</label>
+                        <div class="col-md-3 mb-4">
+                            <label for="select2Multiple1" class="form-label">{{ __('admin.company_list') }}</label>
                             <select id="select2Multiple1" class="select2 form-select" name="company_id">
-                                <option value="0">
-                                    {{ __('admin.all') }}</option>
-                                @foreach ($companies as $company)
+                                <option value="">
+                                    {{ __('admin.please_select') }}</option>
+                                @foreach ($vendor_companies as $company)
                                     <option value="{{ $company->id }}">
                                         {{ $company->name }}</option>
                                 @endforeach
-                            </select> --}}
+                            </select>
 
-                            <input type="hidden" value="{{Auth::guard('vendor')->user()->company_id}}" name="company_id">
-                        {{-- </div> --}}
+                        </div>
                         <div class="col-md-3 mb-4">
-                            <label for="select2Multiple" class="form-label">{{ __('admin.emirates') }}</label>
-                            <select id="select2Multiple1" class="select2 form-select" name="emirate_id">
+                            <label for="select2Multiple2" class="form-label">{{ __('admin.emirates') }}</label>
+                            <select id="select2Multiple2" class="select2 form-select" name="emirate_id">
                                 <option value="0">
                                     {{ __('admin.all') }}</option>
                                 @foreach ($emirates as $emirate)
                                     <option value="{{ $emirate->id }}">
                                         {{ $emirate->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <label for="select2Multiple3" class="form-label">{{ __('admin.status') }}</label>
+                            <select id="select2Multiple3" class="select2 form-select" name="status_id">
+                                <option value="0">
+                                    {{ __('admin.all') }}</option>
+                                @foreach ($status_list as $list)
+                                    <option value="{{ $list->id }}">
+                                        {{ $list->name }}</option>
                                 @endforeach
                             </select>
                         </div>

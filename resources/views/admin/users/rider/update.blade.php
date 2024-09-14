@@ -78,7 +78,8 @@
                             class="form-select  @error('user_branch') is-invalid @enderror" id="user_branch"
                             aria-label="user_branch select example">
                             @foreach ($branches as $branch)
-                                <option value={{ $branch->id }} {{ $data->branch_id == $branch->id ? 'selected' : '' }}>
+                                <option value={{ $branch->id }}
+                                    {{ $data->branch_id == $branch->id ? 'selected' : '' }}>
                                     {{ $branch->branch_name }}</option>
                             @endforeach
                         </select>
@@ -182,8 +183,13 @@
 
                     <div class="col-md-4">
                         <div class="avatar avatar-xl mb-3">
-                            <img id="avatar" src="{{ asset('build/assets/img/uploads/avatars/' . $data->image) }}"
-                                alt="{{ __('admin.user_management_admin_avatar') }}">
+                            @if ($data->image)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->image) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                         </div>
                         <label for="rider_image"
                             class="form-label">{{ __('admin.user_management_admin_avatar') }}</label>

@@ -78,11 +78,13 @@
                     <div class="col-md-4">
                         <label for="user_department"
                             class="form-label">{{ __('admin.user_management_admin_department') }}</label>
-                            <select name="user_department" value="{{ old('user_department') }}"
+                        <select name="user_department" value="{{ old('user_department') }}"
                             class="form-select  @error('user_department') is-invalid @enderror" id="user_department"
                             aria-label="user_department select example">
                             @foreach ($departments as $department)
-                                <option value="{{ $department->id }}" {{ $department->id == $data->department_id ? 'selected' : '' }}>{{ $department->name }}</option>
+                                <option value="{{ $department->id }}"
+                                    {{ $department->id == $data->department_id ? 'selected' : '' }}>
+                                    {{ $department->name }}</option>
                             @endforeach
 
                         </select>
@@ -225,8 +227,13 @@
                     </div>
                     <div class="col-md-4">
                         <div class="avatar avatar-xl mb-3">
-                            <img id="avatar" src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}"
-                                alt="{{ __('admin.user_management_admin_avatar') }}">
+                            @if ($data->photo)
+                                <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                         </div>
                         <label for="employee_image"
                             class="form-label">{{ __('admin.user_management_admin_avatar') }}</label>

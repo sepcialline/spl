@@ -1,6 +1,5 @@
 <div class="d-none" id="delivered">
 
-
     {{-- <div class="mb-3">
         <label class="form-label" for="payment_divided">{{ __('admin.payment_divided') }}</label>
         <select name="payment_divided" id="payment_divided" class="form-select">
@@ -54,7 +53,7 @@
                 {{ __('admin.please_select') }}
             </option>
             @foreach ($branches as $branch)
-                <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
+                <option value="{{ $branch->id }}" {{($shipment->rider_id && ($branch->id == App\Models\Rider::where('id',$shipment->rider_id)->first()->branch_id))  ? 'selected' : ''}} >{{ $branch->branch_name }}</option>
             @endforeach
         </select>
     </div>

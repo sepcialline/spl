@@ -17,14 +17,19 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <img src="{{ asset('build/assets/img/uploads/avatars/' . $data->photo) }}" alt="avatar"
-                                class="rounded-circle img-fluid" style="width: 150px;">
+                            @if ($data->avatar)
+                                <img src="{{ asset('build/assets/img/uploads/vendors/' . $data->avatar) }}"
+                                    alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                            @else
+                                <img src="{{ asset('build/assets/img/uploads/avatars/1.png') }}" alt="avatar"
+                                    class="rounded-circle img-fluid" style="width: 150px;">
+                            @endif
                             <h5 class="my-3">{{ $data->name }}</h5>
                             {{-- <p class="text-muted mb-1">{{ $data->emirate->name }} :{{ $data->city_id??__('admin.not_assigned') }} </p> --}}
                             {{-- <span class="badge rounded-pill bg-label-primary">{{ $role[0]->name }}</span> --}}
                         </div>
                         <div class="d-flex justify-content-around mb-4">
-                            <a href="edit/{{ $data['id'] }}"
+                            <a href="{{route('vendor.vendor_profile_edit')}}"
                                 class="btn btn-label-dark">{{ __('admin.branch_action_edit') }}</a>
 
                             <a href="{{ $data['id'] }}" data-bs-toggle="modal" data-bs-target="#update_password"
@@ -87,7 +92,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Full Name</p>
+                                    <p class="mb-0">{{__('admin.name')}}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     <p class="text-muted mb-0">{{ $data->name }}</p>
@@ -96,7 +101,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Email</p>
+                                    <p class="mb-0">{{__('admin.email')}}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     <p class="text-muted mb-0">{{ $data->email }}</p>
@@ -105,7 +110,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Phone</p>
+                                    <p class="mb-0">{{__('admin.mobile')}}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     <p class="text-muted mb-0">{{ $data->mobile }}</p>
@@ -114,7 +119,7 @@
                             <hr>
                             <div class="row">
                                 <div class="col-sm-3">
-                                    <p class="mb-0">Status</p>
+                                    <p class="mb-0">{{__('admin.status')}}</p>
                                 </div>
                                 <div class="col-sm-9">
                                     {{-- <p class="text-muted mb-0">{{ $data->status==1?'Yes':'No'}}</p> --}}
@@ -124,23 +129,6 @@
                             </div>
 
                             <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <p class="mb-0">Branch</p>
-                                </div>
-                                <div class="col-sm-9">
-                                    <p class="text-muted mb-0">{{ $data->branch->branch_name ?? __('admin.not_assigned') }}</p>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    <p class="mb-0">Address</p>
-                                </div>
-                                <div class="col-sm-9">
-                                    <p class="text-muted mb-0">{{ $data->address }}</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 

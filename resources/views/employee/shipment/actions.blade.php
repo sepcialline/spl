@@ -346,7 +346,7 @@
                         @include('includes.shipments_actions.in_progress')
                         @include('includes.shipments_actions.delayed')
                         @include('includes.shipments_actions.transfered')
-                        @include('includes.shipments_actions.delivered')
+                        @include('includes.shipments_actions.delivered',['shipment'=>$shipment])
                         @include('includes.shipments_actions.returned')
                         <div class="mb-3">
                             <label for="invoice-to" class="form-label">{{ __('admin.note:') }}</label>

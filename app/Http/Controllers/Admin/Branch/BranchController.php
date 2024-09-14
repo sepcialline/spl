@@ -240,7 +240,7 @@ class BranchController extends Controller
         $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
         $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
         $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
-        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        $data['parnets'] = AccountTree::select('id', 'account_name', 'account_code')->get();
         return view('admin.branchs.account_details_rev', $data);
     }
 
@@ -253,7 +253,7 @@ class BranchController extends Controller
         $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
         $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
         $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
-        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        $data['parnets'] = AccountTree::select('id', 'account_name', 'account_code')->get();
         return view('admin.branchs.account_details_vat_on_sales', $data);
     }
     public function show_account_details_page_vat_on_purchase($id)
@@ -263,7 +263,7 @@ class BranchController extends Controller
         $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
         $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
         $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
-        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        $data['parnets'] = AccountTree::select('id', 'account_name', 'account_code')->get();
         return view('admin.branchs.account_details_vat_on_purchase', $data);
     }
 
@@ -275,7 +275,7 @@ class BranchController extends Controller
         $data['vat_on_sales'] = AccountTree::where('account_code', $data['branch']->vat_on_sales)->first();
         $data['vat_on_purchase'] = AccountTree::where('account_code', $data['branch']->vat_on_purchase)->first();
         $data['exp_account'] = AccountTree::where('account_code', $data['branch']->expense_account)->first();
-        $data['parnets'] = AccountTree::select('id','account_name','account_code')->get();
+        $data['parnets'] = AccountTree::select('id', 'account_name', 'account_code')->get();
         return view('admin.branchs.account_details_exp', $data);
     }
 
@@ -296,8 +296,12 @@ class BranchController extends Controller
         }
 
         DB::transaction(function () use ($request) {
+            // Find the existing account code if it exists
+            $old_code = AccountTree::where('account_code', $request->id)->first();
+
+            // Update or create the account tree entry
             $account = AccountTree::updateOrCreate(
-                ['account_code' => $request->code],
+                ['id' => $request->id], // Use optional() to avoid undefined property access
                 [
                     'account_level' => $request->level,
                     'account_code' => $request->code,
@@ -308,30 +312,29 @@ class BranchController extends Controller
                     'account_final' => $request->account_final
                 ]
             );
+
+            // Find the branch
             $branch = Branches::where('id', $request->branch_id)->first();
+
             if ($branch) {
-                if ($request->account_detail == "rev") {
-                    $branch->update([
-                        'revenuse_account' => $account->account_code,
-                    ]);
-                }
-                if ($request->account_detail == "vat_on_sales") {
-                    $branch->update([
-                        'vat_on_sales' => $account->account_code,
-                    ]);
-                }
-                if ($request->account_detail == "vat_on_purchase") {
-                    $branch->update([
-                        'vat_on_purchase' => $account->account_code,
-                    ]);
-                }
-                if ($request->account_detail == "exp") {
-                    $branch->update([
-                        'expense_account' => $account->account_code,
-                    ]);
+                // Update branch based on account_detail
+                switch ($request->account_detail) {
+                    case "rev":
+                        $branch->update(['revenuse_account' => $account->account_code]);
+                        break;
+                    case "vat_on_sales":
+                        $branch->update(['vat_on_sales' => $account->account_code]);
+                        break;
+                    case "vat_on_purchase":
+                        $branch->update(['vat_on_purchase' => $account->account_code]);
+                        break;
+                    case "exp":
+                        $branch->update(['expense_account' => $account->account_code]);
+                        break;
                 }
             }
         });
+
 
 
 

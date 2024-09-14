@@ -17,6 +17,7 @@ use App\Http\Controllers\Employee\UserManagment\EmployeeController;
 use App\Http\Controllers\Employee\Warehouse\WarehouseController;
 use App\Http\Controllers\Employee\WarehouseReport\WarehouseReportController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Employee\CompensationRequestController;
 use App\Http\Controllers\Employee\UserManagment\RoleController;
 use App\Http\Controllers\Employee\UserManagment\UserRiderController;
 
@@ -49,12 +50,15 @@ Route::prefix('employee')->name('employee.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('index'); // روت تسجيل الدخول للادارة
         // End Dashboard
 
+        Route::get('/mark_as_read/{id}', [DashboardController::class, 'ReadNotification'])->name('ReadNotification');
 
         //start user management
         //بداية admin profile
         Route::controller(EmployeeProfileController::class)->group(function () {
             Route::get('/users/employee/profile', 'index')->name('employee_profile_index');
-            Route::post('/employee/update_password', 'update_password')->name('employee_update_password');
+            Route::post('/users/employee/update_password/profile', 'update_password')->name('employee_update_password');
+            Route::get('/users/employee/profile/edit/profile', 'edit')->name('employee_profile_edit');
+            Route::post('/users/employee/profile/update/profile', 'update')->name('employee_profile_update');
         }); //نهاية  admin profile
 
 
@@ -138,14 +142,7 @@ Route::prefix('employee')->name('employee.')->group(function () {
             //بداية  warehouse report
             Route::controller(WarehouseReportController::class)->group(function () {
                 Route::get('/warehouse_report', 'index')->name('warehouse_report_index');
-                Route::get('/warehouse_report/add', 'create')->name('warehouse_report_create');
-                Route::get('/warehouse_report/edit/{id}', 'edit')->name('warehouse_report_edit');
-                Route::put('/warehouse_report/update/{id}', 'update')->name('warehouse_report_update');
-                Route::post('/warehouse_report/store', 'store')->name('warehouse_report_store');
-                Route::post('/warehouse_report/config', 'savewarehouseConfig')->name('warehouse_report_config');
-                Route::delete('/warehouse_report/destroy/{id}', 'destroy')->name('warehouse_report_destroy');
-                Route::get('/warehouse_report/{id}', 'show')->name('warehouse_report_show');
-                Route::post('/warehouse_report/update-status/{id}', 'updateStatus')->name('warehouse_report_status_update');
+
             });
             //نهاية warehouse report
 
@@ -160,8 +157,10 @@ Route::prefix('employee')->name('employee.')->group(function () {
                 Route::delete('/products/destroy/{id}', 'destroy')->name('products_destroy');
                 Route::post('/products/{id}', [ProductController::class, 'delete_products'])->name('products_delete');
                 Route::get('/products/{id}', 'show')->name('products_show');
-                Route::post('/products/update-status/{id}', 'updateStatus')->name('warehouse_status_update');
-                Route::post('/products/import-export', 'productImportExport')->name('product_import_export');
+                //  Route::post('/products/update-status/{id}', 'updateStatus')->name('warehouse_status_update');
+
+                Route::post('products_import_export','products_import_export')->name('products_import_export');
+
             });
             //نهاية products
 
@@ -250,15 +249,21 @@ Route::prefix('employee')->name('employee.')->group(function () {
                 Route::get('shipment/assign_to_rider', 'assignToRider')->name('shipments_assign_to_rider');
                 Route::post('shipment/assign-shipmets-rider', 'assignShipments')->name('assignShipments');
 
+
+                Route::get('shipment/assign-by-scan', 'assignToRiderByScan')->name('shipments_assign_to_rider_by_scan');
+                Route::post('shipment/assign-by-scan-qr', 'assignToRiderByScanQr')->name('shipments_assign_to_rider_by_scan_qr');
+
+                Route::post('shipments/remove_rider', 'shipments_remove_rider')->name('shipments_remove_rider');
+
+
                 Route::get('shipment/vendor_invoices', 'multi_invoices')->name('shipment_vendor_invoices');
                 Route::post('shipment/print_vendor_invoices', 'printVendorInvoices')->name('shipment_print_vendor_invoices');
 
 
-                Route::post('shipment/search','search')->name('shipment.search');
+                Route::post('shipment/search', 'search')->name('shipment.search');
 
-                Route::get('/downloadfile','downloadfile')->name('shipment.downloadfile');
+                Route::get('/downloadfile', 'downloadfile')->name('shipment.downloadfile');
                 Route::post('shipment/import', 'import')->name('shipment.import');
-
             });
             //end shipments
 
@@ -281,6 +286,15 @@ Route::prefix('employee')->name('employee.')->group(function () {
 
                 Route::get('collect-cash/pay_to_merchant', 'getPayToTheMerchant')->name('transactions_get_pay_to_the_merchant');
                 Route::post('pay_to_merchant', 'payToTheMerchant')->name('transactions_pay_to_the_merchant');
+            });
+
+            Route::controller(CompensationRequestController::class)->group(function () {
+                Route::get('compensation_request', 'index')->name('compensation_request_index');
+                Route::get('compensation_request/create', 'create')->name('compensation_request_create');
+                Route::post('compensation_request/store', 'store')->name('compensation_request_store');
+                Route::get('compensation_request/edit/{id}', 'edit')->name('compensation_request_edit');
+                Route::post('compensation_request/update', 'update')->name('compensation_request_update');
+                Route::get('compensation_request/show/{id}', 'show')->name('compensation_request_show');
             });
         }); //end admin auth area
     });

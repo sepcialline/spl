@@ -28,8 +28,25 @@ class VendorCompany extends Model
         return $this->hasMany(Vendor::class, 'company_id', 'id');
     }
 
+
+    public function owner(){
+         return $this->belongsTo(Vendor::class,'vendor_id');
+    }
+
+    public function branch(){
+        return $this->belongsTo(Branches::class, 'branch_id');
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class, 'company_id');
+    }
+
+    public function bankAccounts(){
+        return $this->hasMany(CompanyBanks::class, 'company_id');
+    }
+
+    public function vendor(){
+        return $this->belongsTo(Vendor::class, 'vendor_id');
     }
 }

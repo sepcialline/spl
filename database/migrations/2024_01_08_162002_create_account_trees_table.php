@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('account_trees', function (Blueprint $table) {
             $table->id();
             $table->tinyInteger('account_level')->comment("المستوى")->nullable();
-            $table->integer('account_code')->comment("رمز الحساب")->nullable();
+            $table->string('account_code')->comment("رمز الحساب")->nullable();
             $table->json('account_name')->comment("اسم الحساب")->nullable();
             $table->tinyInteger('account_type')->comment("صفر رئيسي و واحد فرعي")->nullable();
             $table->integer('account_parent')->comment("الحساب الأب")->nullable();

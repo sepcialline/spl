@@ -1,7 +1,7 @@
 <x-app-layout>
 
     @section('title')
-        {{ __('admin.transactions') }} | {{ __('admin.journals') }}
+        {{ __('admin.transactions') }} | {{ __('admin.balance_review') }}
     @endsection
 
     @section('VendorsCss')
@@ -11,14 +11,14 @@
 
         <h4 class="py-3 breadcrumb-wrapper mb-4">
             <span class="text-muted fw-light">{{ __('admin.transactions') }} / </span>
-            {{ __('admin.journals') }}
+            {{ __('admin.balance_review') }}
         </h4>
 
         <div class="card my-2">
             <div class="card-body">
                 <form action="">
                     <div class="row">
-                        <div class="mb-3 col">
+                        {{-- <div class="mb-3 col">
                             <label for="exampleFormControlInput1" class="form-label">{{ __('admin.from') }}</label>
                             <input type="date" class="form-control" id="from" name="from"
                                 value="{{ Request()->from ?? Carbon\Carbon::today()->format('Y-m-d') }}">
@@ -27,26 +27,30 @@
                             <label for="exampleFormControlInput1" class="form-label">{{ __('admin.to') }}</label>
                             <input type="date" class="form-control" id="to" name="to"
                                 value="{{ Request()->to ?? Carbon\Carbon::today()->format('Y-m-d') }}">
-                        </div>
+                        </div> --}}
                         <div class="mb-3 col">
                             <label for="exampleFormControlInput1"
-                                class="form-label">{{ __('admin.accounts_accounts') }}</label>
-                            <select class="js-example-basic-single form-control" name="account" id="account">
-                                <option value="0" {{ 0 == Request()->account ? 'selected' : '' }}>
-                                    {{ __('admin.all') }}</option>
-                                @foreach ($accounts as $account)
-                                    <option value="{{ $account->account_code }}"
-                                        {{ $account->account_code == Request()->account ? 'selected' : '' }}>
-                                        {{ $account->account_code }} | {{ $account->account_name }}</option>
+                                class="form-label">{{ __('admin.report_source') }}</label>
+                            <select class="js-example-basic-multiple form-control" name="report_source[]"
+                                id="report_source" multiple="multiple" required>
+                                @foreach ($report_sources as $report_source)
+                                    <option value="{{ $report_source->id }}">{{ $report_source->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col">
-                            <label for="">{{ __('admin.number_voucher') }}</label>
-                            <input type="text" class="form-control" name="search" value="{{ Request()->search }}">
+                        <div class="mb-3 col">
+                            <label for="exampleFormControlInput1"
+                                class="form-label">{{ __('admin.show_options') }}</label>
+                            <select class="js-example-basic-multiple form-control" name="show_options[]"
+                                id="show_options" multiple="multiple" required>
+                                @foreach ($show_options as $show_option)
+                                    <option value="{{ $show_option['id'] }}">{{ $show_option['name'] }}</option>
+                                @endforeach
+                            </select>
                         </div>
+
                     </div>
-                    <button type="submit" class="btn btn-label-dark">{{ __('admin.search') }}</button>
+                    <button type="submit" name="action" value="search" class="btn btn-label-dark">{{ __('admin.search') }}</button>
                 </form>
 
             </div>
@@ -64,19 +68,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($account_totals as $account)
+                        {{dd($accounts)}}
+                        {{-- @foreach ($account_totals as $account)
                             @if ($account['account_number'] != null)
                                 <tr>
-                                    <td>{{ $account['account_number']['account_name'] }} {{ $account['account_number']['account_code'] }}</td>
+                                    <td>{{ $account['account_number']['account_name'] }}
+                                        {{ $account['account_number']['account_code'] }}</td>
                                     <td>{{ $account['total_debit'] }}</td>
                                     <td>{{ $account['total_credit'] }}</td>
                                     <td>{{ $account['balance'] }}</td>
                                 </tr>
                             @endif
-                        @endforeach
+                        @endforeach --}}
                     </tbody>
                 </table>
-                {{ $entries->links() }}
+                {{-- {{ $entries->links() }} --}}
 
             </div>
         </div>
@@ -89,15 +95,8 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script>
             $(document).ready(function() {
-                $('.js-example-basic-single').select2();
+                $('.js-example-basic-multiple').select2();
             });
         </script>
     @endsection
 </x-app-layout>
-{{-- <td class="py-0 my-0">{{ $i++ }}
-    @if ($journal?->type?->id == 2)
-        <a target="_blank" href="{{route('admin.account.print_recipt_voucher',['number'=>$journal->number])}}"><i class='bx bxs-printer text-danger'></i></a>
-    @elseif($journal?->type?->id == 3)
-        <a target="_blank" href="{{route('admin.account.print_payment_voucher',['number'=>$journal->number])}}"><i class='bx bxs-printer text-success'></i></a>
-    @endif
-</td> --}}

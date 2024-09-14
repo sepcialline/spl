@@ -15,9 +15,7 @@ class SearchController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-    }
+    public function index(Request $request) {}
 
     /**
      * Show the form for creating a new resource.
@@ -36,27 +34,31 @@ class SearchController extends Controller
             //code...
             $has_stock = null;
             $shipment_content = [];
-            $shipment = Shipment::where('shipment_no', $request->shipment_no)->orWhere('shipment_refrence', $request->shipment_no)->orderBy('id','desc')->first();
-
+            $shipment = Shipment::where('shipment_no', $request->shipment_no)->orWhere('shipment_refrence', $request->shipment_no)->orderBy('id', 'desc')->first();
             //return response(compact('shipment'), 200);
             $shipment_company = VendorCompany::where('id', $shipment->company_id)->first();
             $notes = $shipment->shipment_notes;
 
-            if ($shipment_company->has_stock == 1) {
-                $has_stock = 1;
+            if ($shipment_company->has_stock == 1) {  //  اذا كان التاجر لديه ستوك
                 $shipment_content = ShipmentContent::where('shipment_id', $shipment->id)
                     ->with('product', function ($q) {
                         return $q->select('id', 'name')->get();
                     })->select('id', 'product_id', 'quantity')->get();
+                if (count($shipment_content) > 0) {
+                    $has_stock = 1;
+                } else { // اذا كان التاجر لديه ستوك لكن الشحنة مافيها منتجات من الستوك
+                    $has_stock = 0;
+                    $shipment_content = Null;
+                }
             } else {
                 $has_stock = 0;
-                $shipment_content = ShipmentContent::where('shipment_id', $shipment->id)->get();
+                $shipment_content = ShipmentContent::where('shipment_id', $shipment->id)->first()->content_text ?? Null;
             }
             $data =  new SearchShipmentResource($shipment);
 
 
             $message = ['success' => 0, 'message' => 'Success'];
-            return response(compact('data', 'shipment_content',  'has_stock', 'message','notes'), 200);
+            return response(compact('data', 'shipment_content',  'has_stock', 'message', 'notes'), 200);
         } catch (\Throwable $th) {
             //throw $th;
             $message = ['success' => 1, 'message' => $th];

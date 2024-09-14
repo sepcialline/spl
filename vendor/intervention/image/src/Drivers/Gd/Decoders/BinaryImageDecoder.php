@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace Intervention\Image\Drivers\Gd\Decoders;
 
+use Intervention\Image\Exceptions\RuntimeException;
 use Intervention\Image\Interfaces\ColorInterface;
 use Intervention\Image\Interfaces\DecoderInterface;
 use Intervention\Image\Interfaces\ImageInterface;
-use Intervention\Image\Drivers\Gd\Decoders\Traits\CanDecodeGif;
 use Intervention\Image\Exceptions\DecoderException;
+use Intervention\Image\Format;
 use Intervention\Image\Modifiers\AlignRotationModifier;
 
-class BinaryImageDecoder extends GdImageDecoder implements DecoderInterface
+class BinaryImageDecoder extends NativeObjectDecoder implements DecoderInterface
 {
-    use CanDecodeGif;
-
     /**
      * {@inheritdoc}
      *
@@ -36,8 +35,8 @@ class BinaryImageDecoder extends GdImageDecoder implements DecoderInterface
      * Decode image from given binary data
      *
      * @param string $input
+     * @throws RuntimeException
      * @return ImageInterface
-     * @throws DecoderException
      */
     private function decodeBinary(string $input): ImageInterface
     {
@@ -50,19 +49,21 @@ class BinaryImageDecoder extends GdImageDecoder implements DecoderInterface
         // create image instance
         $image = parent::decode($gd);
 
-        // extract & set exif data
-        $image->setExif($this->extractExifData($input));
+        // get media type
+        $mediaType = $this->getMediaTypeByBinary($input);
 
-        try {
-            // set mediaType on origin
-            $image->origin()->setMediaType(
-                $this->getMediaTypeByBinary($input)
-            );
-        } catch (DecoderException) {
+        // extract & set exif data for appropriate formats
+        if (in_array($mediaType->format(), [Format::JPEG, Format::TIFF])) {
+            $image->setExif($this->extractExifData($input));
         }
 
+        // set mediaType on origin
+        $image->origin()->setMediaType($mediaType);
+
         // adjust image orientation
-        $image->modify(new AlignRotationModifier());
+        if ($this->driver()->config()->autoOrientation) {
+            $image->modify(new AlignRotationModifier());
+        }
 
         return $image;
     }
