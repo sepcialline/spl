@@ -164,7 +164,7 @@ class EmployeeController extends Controller
         $employee->is_sales = $request->employee_is_sale;
         $employee->status = $request->employee_status;
         $employee->save();
-        DB::table('model_has_roles')->where('model_id', $request->employee_id)->delete();
+        DB::table('model_has_roles')->where('model_id', $request->employee_id)->where('model_type','App\\Models\\Employee')->delete();
         foreach ($request->employee_role as $role) {
             # code...
             $employee->assignRole("$role");

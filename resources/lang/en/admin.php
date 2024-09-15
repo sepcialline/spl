@@ -792,8 +792,8 @@ return [
     'joined_date'=>'Joined Date',
     'account_number'=>'Company Code',
     'company_profile'=>'Company Profile',
-    'rider_request'=>'طلب مندوب',
-    'service_request'=>'طلب خدمة',
+    'rider_request'=>'Rider Request',
+    'service_request'=>'Service Request',
     'name_owner'=>'Owner Name',
     'my_profile'=>'My Profile',
     'current_password_is_wrong'=>'Current Password is wrong',
@@ -825,4 +825,5 @@ return [
     'to_add_product_toany_vendor_company_you_should_to_check_if_company_has_stock_in_company_details'=>'To Add Product to Vendor Company You Should To check if Company has Stock in Company Details',
     'interational'=>'Interational',
     'price'=>'Price',
+    'checked_by_operation'=>'Checked By operation Waiting CEO',
 ];

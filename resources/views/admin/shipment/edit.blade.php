@@ -403,36 +403,48 @@ is-invalid
                             <div class="row">
                                 <div class="mb-3 col">
                                     <h6>{{ __('admin.is_external_order') }}</h6>
-                                    <label class="switch switch-primary">
-                                        <input type="checkbox" class="switch-input is_external_order" data-url=""
-                                            name="is_external_order" id="is_external_order"
-                                            {{ $shipment->is_external_order == 1 ? 'checked' : '' }} />
-                                        <span class="switch-toggle-slider" style="width: 150px">
+                                    {{-- <label class="switch switch-primary">
+                                        <input type="checkbox" class="switch-input is_external_order"
+                                            data-url="" name="is_external_order"
+                                            id="is_external_order" />
+                                        <span class="switch-toggle-slider" style="width: 75px">
                                             <span class="switch-on">
-                                                <span>{{ __('admin.external') }}</span>
+                                                <span>{{__('admin.external')}}</span>
                                             </span>
                                             <span class="switch-off">
-                                                <span>{{ __('admin.internal') }}</span>
+                                                <span>{{__('admin.internal')}}</span>
+                                            </span>
+                                        </span>
+                                    </label> --}}
+
+                                    <select name="is_external_order" id="is_external_order" class="form-control">
+                                        <option value="0"
+                                            {{ $shipment->is_external_order == 0 ? 'selected' : '' }}>
+                                            {{ __('admin.internal') }}</option>
+                                        <option value="1"
+                                            {{ $shipment->is_external_order == 1 ? 'selected' : '' }}>
+                                            {{ __('admin.external') }}</option>
+                                        <option value="2"
+                                            {{ $shipment->is_external_order == 2 ? 'selected' : '' }}>
+                                            {{ __('admin.interational') }}</option>
+                                    </select>
+                                </div>
+                                {{-- <div class="mb-3 col">
+                                    <h6>{{ __('admin.Including_vat?') }}</h6>
+                                    <label class="switch switch-success">
+                                        <input type="checkbox" class="switch-input Including_vat"
+                                            data-url="" name="Including_vat" checked
+                                            id="Including_vat" />
+                                        <span class="switch-toggle-slider" style="width: 100px">
+                                            <span class="switch-on">
+                                                <span>{{__('admin.Including_vat')}}</span>
+                                            </span>
+                                            <span class="switch-off">
+                                                <span>{{__('admin.vat_not_included')}}</span>
                                             </span>
                                         </span>
                                     </label>
-                                </div>
-                                <div class="mb-3 col">
-                                    <h6>{{ __('admin.Including_vat') }}</h6>
-                                    <label class="switch switch-primary">
-                                        <input type="checkbox" class="switch-input Including_vat" data-url=""
-                                            name="Including_vat" id="Including_vat"
-                                            {{ $shipment->Including_vat == 1 ? 'checked' : '' }} />
-                                        <span class="switch-toggle-slider" style="width: 150px">
-                                            <span class="switch-on">
-                                                <span>{{ __('admin.Including_vat') }}</span>
-                                            </span>
-                                            <span class="switch-off">
-                                                <span>{{ __('admin.vat_not_included') }}</span>
-                                            </span>
-                                        </span>
-                                    </label>
-                                </div>
+                                </div> --}}
                             </div>
                             <hr class="mx-n4" />
 

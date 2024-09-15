@@ -418,11 +418,16 @@ is-invalid
                                         </span>
                                     </label> --}}
 
-                                    <select name="is_external_order" id="is_external_order"
-                                        class="form-control">
-                                        <option value="0" {{$shipment->is_external_order == 0 ? 'selected' : ''}}>{{ __('admin.internal') }}</option>
-                                        <option value="1" {{$shipment->is_external_order == 1 ? 'selected' : ''}}>{{ __('admin.external') }}</option>
-                                        <option value="2" {{$shipment->is_external_order == 2 ? 'selected' : ''}}>{{ __('admin.interational') }}</option>
+                                    <select name="is_external_order" id="is_external_order" class="form-control">
+                                        <option value="0"
+                                            {{ $shipment->is_external_order == 0 ? 'selected' : '' }}>
+                                            {{ __('admin.internal') }}</option>
+                                        <option value="1"
+                                            {{ $shipment->is_external_order == 1 ? 'selected' : '' }}>
+                                            {{ __('admin.external') }}</option>
+                                        <option value="2"
+                                            {{ $shipment->is_external_order == 2 ? 'selected' : '' }}>
+                                            {{ __('admin.interational') }}</option>
                                     </select>
                                 </div>
                                 {{-- <div class="mb-3 col">

@@ -242,8 +242,12 @@ class UserAdminController extends Controller
         $admin->is_sales = $request->admin_is_sale;
         $admin->status = $request->admin_status;
         $admin->save();
-
-        $admin->assignRole("$request->admin_role");
+        DB::table('model_has_roles')->where('model_id', $request->admin_role)->where('model_type','App\\Models\\Admin')->delete();
+        foreach ($request->admin_role as $role) {
+            # code...
+            $admin->assignRole("$role");
+        }
+        // $admin->assignRole("$request->admin_role");
         toastr()->success(__('admin.msg_success_update'));
         return redirect()->back();
     }
@@ -308,7 +312,7 @@ class UserAdminController extends Controller
         $admin->is_sales = $request->admin_is_sale;
         $admin->status = $request->admin_status;
         $admin->save();
-        DB::table('model_has_roles')->where('model_id', $request->admin_id)->delete();
+        DB::table('model_has_roles')->where('model_id', $request->admin_role)->where('model_type','App\\Models\\Admin')->delete();
         foreach ($request->admin_role as $role) {
             # code...
             $admin->assignRole("$role");
